@@ -1,42 +1,36 @@
-import { ItemInterface } from '@/lib/interfaces/item.interface';
-import Image from 'next/image';
+'use client';
+
 import { useDrag } from 'react-dnd';
 
-interface HandleDraggableItemProps {
-  item: ItemInterface,
-  cellIndex: number,
-  rowIndex: number,
-  onDrag: (isDragging: boolean) => void;
+interface Item {
+  id: number;
+  name: string;
+  emoji: string;
+  type: string;
 }
 
-const DraggableItem = ({ item, cellIndex, rowIndex, onDrag}: HandleDraggableItemProps) => {
+interface Props {
+  item: Item;
+  index: number;
+}
+
+const DraggableItem = ({ item, index }: Props) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'ITEM',
-    item: item,
-    collect: (monitor) => {
-      onDrag(!!monitor.isDragging());
-      return {
-        isDragging: !!monitor.isDragging(),
-      };
-    },
+    item: { ...item, index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
   }));
 
-  const width = 40 * item.width - 5; 
-  const height = 40 * item.height - 5;
-
   return (
-    <Image
-      src={`/items/${item.image}.webp`}
-      width={width}
-      height={height}
-      alt={item.name}
-      style={{
-        top: `${cellIndex * 14.5 + 2.9}%`,
-        left: `${rowIndex * 12.5 + 1}%`,
-      }}
-      className='absolute hover:cursor-pointer hover:brightness-125'
+    <div
       ref={drag}
-    />
+      className={`w-14 h-14 border-2 border-[#5c4033] bg-[#f5e8c7] flex items-center justify-center text-3xl cursor-grab active:cursor-grabbing transition-all hover:bg-yellow-200
+        ${isDragging ? 'opacity-50 scale-95' : ''}`}
+    >
+      {item.emoji}
+    </div>
   );
 };
 

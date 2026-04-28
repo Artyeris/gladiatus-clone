@@ -1,0 +1,18 @@
+'use client';
+
+import GameHeader from '@/components/game-header/GameHeader';
+import OverviewContent from '@/components/content/OverviewContent';
+
+export default function OverviewPage() {
+  return (
+    <div className="min-h-screen bg-[#2c2118]">
+      {/* Viršutinis Header su resursais ir mygtukais */}
+      <GameHeader />
+
+      {/* Pagrindinis turinys (Character Panel + Stats + Inventory) */}
+      <div className="pt-4">
+        <OverviewContent />
+      </div>
+    </div>
+  );
+}

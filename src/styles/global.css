@@ -1,0 +1,41 @@
+/* Import a nice font for headers */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;500&display=swap');
+
+body {
+  background-color: #1a1a1a; /* Dark background outside the game window */
+  font-family: 'Roboto', sans-serif;
+}
+
+/* The Main Game Window Container */
+.game-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f4eac8; /* Light beige parchment color */
+  border: 5px solid #5c3a21; /* Dark brown wood/stone border */
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Tabs (Like "Bendras vaizdas" in Pic 4) */
+.game-header {
+  display: flex;
+  border-bottom: 3px solid #5c3a21;
+  margin-bottom: 20px;
+}
+
+.header-tab {
+  background-color: #8b5a2b;
+  color: white;
+  padding: 10px 20px;
+  font-family: 'Cinzel', serif; /* Use this for headers */
+  cursor: pointer;
+  border-right: 1px solid #3e2714;
+}
+
+.header-tab.active {
+  background-color: #c6a87c; /* Gold color for active tab */
+  font-weight: bold;
+}
