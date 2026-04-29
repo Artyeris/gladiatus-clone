@@ -1,10 +1,8 @@
-'use client'; // <--- ADD THIS LINE AT THE VERY TOP
+'use client'; // <--- THIS FIXES THE ERROR
 
 import React, { useEffect, useState } from 'react';
-// Adjust path if necessary based on where you put the image
-// If your images are in /public/pics, use '/pics/avatar.png'
-import avatarImg from '../pics/avatar.png'; 
 
+// Define the shape of our user data
 interface UserStats {
   name: string;
   level: number;
@@ -35,10 +33,13 @@ const CharacterPanel = () => {
       .catch(err => console.error("Error fetching profile:", err));
   }, []);
 
-  if (loading) return <div>Loading stats...</div>;
-  if (!user) return <div>No user found</div>;
+  if (loading) return <div style={{padding: '20px'}}>Loading stats...</div>;
+  
+  // Fallback if no user data is found yet
+  if (!user) return <div style={{padding: '20px', color: 'red'}}>No user found. Check API.</div>;
 
   const getPercentage = (current: number, max: number) => {
+    if (!max || max === 0) return 0;
     return Math.min((current / max) * 100, 100);
   };
 
@@ -62,7 +63,7 @@ const CharacterPanel = () => {
         <p style={{ margin: '5px 0 0', color: '#ffd700', fontSize: '0.9rem' }}>Gladiatorius</p>
       </div>
 
-      {/* Avatar Image */}
+      {/* Avatar Image - Using public folder path is safer */}
       <div style={{ 
         border: '3px solid #d4af37', 
         padding: '5px', 
@@ -70,7 +71,7 @@ const CharacterPanel = () => {
         marginBottom: '10px'
       }}>
         <img 
-          src={avatarImg.src} 
+          src="/pics/avatar.png" // Assumes you moved avatar.png to /public/pics/
           alt="Character" 
           style={{ width: '100%', height: 'auto', display: 'block' }}
         />
@@ -83,33 +84,33 @@ const CharacterPanel = () => {
         padding: '10px' 
       }}>
         
-        <StatRow label="Lygis" value={user.level} />
+        <StatRow label="Lygis" value={user.level || 1} />
 
         {/* Health (Red Bar) */}
         <ProgressBar 
           label="Gyvybės taškai" 
-          current={user.health} 
-          max={user.maxHealth} 
+          current={user.health || 100} 
+          max={user.maxHealth || 100} 
           color="#cc0000" // Red for HP
-          percentageText={`${getPercentage(user.health, user.maxHealth).toFixed(1)}%`}
+          percentageText={`${getPercentage(user.health || 0, user.maxHealth || 100).toFixed(1)}%`}
         />
 
         {/* Experience (Yellow/Gold Bar) */}
         <ProgressBar 
           label="Patirtis" 
-          current={user.experience} 
-          max={user.maxExperience} 
+          current={user.experience || 0} 
+          max={user.maxExperience || 100} 
           color="#d4af37" // Gold for XP
-          percentageText={`${getPercentage(user.experience, user.maxExperience).toFixed(2)}%`}
+          percentageText={`${getPercentage(user.experience || 0, user.maxExperience || 100).toFixed(2)}%`}
         />
 
         {/* Main Attributes (Green Bars) */}
-        <StatRow label="Jėga (Strength)" value={user.strength} barColor="#228b22" />
-        <StatRow label="Atsparumas (Endurance)" value={user.endurance} barColor="#228b22" />
-        <StatRow label="Vikrumas (Agility)" value={user.agility} barColor="#228b22" />
-        <StatRow label="Lankstumas (Dexterity)" value={user.dexterity} barColor="#228b22" />
-        <StatRow label="Protingumas (Intelligence)" value={user.intelligence} barColor="#228b22" />
-        <StatRow label="Charizma (Charisma)" value={user.charisma} barColor="#228b22" />
+        <StatRow label="Jėga (Strength)" value={user.strength || 5} barColor="#228b22" />
+        <StatRow label="Atsparumas (Endurance)" value={user.endurance || 5} barColor="#228b22" />
+        <StatRow label="Vikrumas (Agility)" value={user.agility || 5} barColor="#228b22" />
+        <StatRow label="Lankstumas (Dexterity)" value={user.dexterity || 5} barColor="#228b22" />
+        <StatRow label="Protingumas (Intelligence)" value={user.intelligence || 5} barColor="#228b22" />
+        <StatRow label="Charizma (Charisma)" value={user.charisma || 5} barColor="#228b22" />
 
       </div>
     </div>
@@ -123,6 +124,7 @@ const StatRow = ({ label, value, barColor = "#228b22" }) => (
       <span>{value}</span>
     </div>
     <div style={{ height: '6px', background: '#3e2714', borderRadius: '3px', marginTop: '2px' }}>
+       {/* Cap the bar width at 100% so it doesn't overflow */}
        <div style={{ width: `${Math.min(value, 100)}%`, height: '100%', background: barColor, borderRadius: '3px' }}></div>
     </div>
   </div>
@@ -146,6 +148,7 @@ const ProgressBar = ({ label, current, max, color, percentageText }) => (
 );
 
 function getPercentage(current: number, max: number) {
+    if (!max || max === 0) return 0;
     return Math.min((current / max) * 100, 100);
 }
 
