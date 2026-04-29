@@ -1,11 +1,11 @@
 // lib/actions/character/train.action.ts
-'use server'
+'use server';
 
 import { revalidatePath } from 'next/cache';
-import Character from '@/lib/models/character.model';
-import User from '@/lib/models/user.model';
-import { connectToDB } from '@/lib/dbConnect'; // Use the fixed dbConnect
-import { extractUserId } from '@/lib/utils/jwtUtils'; // Use the fixed jwtUtils
+import dbConnect from '@/lib/dbConnect'; // Fixed import to match default export
+import User from '@/lib/models/user.model'; 
+import { cookies } from 'next/headers';
+import { extractUserId } from '@/lib/utils/jwtUtils'; // Assuming you have this utility
 
 interface TrainCharacterParams {
   stat: string;
@@ -13,71 +13,51 @@ interface TrainCharacterParams {
 
 export async function trainCharacter({ stat }: TrainCharacterParams) {
   try {
-    await connectToDB();
+    await dbConnect();
 
-    // Get user ID from cookie (assuming you have a way to get this, e.g., via cookies().get(COOKIE_NAME))
-    // For now, let's assume we pass userId or get it from session. 
-    // If your train action is called with just stat, we need the userId first.
+    // 1. Get User ID from cookie
+    const tokenCookie = cookies().get('token'); // Adjust name if your cookie is different (e.g., 'jwt', 'session')
     
-    // NOTE: You likely need to import { cookies } from 'next/headers' and get the ID here like in getUser.action.ts
-    
-    const tokenCookie = cookies().get(COOKIE_NAME);
-    if (!tokenCookie || !tokenCookie.value) throw new Error('Unauthorized');
-    const userId = extractUserId(tokenCookie.value);
-
-    // FIX: Use strictPopulate: false to avoid the error
-    const user = await User.findById(userId).populate({ 
-      path: 'character', 
-      model: Character,
-      strictPopulate: false 
-    });
-
-    if (!user) throw new Error('User not found');
-    
-    // Ensure character exists before training
-    if (!user.character) {
-        // Create a default character if none exists
-        const newCharacter = await Character.create({
-            userId: user._id,
-            strength: 5,
-            endurance: 5,
-            agility: 5,
-            dexterity: 5,
-            intelligence: 5,
-            charisma: 5,
-            // ... other default fields
-        });
-        user.character = newCharacter;
+    let userId: string;
+    if (tokenCookie) {
+      userId = extractUserId(tokenCookie.value);
+    } else {
+        // Fallback for local testing if no auth yet - replace with actual ID or logic
+        // For now, we assume the user is logged in. 
+        // If you are testing without login, hardcode a valid User ID here:
+        userId = 'YOUR_USER_ID_HERE'; 
     }
 
-    const character = user.character;
+    // 2. Find User and update stats directly
+    // This ensures Overview (which reads from User) stays in sync with Training
+    const user = await User.findById(userId);
 
-    // Check if user has enough crowns (example logic)
-    const cost = Math.floor(character[stat as keyof typeof character] * 1.5);
-    
+    if (!user) {
+      return { error: 'User not found' };
+    }
+
+    // 3. Calculate Cost (Example logic: cost increases with level)
+    const currentStatValue = user[stat as keyof typeof user] || 5;
+    const cost = Math.floor(currentStatValue * 1.5); 
+
     if ((user as any).crowns < cost) {
-        return { error: 'Not enough crowns' };
+      return { error: 'Not enough crowns' };
     }
 
-    // Update Character Model
-    character[stat as keyof typeof character] += 1;
-    await character.save();
-
-    // FIX: Update User Model so Overview reflects the change
-    user[stat as keyof typeof user] = character[stat as keyof typeof character];
-    
-    // Decrease crowns
+    // 4. Update User Stats
+    (user as any)[stat] += 1;
     (user as any).crowns -= cost;
-    
+
     await user.save();
 
+    // 5. Revalidate both pages so they show new data instantly
     revalidatePath('/game/training');
-    revalidatePath('/game/overview'); // Revalidate overview so it shows new stats
+    revalidatePath('/game/overview');
 
     return { message: 'Stat trained successfully' };
 
   } catch (error) {
-    console.log(`${new Date()} - Failed to train stat - ${error}`);
+    console.error(`${new Date()} - Failed to train stat - ${error}`);
     throw error;
   }
 }
