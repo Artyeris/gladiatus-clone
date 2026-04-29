@@ -1,98 +1,94 @@
 'use client'
 
 import Image from 'next/image';
-import DescriptionCard from '@/components/cards/DescriptionCard';
-import { CharacterInterface } from '@/lib/interfaces/character.interface';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 import TrainStat from '@/components/shared/TrainStat';
 import { trainCharacter } from '@/lib/actions/character/train.action';
-import toast from 'react-hot-toast';
+import { CharacterInterface } from '@/lib/interfaces/character.interface';
 
 const calculateStatCost = (stat: number) => Math.pow(stat, 2) + stat + 1;
 
-const TrainingContent = ({ character }: { character: CharacterInterface }) => {
-  const handleClick = async (stat: string) => {
-    const response = await trainCharacter(stat);
+type TrainableStat = 'strength' | 'endurance' | 'agility' | 'dexterity' | 'intelligence' | 'charisma';
 
-    if (response && response.error) return toast.error(response.error.message);
-  }
+const trainingStats: { id: TrainableStat; label: string }[] = [
+  { id: 'strength', label: 'Strength' },
+  { id: 'endurance', label: 'Endurance' },
+  { id: 'agility', label: 'Agility' },
+  { id: 'dexterity', label: 'Dexterity' },
+  { id: 'intelligence', label: 'Intelligence' },
+  { id: 'charisma', label: 'Charisma' },
+];
+
+const TrainingContent = ({ character }: { character: CharacterInterface }) => {
+  const router = useRouter();
+  const [pendingStat, setPendingStat] = useState<TrainableStat | null>(null);
+
+  const handleClick = async (stat: TrainableStat) => {
+    if (pendingStat) return;
+
+    setPendingStat(stat);
+
+    try {
+      const response = await trainCharacter({ stat });
+
+      if (response?.error) {
+        toast.error(response.error.message);
+        return;
+      }
+
+      toast.success('Training complete');
+      router.refresh();
+    } catch {
+      toast.error('Training failed');
+    } finally {
+      setPendingStat(null);
+    }
+  };
 
   return (
-    <>
-      <div className='flex gap-4'>
-        <Image 
+    <section className="training-panel">
+      <div className="training-tab">Training</div>
+
+      <div className="training-description">
+        <Image
+          className="training-portrait"
           width={168}
           height={194}
-          src={`/images/barracks.jpg`}
-          alt='barrakcs'
+          src="/images/barracks.jpg"
+          alt="Training master"
+          priority
         />
-        <DescriptionCard
-          title='Training'
-        >
+
+        <div className="training-copy">
+          <h1>Training</h1>
           <p>
             Within the city&apos;s barracks, you can observe robust soldiers training, who are willing to impart their skills in exchange for a generous sum of crowns.
           </p>
-          <div className='flex items-center gap-1'>
-            Your balance: {character.crowns} 
-            <Image 
-              src={'/images/crowns.png'}
-              width={12}
-              height={12}
-              alt='crowns'
-            />
+          <div className="training-balance">
+            Your balance: <strong>{character.crowns}</strong>
+            <Image src="/images/crowns.png" width={12} height={12} alt="crowns" />
           </div>
-        </DescriptionCard>
+        </div>
       </div>
-      <div className='brown-card flex flex-col text-sm rounded-sm'>
-        <TrainStat 
-          statName='Strength'
-          statValue={character.strength}
-          handleClick={() => handleClick('strength')}
-          crownsValue={calculateStatCost(character.strength)}
-          characterCrowns={character.crowns}
-        />
 
-        <TrainStat 
-          statName='Endurance'
-          statValue={character.endurance}
-          handleClick={() => handleClick('endurance')}
-          crownsValue={calculateStatCost(character.endurance)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Agility'
-          statValue={character.agility}
-          handleClick={() => handleClick('agility')}
-          crownsValue={calculateStatCost(character.agility)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Dexterity'
-          statValue={character.dexterity}
-          handleClick={() => handleClick('dexterity')}
-          crownsValue={calculateStatCost(character.dexterity)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Intelligence'
-          statValue={character.intelligence}
-          handleClick={() => handleClick('intelligence')}
-          crownsValue={calculateStatCost(character.intelligence)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Charisma'
-          statValue={character.charisma}
-          handleClick={() => handleClick('charisma')}
-          crownsValue={calculateStatCost(character.charisma)}
-          characterCrowns={character.crowns}
-          last
-        />
+      <div className="training-table">
+        {trainingStats.map((stat, index) => (
+          <TrainStat
+            key={stat.id}
+            statName={stat.label}
+            statValue={character[stat.id]}
+            handleClick={() => handleClick(stat.id)}
+            crownsValue={calculateStatCost(character[stat.id])}
+            characterCrowns={character.crowns}
+            isPending={pendingStat === stat.id}
+            disabled={Boolean(pendingStat)}
+            last={index === trainingStats.length - 1}
+          />
+        ))}
       </div>
-    </>
+    </section>
   )
 }
 

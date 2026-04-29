@@ -5,14 +5,15 @@ import { UserInterface } from '@/lib/interfaces/user.interface';
 
 const Page = async () => {
   const user = await getUser().catch(() => redirect('/')) as UserInterface;
-  const character = user.character;
 
   if (!user) return null;
 
   if (!user.character) redirect('/onboarding');
 
+  const character = user.character;
+
   return (
-    <div className='px-8 gap-4 flex flex-col'>
+    <div className='game-page'>
       <TrainingContent character={character} />
     </div>
   )

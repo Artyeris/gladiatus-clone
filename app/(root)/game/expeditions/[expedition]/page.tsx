@@ -9,10 +9,12 @@ import ExpeditionContent from '@/components/content/ExpeditionContent';
 const Page = async ({ params }: { params: { expedition: string } }) => {
   const user = await getUser().catch(() => redirect('/'));
   const expeditionName = params.expedition;
-  const enemies = await getExpeditionEnemies(expeditionName);
+
+  if (!user) return null;
 
   if (!user.character) redirect('/onboarding');
 
+  const enemies = await getExpeditionEnemies(expeditionName);
   const expeditionInfo = expeditions[expeditionName];
 
   if (!enemies) return <NoResults />;

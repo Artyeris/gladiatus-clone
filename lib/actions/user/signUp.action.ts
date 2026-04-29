@@ -25,7 +25,7 @@ export async function signUpUser({ name, email, password, repeatedPassword }: Si
   if (password !== repeatedPassword) return { error: { message: `Passwords doesn't match` } };
 
   try {
-    connectToDB();
+    await connectToDB();
 
     const isNameTaken = await User.findOne({ username: name.toLowerCase().trim() });
 

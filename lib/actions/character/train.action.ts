@@ -1,63 +1,84 @@
-// lib/actions/character/train.action.ts
 'use server';
 
+import { COOKIE_NAME } from '@/constants';
+import Character from '@/lib/models/character.model';
+import User from '@/lib/models/user.model';
+import { connectToDB } from '@/lib/mongoose';
+import { extractUserId } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
-import dbConnect from '@/lib/dbConnect'; // Fixed import to match default export
-import User from '@/lib/models/user.model'; 
 import { cookies } from 'next/headers';
-import { extractUserId } from '@/lib/utils/jwtUtils'; // Assuming you have this utility
 
-interface TrainCharacterParams {
-  stat: string;
+const TRAINABLE_STATS = [
+  'strength',
+  'endurance',
+  'agility',
+  'dexterity',
+  'intelligence',
+  'charisma',
+] as const;
+
+type TrainableStat = typeof TRAINABLE_STATS[number];
+type TrainCharacterParams = { stat: TrainableStat } | TrainableStat;
+
+const calculateStatCost = (stat: number) => Math.pow(stat, 2) + stat + 1;
+
+function normalizeStat(params: TrainCharacterParams): TrainableStat | null {
+  const stat = typeof params === 'string' ? params : params?.stat;
+
+  if (TRAINABLE_STATS.includes(stat as TrainableStat)) {
+    return stat as TrainableStat;
+  }
+
+  return null;
 }
 
-export async function trainCharacter({ stat }: TrainCharacterParams) {
+export async function trainCharacter(params: TrainCharacterParams) {
+  const stat = normalizeStat(params);
+
+  if (!stat) {
+    return { error: { message: 'Invalid stat' } };
+  }
+
+  const token = cookies().get(COOKIE_NAME);
+
+  if (!token) {
+    return { error: { message: 'Unauthorized' } };
+  }
+
   try {
-    await dbConnect();
+    await connectToDB();
 
-    // 1. Get User ID from cookie
-    const tokenCookie = cookies().get('token'); // Adjust name if your cookie is different (e.g., 'jwt', 'session')
-    
-    let userId: string;
-    if (tokenCookie) {
-      userId = extractUserId(tokenCookie.value);
-    } else {
-        // Fallback for local testing if no auth yet - replace with actual ID or logic
-        // For now, we assume the user is logged in. 
-        // If you are testing without login, hardcode a valid User ID here:
-        userId = 'YOUR_USER_ID_HERE'; 
+    const userId = extractUserId(token);
+    const user = await User.findById(userId).populate({
+      path: 'character',
+      model: Character,
+    });
+
+    if (!user || !user.character) {
+      return { error: { message: 'Character not found' } };
     }
 
-    // 2. Find User and update stats directly
-    // This ensures Overview (which reads from User) stays in sync with Training
-    const user = await User.findById(userId);
+    const character = user.character as any;
+    const currentStatValue = Number(character[stat] ?? 5);
+    const cost = calculateStatCost(currentStatValue);
 
-    if (!user) {
-      return { error: 'User not found' };
+    if (character.crowns < cost) {
+      return { error: { message: 'Not enough crowns' } };
     }
 
-    // 3. Calculate Cost (Example logic: cost increases with level)
-    const currentStatValue = user[stat as keyof typeof user] || 5;
-    const cost = Math.floor(currentStatValue * 1.5); 
+    character[stat] = currentStatValue + 1;
+    character.crowns -= cost;
 
-    if ((user as any).crowns < cost) {
-      return { error: 'Not enough crowns' };
-    }
+    await character.save();
 
-    // 4. Update User Stats
-    (user as any)[stat] += 1;
-    (user as any).crowns -= cost;
-
-    await user.save();
-
-    // 5. Revalidate both pages so they show new data instantly
     revalidatePath('/game/training');
     revalidatePath('/game/overview');
+    revalidatePath('/game/arena');
+    revalidatePath('/game/expeditions');
 
     return { message: 'Stat trained successfully' };
-
   } catch (error) {
-    console.error(`${new Date()} - Failed to train stat - ${error}`);
-    throw error;
+    console.log(`${new Date()} - Failed to train stat - ${error}`);
+    return { error: { message: 'Failed to train stat' } };
   }
 }

@@ -33,7 +33,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId)
       .populate({
@@ -119,7 +119,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     return JSON.parse(JSON.stringify(savedBattleReport._id));
 
   } catch (error) {
-    console.log(`${new Date} - Failed to simulate battle - ${error}`);
+    console.log(`${new Date()} - Failed to simulate battle - ${error}`);
     throw error;
   }
 }

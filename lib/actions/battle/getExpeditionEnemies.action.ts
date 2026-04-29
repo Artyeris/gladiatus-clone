@@ -25,7 +25,7 @@ export async function getExpeditionEnemies(expeditionName: string) {
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId)
       .populate({
@@ -46,7 +46,7 @@ export async function getExpeditionEnemies(expeditionName: string) {
       if (expedition.hasOwnProperty(enemyName)) {
         const enemy = expedition[enemyName];
 
-        const enemyKnowledge = character.journal.expeditions[expeditionName][enemyName]?.knowledge || 0;
+        const enemyKnowledge = character.journal?.expeditions?.[expeditionName]?.[enemyName]?.knowledge || 0;
 
         const enemyInfo: EnemyStatsInterface = {
           name: enemy.name,
@@ -79,7 +79,7 @@ export async function getExpeditionEnemies(expeditionName: string) {
     return enemiesInfo;
 
   } catch (error) {
-    console.log(`${new Date} - Failed to get enemies - ${error}`);
+    console.log(`${new Date()} - Failed to get enemies - ${error}`);
     return null;
   }
 }

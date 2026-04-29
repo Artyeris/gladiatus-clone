@@ -15,7 +15,7 @@ export async function getArenaRivals() {
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId)
       .populate({
@@ -36,7 +36,7 @@ export async function getArenaRivals() {
         {
           honor: { $gte: character.honor },
           _id: { $ne: character._id },
-          onboarded: true,
+          $or: [{ onboarded: true }, { onboarded: { $exists: false } }],
         },
         { name: 1, _id: 1, honor: 1 },
       )
@@ -60,7 +60,7 @@ export async function getArenaRivals() {
     return JSON.parse(JSON.stringify(rivals.reverse()));
 
   } catch (error) {
-    console.log(`${new Date} - Failed to get arena rivals - ${error}`);
+    console.log(`${new Date()} - Failed to get arena rivals - ${error}`);
     throw error;
   }
 }

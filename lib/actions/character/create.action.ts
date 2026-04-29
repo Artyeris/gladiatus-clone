@@ -26,7 +26,7 @@ export async function createCharacter({ name, gender }: CreateCharacterParams) {
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId);
 
@@ -40,6 +40,7 @@ export async function createCharacter({ name, gender }: CreateCharacterParams) {
       name,
       gender,
       owner: user._id,
+      onboarded: true,
     })
 
     const sword = items.short_sword; // Initial sword.

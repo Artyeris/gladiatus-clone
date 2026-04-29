@@ -15,7 +15,7 @@ export async function getArenaHighscore() {
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId)
       .populate({
@@ -26,14 +26,14 @@ export async function getArenaHighscore() {
     if (!user || !user.character) throw new Error('Unauthorized');
 
     const highcoreArena = await Character
-      .find({ onboarded: true })
+      .find({ $or: [{ onboarded: true }, { onboarded: { $exists: false } }] })
       .sort({ honor: -1 })
       .limit(100);
 
       return JSON.parse(JSON.stringify(highcoreArena));
 
   } catch (error) {
-    console.log(`${new Date} - Failed to get highscore - ${error}`);
+    console.log(`${new Date()} - Failed to get highscore - ${error}`);
     throw error;
   }
 }

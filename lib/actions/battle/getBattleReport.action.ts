@@ -16,7 +16,7 @@ export async function getBattleReport(battleReportId: string) {
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId)
       .populate({
@@ -47,7 +47,7 @@ export async function getBattleReport(battleReportId: string) {
    return JSON.parse(JSON.stringify(battleReport));
 
   } catch (error) {
-    console.log(`${new Date} - Failed to get battle report - ${error}`);
+    console.log(`${new Date()} - Failed to get battle report - ${error}`);
     return null;
   }
 }

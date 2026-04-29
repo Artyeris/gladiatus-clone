@@ -1,17 +1,4 @@
-import React from 'react';
-
 const EquipmentSlots = () => {
-  // Mock data for slots - you will replace these with real item images later
-  const slots = [
-    { id: 1, type: 'weapon', label: 'Sword' },
-    { id: 2, type: 'armor', label: 'Chestplate' },
-    { id: 3, type: 'shield', label: 'Shield' },
-    { id: 4, type: 'helmet', label: 'Helmet' },
-    { id: 5, type: 'boots', label: 'Boots' },
-    { id: 6, type: 'ring1', label: 'Ring' },
-    { id: 7, type: 'amulet', label: 'Amulet' },
-  ];
-
   return (
     <div style={{ 
       background: '#dcd0b8', // Stone color
@@ -50,7 +37,7 @@ const EquipmentSlots = () => {
 };
 
 // Helper component for a single slot
-const EquipmentSlot = ({ type }) => (
+const EquipmentSlot = ({ type }: { type: string }) => (
   <div style={{ 
     width: '60px', 
     height: '60px', 

@@ -20,7 +20,7 @@ export async function battleArena(defenderId: string) {
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId)
       .populate({
@@ -132,7 +132,7 @@ export async function battleArena(defenderId: string) {
     return JSON.parse(JSON.stringify(savedBattleReport._id));
 
   } catch (error) {
-    console.log(`${new Date} - Failed to simulate arena battle - ${error}`);
+    console.log(`${new Date()} - Failed to simulate arena battle - ${error}`);
     throw error;
   }
 }

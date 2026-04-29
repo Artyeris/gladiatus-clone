@@ -70,8 +70,13 @@
   * {
     @apply border-border;
   }
+  html {
+    min-height: 100%;
+  }
   body {
     @apply bg-background text-foreground;
+    min-height: 100%;
+    margin: 0;
   }
 }
 
@@ -104,8 +109,54 @@ body::-webkit-scrollbar {
 }
 
 .main-container {
+  min-height: 100vh;
   overflow-y: scroll;
   position: relative;
+}
+
+.game-shell {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+}
+
+.game-stage {
+  width: min(100%, 1060px);
+  min-height: 100vh;
+  padding: 64px 16px 32px;
+  display: grid;
+  grid-template-columns: 200px 640px;
+  justify-content: center;
+  align-items: start;
+  gap: 24px;
+}
+
+.game-content-column {
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-content-frame {
+  width: 620px;
+  min-height: 600px;
+  padding: 16px 0;
+  overflow: hidden;
+}
+
+.game-footer {
+  width: 640px;
+  height: 50px;
+}
+
+.game-page {
+  width: 100%;
+  padding: 0 24px 24px;
 }
 
 .cream-card {
@@ -206,4 +257,211 @@ body::-webkit-scrollbar {
 	width: 100%;
 	height: 18px;
   border-radius: 2px;
+}
+
+.training-panel {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  margin: 28px auto 0;
+  padding: 22px 28px 28px;
+  color: #3a210f;
+  background:
+    linear-gradient(180deg, rgba(238, 223, 184, 0.96), rgba(212, 194, 142, 0.96)),
+    #eedfb8;
+  border: 3px solid #8d2f25;
+  outline: 3px solid #d1a05d;
+  box-shadow: inset 0 0 0 2px rgba(255, 241, 194, 0.85), 0 12px 22px rgba(0, 0, 0, 0.35);
+}
+
+.training-tab {
+  position: absolute;
+  top: -28px;
+  left: 16px;
+  min-width: 116px;
+  height: 30px;
+  padding: 5px 16px 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a270f;
+  background: linear-gradient(180deg, #e8d59d, #c4a35f);
+  border: 3px solid #8d2f25;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.training-description {
+  display: grid;
+  grid-template-columns: 168px 1fr;
+  gap: 14px;
+  padding: 10px;
+  background: rgba(224, 204, 145, 0.72);
+  border: 2px solid rgba(141, 47, 37, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 241, 194, 0.65);
+}
+
+.training-portrait {
+  display: block;
+  border: 3px solid #b8924d;
+  outline: 1px solid #fff0bd;
+  object-fit: cover;
+}
+
+.training-copy {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #4d260c;
+}
+
+.training-copy h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #5b120d;
+}
+
+.training-copy p {
+  margin: 0 0 14px;
+}
+
+.training-balance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.training-table {
+  margin-top: 14px;
+  background: linear-gradient(180deg, #c7ab69, #b69755);
+  border: 2px solid rgba(105, 82, 32, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255, 241, 194, 0.45);
+}
+
+.training-stat-row {
+  min-height: 36px;
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) 44px 88px 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px;
+  color: #4a270f;
+  font-size: 13px;
+}
+
+.training-stat-row-bordered {
+  border-bottom: 1px solid rgba(238, 215, 161, 0.85);
+}
+
+.training-stat-name {
+  display: grid;
+  grid-template-columns: 82px minmax(48px, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.training-stat-bar {
+  height: 5px;
+  background: #1d180e;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.training-stat-bar span {
+  display: block;
+  height: 100%;
+  background: #1f8b28;
+}
+
+.training-stat-value {
+  font-weight: 800;
+  color: #5b120d;
+  text-align: right;
+}
+
+.training-stat-cost {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-weight: 700;
+  color: #5b120d;
+}
+
+.training-stat-button {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.training-stat-button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.training-stat-button:disabled {
+  cursor: not-allowed;
+}
+
+.training-stat-button-disabled {
+  filter: grayscale(1) brightness(0.75);
+  opacity: 0.65;
+}
+
+.training-stat-spinner {
+  position: absolute;
+  inset: 6px;
+  border: 2px solid rgba(255, 241, 194, 0.85);
+  border-top-color: #540400;
+  border-radius: 50%;
+  animation: spinner 0.75s linear infinite;
+}
+
+@media (max-width: 920px) {
+  .game-stage {
+    grid-template-columns: minmax(0, 640px);
+    padding-inline: 12px;
+  }
+
+  .game-content-column,
+  .game-content-frame,
+  .game-footer {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .game-page {
+    padding-inline: 12px;
+  }
+
+  .training-panel {
+    padding: 20px 14px;
+  }
+
+  .training-description {
+    grid-template-columns: 1fr;
+  }
+
+  .training-portrait {
+    width: 168px;
+    justify-self: center;
+  }
+
+  .training-stat-row {
+    grid-template-columns: minmax(116px, 1fr) 34px 76px 32px;
+    gap: 6px;
+  }
+
+  .training-stat-name {
+    grid-template-columns: 74px minmax(36px, 1fr);
+  }
 }

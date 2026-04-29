@@ -1,38 +1,38 @@
-// components/overview/CharacterPanel.tsx
 import Image from 'next/image';
+import { CharacterInterface } from '@/lib/interfaces/character.interface';
 
 interface CharacterPanelProps {
-  user: any; // Replace with proper TypeScript interface if available
+  character?: CharacterInterface;
+  user?: CharacterInterface;
 }
 
-export default function CharacterPanel({ user }: CharacterPanelProps) {
+export default function CharacterPanel({ character, user }: CharacterPanelProps) {
+  const gladiator = character ?? user;
+  const gender = gladiator?.gender ?? 'male';
   
-  // Helper to get correct avatar based on level
   const getAvatarUrl = () => {
-    const lvl = user.level || 1;
-    if (lvl < 10) return '/characters/male/character-lvl-0.png';
-    if (lvl < 20) return '/characters/male/character-lvl-10.png';
-    if (lvl < 30) return '/characters/male/character-lvl-20.png';
-    if (lvl < 40) return '/characters/male/character-lvl-30.png';
-    if (lvl < 50) return '/characters/male/character-lvl-40.png';
-    if (lvl < 60) return '/characters/male/character-lvl-50.png';
-    if (lvl < 70) return '/characters/male/character-lvl-60.png';
-    if (lvl < 80) return '/characters/male/character-lvl-70.png';
-    return '/characters/male/character-lvl-80.png';
+    const lvl = gladiator?.level ?? 1;
+    if (lvl < 10) return `/characters/${gender}/character-lvl-0.jpg`;
+    if (lvl < 20) return `/characters/${gender}/character-lvl-10.jpg`;
+    if (lvl < 30) return `/characters/${gender}/character-lvl-20.jpg`;
+    if (lvl < 40) return `/characters/${gender}/character-lvl-30.jpg`;
+    if (lvl < 50) return `/characters/${gender}/character-lvl-40.jpg`;
+    if (lvl < 60) return `/characters/${gender}/character-lvl-50.jpg`;
+    if (lvl < 70) return `/characters/${gender}/character-lvl-60.jpg`;
+    if (lvl < 80) return `/characters/${gender}/character-lvl-70.jpg`;
+    return `/characters/${gender}/character-lvl-80.jpg`;
   };
 
   const avatarUrl = getAvatarUrl();
 
-  // Calculate Health based on Endurance and Level
-  const maxHealth = (user.endurance || 5) * 10 + (user.level || 1) * 5;
-  const currentHealth = user.health || maxHealth;
+  const maxHealth = (gladiator?.endurance ?? 5) * 10 + (gladiator?.level ?? 1) * 5;
+  const currentHealth = gladiator?.health ?? maxHealth;
   const healthPercent = Math.min((currentHealth / maxHealth) * 100, 100);
 
   return (
-    <div style={{ display: 'flex', gap: '20px', padding: '20px' }}>
+    <div style={{ padding: '20px' }}>
       
-      {/* Left Column: Avatar & Basic Info */}
-      <div style={{ width: '250px', borderRight: '1px solid #8b4513', paddingRight: '20px' }}>
+      <div>
         <div style={{ position: 'relative', width: '100%', height: '200px', marginBottom: '10px' }}>
           <Image 
             src={avatarUrl} 
@@ -42,7 +42,9 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
           />
         </div>
         
-        <h3 style={{ color: '#8b4513', marginBottom: '10px' }}>{user.name}</h3>
+        <h3 style={{ color: '#8b4513', marginBottom: '10px' }}>
+          {gladiator?.name ?? 'Gladiator'}
+        </h3>
         
         {/* Health Bar */}
         <div style={{ marginBottom: '10px' }}>
@@ -54,38 +56,13 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
 
         {/* Stats List - English Only */}
         <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
-          <StatRow label="Strength" value={user.strength || 5} />
-          <StatRow label="Endurance" value={user.endurance || 5} />
-          <StatRow label="Agility" value={user.agility || 5} />
-          <StatRow label="Dexterity" value={user.dexterity || 5} />
-          <StatRow label="Intelligence" value={user.intelligence || 5} />
-          <StatRow label="Charisma" value={user.charisma || 5} />
+          <StatRow label="Strength" value={gladiator?.strength ?? 5} />
+          <StatRow label="Endurance" value={gladiator?.endurance ?? 5} />
+          <StatRow label="Agility" value={gladiator?.agility ?? 5} />
+          <StatRow label="Dexterity" value={gladiator?.dexterity ?? 5} />
+          <StatRow label="Intelligence" value={gladiator?.intelligence ?? 5} />
+          <StatRow label="Charisma" value={gladiator?.charisma ?? 5} />
         </div>
-      </div>
-
-      {/* Right Column: Equipment & Inventory */}
-      <div style={{ flex: 1 }}>
-         {/* Placeholder for Equipment Grid - Add your existing equipment code here */}
-         <h4 style={{ textAlign: 'center', color: '#8b4513' }}>Equipment</h4>
-         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '20px' }}>
-            {/* Example Equipment Slots */}
-            <Slot label="Helmet" />
-            <Slot label="Weapon" />
-            <Slot label="Armor" />
-            <Slot label="Shield" />
-            <Slot label="Boots" />
-            <Slot label="Ring 1" />
-            <Slot label="Amulet" />
-         </div>
-
-         {/* Placeholder for Inventory */}
-         <h4 style={{ textAlign: 'center', color: '#8b4513' }}>Inventory (Bag)</h4>
-         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '5px', background: '#d2b48c', padding: '10px' }}>
-            {/* Example Inventory Slots */}
-            {Array.from({ length: 32 }).map((_, i) => (
-              <div key={i} style={{ width: '40px', height: '40px', background: '#8b4513', border: '1px solid #5d4037' }}></div>
-            ))}
-         </div>
       </div>
 
     </div>
@@ -108,19 +85,3 @@ function StatRow({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Slot({ label }: { label: string }) {
-  return (
-    <div style={{ 
-        width: '60px', 
-        height: '60px', 
-        background: '#d2b48c', 
-        border: '2px solid #8b4513', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        fontSize: '10px'
-    }}>
-      {label}
-    </div>
-  );
-}

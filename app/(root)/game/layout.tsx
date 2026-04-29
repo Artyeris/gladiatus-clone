@@ -15,30 +15,30 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   if (!user) return null;
 
   return (
-    <body className={`${inter.className} main-container`}>
-      <div className='w-full flex justify-center min-h-screen bg-fixed bg-cover bg-center' style={{ backgroundImage: 'url("/images/game-image.webp")' }}>
+    <div className={`${inter.className} main-container`}>
+      <div className='game-shell' style={{ backgroundImage: 'url("/images/game-image.webp")' }}>
         <Toaster
           toastOptions={{
             className: '',
             style: {
-              background: '#eed7a1'
+              background: '#eed7a1',
+              color: '#540400',
+              border: '2px solid #974342',
             }
           }}
         />
-          <GameNavbar />
-          <div className='w-full h-min-full flex flex-row justify-center gap-6'>
+        <GameNavbar />
+        <div className='game-stage'>
           <NavigationBanner />
-          <div className='flex flex-col items-center h-min-full'>
+          <div className='game-content-column'>
             <GameHeader user={user} />
-            <div className='h-min-full main-cream-card w-[620px] flex-grow py-4'>
-              <div>
-                {children}
-              </div>
+            <div className='main-cream-card game-content-frame'>
+              {children}
             </div>
-            <div className='footer w-[640px] h-[50px] orange-gradient' />
+            <div className='footer game-footer orange-gradient' />
           </div>
         </div>
       </div>
-    </body>
-)
+    </div>
+  )
 }

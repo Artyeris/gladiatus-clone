@@ -21,7 +21,10 @@ const SignUp = () => {
 
     const response = await signUpUser(payload);
 
-    if (response && response.error) return toast.error(response.error.message);
+    if (response && response.error) {
+      toast.error(response.error.message);
+      return;
+    }
 
     router.push('/game/overview');
   }

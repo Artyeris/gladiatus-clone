@@ -42,7 +42,7 @@ const ArenaContent = ({ arenaRivals, character }: ArenaContentProps) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [character.arenaLastBattle]);
 
   return (
     <>

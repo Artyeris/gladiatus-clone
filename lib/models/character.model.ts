@@ -51,6 +51,10 @@ const characterSchema = new mongoose.Schema({
     type: String,
     enum: ['male', 'female'],
   },
+  onboarded: {
+    type: Boolean,
+    default: true,
+  },
   journal: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Journal',
@@ -89,5 +93,14 @@ const characterSchema = new mongoose.Schema({
 });
 
 const Character = mongoose.models.Character || mongoose.model('Character', characterSchema);
+
+if (!Character.schema.path('onboarded')) {
+  Character.schema.add({
+    onboarded: {
+      type: Boolean,
+      default: true,
+    },
+  });
+}
 
 export default Character;

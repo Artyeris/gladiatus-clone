@@ -7,12 +7,15 @@ import DescriptionCard from '@/components/cards/DescriptionCard';
 
 const Page = async () => {
   const user = await getUser().catch(() => redirect('/'));
+
+  if (!user) return null;
+
+  if (!user.character) redirect('/onboarding');
+
   const arenaRivals = await getArenaRivals();
   const character = user.character;
 
-  if (!user || !arenaRivals) return null;
-
-  if (!user.character) redirect('/onboarding');
+  if (!arenaRivals) return null;
 
   return (
     <div className='px-8 gap-4 flex flex-col'>

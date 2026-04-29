@@ -22,29 +22,32 @@ const CooldownTimer = ({ name, message, cooldown, characterLastBattle, redirect 
   const router = useRouter();
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
 
-  if (characterLastBattle) {
-    useEffect(() => {
-      const intervalId = setInterval(() => {
-        const expeditionLastBattleTime = new Date(characterLastBattle).getTime();
-        const currentTime = new Date().getTime();
-  
-        const timeDifference = (currentTime - expeditionLastBattleTime);
-        const timeRemainingUntilCooldown = Math.ceil((cooldown - timeDifference / 1000));
-  
-        if (timeRemainingUntilCooldown <= 0) {
-          // If the remaining minutes have passed, clear the interval.
-          setTimeRemaining(timeRemainingUntilCooldown);
-          clearInterval(intervalId);
-        } else {
-          // Update the time remaining.
-          setTimeRemaining(timeRemainingUntilCooldown);
-        }
-      }, 1000);
-  
-      // Cleanup function to clear the interval when component unmounts
-      return () => clearInterval(intervalId);
-    }, [characterLastBattle]);
-  }
+  useEffect(() => {
+    if (!characterLastBattle) {
+      setTimeRemaining(0);
+      return;
+    }
+
+    const updateTimeRemaining = () => {
+      const expeditionLastBattleTime = new Date(characterLastBattle).getTime();
+      const currentTime = new Date().getTime();
+      const timeDifference = currentTime - expeditionLastBattleTime;
+      const timeRemainingUntilCooldown = Math.ceil(cooldown - timeDifference / 1000);
+
+      setTimeRemaining(timeRemainingUntilCooldown);
+      return timeRemainingUntilCooldown;
+    };
+
+    if (updateTimeRemaining() <= 0) return;
+
+    const intervalId = setInterval(() => {
+      if (updateTimeRemaining() <= 0) {
+        clearInterval(intervalId);
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [characterLastBattle, cooldown]);
 
   let progressPercentage = Math.round(((cooldown - timeRemaining) / cooldown) * 100)
 

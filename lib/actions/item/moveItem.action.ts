@@ -23,7 +23,7 @@ export async function moveItemAction({ itemId, x, y }: MoveItemParams) {
   try {
     const userId = extractUserId(token);
 
-    connectToDB();
+    await connectToDB();
 
     const user = await User.findById(userId)
       .populate({
@@ -43,7 +43,7 @@ export async function moveItemAction({ itemId, x, y }: MoveItemParams) {
 
      await user.character.save();
   } catch (error: any) {
-    console.log(`${new Date} - Failed to move item - ${error}`);
+    console.log(`${new Date()} - Failed to move item - ${error}`);
     throw new Error(error.message)
   }
 }

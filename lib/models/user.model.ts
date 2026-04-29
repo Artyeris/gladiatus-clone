@@ -1,23 +1,53 @@
-// models/User.ts
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   name: string;
+  username?: string;
   email?: string;
-  level: number;
-  strength: number;
-  endurance: number;
-  agility: number;
-  dexterity: number;
-  intelligence: number;
-  charisma: number;
-  experience: number;
-  crowns: number;
+  password?: string;
+  character?: mongoose.Types.ObjectId;
+  level?: number;
+  strength?: number;
+  endurance?: number;
+  agility?: number;
+  dexterity?: number;
+  intelligence?: number;
+  charisma?: number;
+  experience?: number;
+  crowns?: number;
 }
 
-const UserSchema = new Schema<IUser>({
-  name: { type: String, required: true },
-  email: { type: String },
+const userSchema = new Schema<IUser>({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  username: {
+    type: String,
+    unique: true,
+    sparse: true,
+    lowercase: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
+    lowercase: true,
+    trim: true,
+  },
+  password: {
+    type: String,
+    select: false,
+  },
+  character: {
+    type: Schema.Types.ObjectId,
+    ref: 'Character',
+    default: null,
+  },
+
+  // Legacy profile fields kept so older local test users still hydrate safely.
   level: { type: Number, default: 1 },
   strength: { type: Number, default: 5 },
   endurance: { type: Number, default: 5 },
@@ -26,7 +56,52 @@ const UserSchema = new Schema<IUser>({
   intelligence: { type: Number, default: 5 },
   charisma: { type: Number, default: 5 },
   experience: { type: Number, default: 0 },
-  crowns: { type: Number, default: 100 } // Added currency field
+  crowns: { type: Number, default: 100 },
+}, {
+  timestamps: true,
 });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const User: any = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+
+const missingCachedPaths: Record<string, any> = {};
+
+if (!User.schema.path('username')) {
+  missingCachedPaths.username = {
+    type: String,
+    unique: true,
+    sparse: true,
+    lowercase: true,
+    trim: true,
+  };
+}
+
+if (!User.schema.path('email')) {
+  missingCachedPaths.email = {
+    type: String,
+    unique: true,
+    sparse: true,
+    lowercase: true,
+    trim: true,
+  };
+}
+
+if (!User.schema.path('password')) {
+  missingCachedPaths.password = {
+    type: String,
+    select: false,
+  };
+}
+
+if (!User.schema.path('character')) {
+  missingCachedPaths.character = {
+    type: Schema.Types.ObjectId,
+    ref: 'Character',
+    default: null,
+  };
+}
+
+if (Object.keys(missingCachedPaths).length > 0) {
+  User.schema.add(missingCachedPaths);
+}
+
+export default User;
