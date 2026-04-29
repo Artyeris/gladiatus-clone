@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
 
-// FIX: Go up 5 levels (../..) to reach the root, then into lib/dbConnect
-// 1. ../ -> profile/
-// 2. ../../ -> user/
-// 3. ../../../ -> api/
-// 4. ../../../../ -> app/
-// 5. ../../../../../ -> Root folder (where lib is)
-import dbConnect from '../../../../../lib/dbConnect'; 
+// FIX: Use @/ alias to point directly to root/lib/dbConnect
+import dbConnect from '@/lib/dbConnect'; 
 
-// FIX: Go up 5 levels to reach the root, then into lib/models/user.model
-import User from '../../../../../lib/models/user.model'; 
+// FIX: Use @/ alias to point directly to root/lib/models/user.model
+import User from '@/lib/models/user.model'; 
 
 export async function GET(request: Request) {
   await dbConnect();
