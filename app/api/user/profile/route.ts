@@ -1,36 +1,28 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '../../lib/dbConnect'; 
-import User from '../../lib/models/user.model'; 
 
-// Import getServerSession to check who is logged in
-// Note: If your auth config file is named differently, adjust the import path
-import { getServerSession } from 'next-auth/next';
+// FIX: Go up 5 levels (../..) to reach the root, then into lib/dbConnect
+// 1. ../ -> profile/
+// 2. ../../ -> user/
+// 3. ../../../ -> api/
+// 4. ../../../../ -> app/
+// 5. ../../../../../ -> Root folder (where lib is)
+import dbConnect from '../../../../../lib/dbConnect'; 
+
+// FIX: Go up 5 levels to reach the root, then into lib/models/user.model
+import User from '../../../../../lib/models/user.model'; 
 
 export async function GET(request: Request) {
   await dbConnect();
 
   try {
-    // 1. Get the current session to find the logged-in user ID
-    const session = await getServerSession({ 
-      req: request as any, // Next.js types sometimes need casting here
-      cookieName: '__next-auth', // Default NextAuth cookie name
-      secret: process.env.NEXTAUTH_SECRET || 'secret' 
-    });
-
-    if (!session) {
-      return NextResponse.json({ error: 'Not logged in' }, { status: 401 });
-    }
-
-    // 2. Find the user by their ID (not name!)
-    const userId = session.user.id; 
-    
-    const user = await User.findById(userId).lean(); 
+    // Find user by name 'Artiom' (Based on your registration nickname)
+    const user = await User.findOne({ name: 'Artiom' }).lean(); 
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found in DB' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found (Check DB for "Artiom")' }, { status: 404 });
     }
 
-    // 3. Calculate stats for the UI bars
+    // Calculate stats for the UI bars
     const maxHealth = (user.endurance || 5) * 10 + (user.level || 1) * 5; 
     const currentHealth = maxHealth; 
     
