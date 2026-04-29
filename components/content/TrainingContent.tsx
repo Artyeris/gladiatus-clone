@@ -1,11 +1,14 @@
 'use client'
 
 import Image from 'next/image';
-import DescriptionCard from '@/components/cards/DescriptionCard';
-import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import TrainStat from '@/components/shared/TrainStat';
-import { trainCharacter } from '@/lib/actions/character/train.action';
 import toast from 'react-hot-toast';
+
+import DescriptionCard from '@/components/cards/DescriptionCard';
+import TrainStat from '@/components/shared/TrainStat';
+import { stats } from '@/constants';
+import { trainCharacter } from '@/lib/actions/character/train.action';
+import { CharacterInterface } from '@/lib/interfaces/character.interface';
+import { calculateStatBreakdown, StatId } from '@/lib/utils/statUtils';
 
 const calculateStatCost = (stat: number) => Math.pow(stat, 2) + stat + 1;
 
@@ -19,7 +22,7 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
   return (
     <>
       <div className='flex gap-4'>
-        <Image 
+        <Image
           width={168}
           height={194}
           src={`/images/barracks.jpg`}
@@ -32,8 +35,8 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
             Within the city&apos;s barracks, you can observe robust soldiers training, who are willing to impart their skills in exchange for a generous sum of crowns.
           </p>
           <div className='flex items-center gap-1'>
-            Your balance: {character.crowns} 
-            <Image 
+            Your balance: {character.crowns}
+            <Image
               src={'/images/crowns.png'}
               width={12}
               height={12}
@@ -43,54 +46,23 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
         </DescriptionCard>
       </div>
       <div className='brown-card flex flex-col text-sm rounded-sm'>
-        <TrainStat 
-          statName='Strength'
-          statValue={character.strength}
-          handleClick={() => handleClick('strength')}
-          crownsValue={calculateStatCost(character.strength)}
-          characterCrowns={character.crowns}
-        />
+        {stats.map((stat, index) => {
+          const statValue = character[stat.id] as number;
+          const breakdown = calculateStatBreakdown(character, stat.id as StatId);
 
-        <TrainStat 
-          statName='Endurance'
-          statValue={character.endurance}
-          handleClick={() => handleClick('endurance')}
-          crownsValue={calculateStatCost(character.endurance)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Agility'
-          statValue={character.agility}
-          handleClick={() => handleClick('agility')}
-          crownsValue={calculateStatCost(character.agility)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Dexterity'
-          statValue={character.dexterity}
-          handleClick={() => handleClick('dexterity')}
-          crownsValue={calculateStatCost(character.dexterity)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Intelligence'
-          statValue={character.intelligence}
-          handleClick={() => handleClick('intelligence')}
-          crownsValue={calculateStatCost(character.intelligence)}
-          characterCrowns={character.crowns}
-        />
-
-        <TrainStat 
-          statName='Charisma'
-          statValue={character.charisma}
-          handleClick={() => handleClick('charisma')}
-          crownsValue={calculateStatCost(character.charisma)}
-          characterCrowns={character.crowns}
-          last
-        />
+          return (
+            <TrainStat
+              key={stat.id}
+              statName={stat.name}
+              statValue={statValue}
+              breakdown={breakdown}
+              handleClick={() => handleClick(stat.id)}
+              crownsValue={calculateStatCost(statValue)}
+              characterCrowns={character.crowns}
+              last={index === stats.length - 1}
+            />
+          );
+        })}
       </div>
     </>
   )

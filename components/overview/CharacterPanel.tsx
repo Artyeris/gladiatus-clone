@@ -1,7 +1,14 @@
 // components/overview/CharacterPanel.tsx
 import Image from 'next/image';
 
+import StatBar from '@/components/shared/StatBar';
+import { stats } from '@/constants';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
+import {
+  calculateStatBreakdown,
+  StatBreakdown,
+  StatId,
+} from '@/lib/utils/statUtils';
 
 interface CharacterPanelProps {
   user: CharacterInterface;
@@ -53,30 +60,30 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
         </div>
       </div>
 
-      {/* Stats List - English Only */}
+      {/* Stats List - hover any row to see base / total / item contribution */}
       <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
-        <StatRow label="Strength" value={user.strength || 5} />
-        <StatRow label="Endurance" value={user.endurance || 5} />
-        <StatRow label="Agility" value={user.agility || 5} />
-        <StatRow label="Dexterity" value={user.dexterity || 5} />
-        <StatRow label="Intelligence" value={user.intelligence || 5} />
-        <StatRow label="Charisma" value={user.charisma || 5} />
+        {stats.map((stat) => {
+          const breakdown = calculateStatBreakdown(user, stat.id as StatId);
+          return (
+            <StatRow
+              key={stat.id}
+              label={stat.name}
+              breakdown={breakdown}
+            />
+          );
+        })}
       </div>
     </div>
   );
 }
 
-// Helper component for stat bars
-function StatRow({ label, value }: { label: string; value: number }) {
-  // Simple bar calculation (max 20 for visual purposes)
-  const percent = Math.min((value / 20) * 100, 100);
-
+function StatRow({ label, breakdown }: { label: string; breakdown: StatBreakdown }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <span style={{ width: '80px' }}>{label}:</span>
-      <span style={{ fontWeight: 'bold', width: '20px' }}>{value}</span>
-      <div style={{ flex: 1, background: '#ddd', height: '6px', borderRadius: '3px' }}>
-        <div style={{ width: `${percent}%`, background: '#388e3c', height: '100%', borderRadius: '3px' }}></div>
+      <span style={{ width: '90px' }}>{label}:</span>
+      <span style={{ fontWeight: 'bold', width: '24px' }}>{breakdown.total}</span>
+      <div style={{ flex: 1 }}>
+        <StatBar statName={label} breakdown={breakdown} />
       </div>
     </div>
   );
