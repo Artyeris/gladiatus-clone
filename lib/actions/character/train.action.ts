@@ -1,63 +1,59 @@
-// lib/actions/character/train.action.ts
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import dbConnect from '@/lib/dbConnect'; // Fixed import to match default export
-import User from '@/lib/models/user.model'; 
 import { cookies } from 'next/headers';
-import { extractUserId } from '@/lib/utils/jwtUtils'; // Assuming you have this utility
 
-interface TrainCharacterParams {
-  stat: string;
-}
+import { COOKIE_NAME, stats } from '@/constants';
+import { connectToDB } from '@/lib/mongoose';
+import Character from '@/lib/models/character.model';
+import User from '@/lib/models/user.model';
+import { extractUserId } from '@/lib/utils/jwtUtils';
 
-export async function trainCharacter({ stat }: TrainCharacterParams) {
+const ALLOWED_STATS = stats.map((s) => s.id);
+const calculateStatCost = (stat: number) => Math.pow(stat, 2) + stat + 1;
+
+export async function trainCharacter(stat: string) {
   try {
-    await dbConnect();
-
-    // 1. Get User ID from cookie
-    const tokenCookie = cookies().get('token'); // Adjust name if your cookie is different (e.g., 'jwt', 'session')
-    
-    let userId: string;
-    if (tokenCookie) {
-      userId = extractUserId(tokenCookie.value);
-    } else {
-        // Fallback for local testing if no auth yet - replace with actual ID or logic
-        // For now, we assume the user is logged in. 
-        // If you are testing without login, hardcode a valid User ID here:
-        userId = 'YOUR_USER_ID_HERE'; 
+    if (!ALLOWED_STATS.includes(stat)) {
+      return { error: { message: 'Invalid stat' } };
     }
 
-    // 2. Find User and update stats directly
-    // This ensures Overview (which reads from User) stays in sync with Training
+    const tokenCookie = cookies().get(COOKIE_NAME);
+    if (!tokenCookie || !tokenCookie.value) {
+      return { error: { message: 'Not authenticated' } };
+    }
+
+    const userId = extractUserId(tokenCookie.value);
+
+    await connectToDB();
+
     const user = await User.findById(userId);
-
-    if (!user) {
-      return { error: 'User not found' };
+    if (!user || !user.character) {
+      return { error: { message: 'Character not found' } };
     }
 
-    // 3. Calculate Cost (Example logic: cost increases with level)
-    const currentStatValue = user[stat as keyof typeof user] || 5;
-    const cost = Math.floor(currentStatValue * 1.5); 
-
-    if ((user as any).crowns < cost) {
-      return { error: 'Not enough crowns' };
+    const character = await Character.findById(user.character);
+    if (!character) {
+      return { error: { message: 'Character not found' } };
     }
 
-    // 4. Update User Stats
-    (user as any)[stat] += 1;
-    (user as any).crowns -= cost;
+    const currentStatValue = character[stat] ?? 5;
+    const cost = calculateStatCost(currentStatValue);
 
-    await user.save();
+    if (character.crowns < cost) {
+      return { error: { message: 'Not enough crowns' } };
+    }
 
-    // 5. Revalidate both pages so they show new data instantly
+    character[stat] = currentStatValue + 1;
+    character.crowns -= cost;
+    await character.save();
+
     revalidatePath('/game/training');
     revalidatePath('/game/overview');
 
     return { message: 'Stat trained successfully' };
-
   } catch (error) {
     console.error(`${new Date()} - Failed to train stat - ${error}`);
-    throw error;
+    return { error: { message: 'Failed to train stat' } };
   }
 }
