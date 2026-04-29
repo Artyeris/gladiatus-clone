@@ -5,16 +5,15 @@ import Character from '@/lib/models/character.model';
 import User from '@/lib/models/user.model';
 import Item from '@/lib/models/item.model';
 import { connectToDB } from '@/lib/mongoose';
-import { extractUserId } from '@/lib/utils';
+// Import from the new file we just created
+import { extractUserId } from '@/lib/utils/jwtUtils'; 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 
-// extracts the user id from the jwt and returns the user object if it is valid
 export async function getUser(getInventory = false) {
-  const tokenCookie = cookies().get(COOKIE_NAME); // Get the cookie object
+  const tokenCookie = cookies().get(COOKIE_NAME); 
   
   // FIX: If no cookie exists, return null instead of throwing immediately. 
-  // This allows the Sign-In page to load even if not logged in.
   if (!tokenCookie || !tokenCookie.value) {
     console.log('No token found');
     return null; 
@@ -34,7 +33,6 @@ export async function getUser(getInventory = false) {
       }
     ]);
 
-    // If "getInventory" is true, populate the entire inventory with the items.
     if (getInventory && user.character) {
       const inventory = user.character.inventory;
       for (let i = 0; i < inventory.length; i++) {
@@ -47,7 +45,7 @@ export async function getUser(getInventory = false) {
       }
     }
 
-    if (!user) return null; // Return null if user not found in DB
+    if (!user) return null; 
     
     revalidatePath('/game/overview');
     
@@ -55,6 +53,6 @@ export async function getUser(getInventory = false) {
 
   } catch (error) {
     console.log(`${new Date()} - Failed to authenticate user - ${error}`);
-    return null; // Return null on error instead of throwing
+    return null; 
   }
 }
