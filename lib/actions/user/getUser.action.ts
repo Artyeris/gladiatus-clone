@@ -13,11 +13,14 @@ import { cookies } from 'next/headers';
 export async function getUser(getInventory = false) {
   const tokenCookie = cookies().get(COOKIE_NAME); // Get the cookie object
   
-  // FIX: Check if cookie exists AND has a value
-  if (!tokenCookie || !tokenCookie.value) throw new Error('Unauthorized');
+  // FIX: If no cookie exists, return null instead of throwing immediately. 
+  // This allows the Sign-In page to load even if not logged in.
+  if (!tokenCookie || !tokenCookie.value) {
+    console.log('No token found');
+    return null; 
+  }
 
   try {
-    // FIX: Pass only the string value (tokenCookie.value) to extractUserId
     const userId = extractUserId(tokenCookie.value); 
     
     await connectToDB();
@@ -44,7 +47,7 @@ export async function getUser(getInventory = false) {
       }
     }
 
-    if (!user) throw new Error('Unauthorized');
+    if (!user) return null; // Return null if user not found in DB
     
     revalidatePath('/game/overview');
     
@@ -52,6 +55,6 @@ export async function getUser(getInventory = false) {
 
   } catch (error) {
     console.log(`${new Date()} - Failed to authenticate user - ${error}`);
-    throw error;
+    return null; // Return null on error instead of throwing
   }
 }
