@@ -1,23 +1,36 @@
 import { NextResponse } from 'next/server';
-
-// Go up 2 folders (../..) into lib/dbConnect
 import dbConnect from '../../lib/dbConnect'; 
-
-// Go up 2 folders (../..) into lib/models/user.model (matches your screenshot)
 import User from '../../lib/models/user.model'; 
+
+// Import getServerSession to check who is logged in
+// Note: If your auth config file is named differently, adjust the import path
+import { getServerSession } from 'next-auth/next';
 
 export async function GET(request: Request) {
   await dbConnect();
 
   try {
-    // Find user by name 'Artiom' (Update this logic later to use Session/ID)
-    const user = await User.findOne({ name: 'Artiom' }).lean(); 
+    // 1. Get the current session to find the logged-in user ID
+    const session = await getServerSession({ 
+      req: request as any, // Next.js types sometimes need casting here
+      cookieName: '__next-auth', // Default NextAuth cookie name
+      secret: process.env.NEXTAUTH_SECRET || 'secret' 
+    });
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    if (!session) {
+      return NextResponse.json({ error: 'Not logged in' }, { status: 401 });
     }
 
-    // Calculate stats for the UI bars
+    // 2. Find the user by their ID (not name!)
+    const userId = session.user.id; 
+    
+    const user = await User.findById(userId).lean(); 
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found in DB' }, { status: 404 });
+    }
+
+    // 3. Calculate stats for the UI bars
     const maxHealth = (user.endurance || 5) * 10 + (user.level || 1) * 5; 
     const currentHealth = maxHealth; 
     
