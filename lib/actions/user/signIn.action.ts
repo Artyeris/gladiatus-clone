@@ -2,7 +2,6 @@
 
 import { COOKIE_NAME, MAX_TOKEN_AGE } from '@/constants';
 import User from '@/lib/models/user.model';
-// Ensure this path matches your file structure (screenshot showed mongoose.ts in lib)
 import { connectToDB } from '@/lib/mongoose'; 
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
@@ -17,7 +16,6 @@ export async function signInUser({ email, password }: signInUserParams) {
   if (!email || !password) return { error: { message: 'All fields must be completed' } };
   
   try {
-    // Ensure DB connection is established
     await connectToDB(); 
     
     const user = await User.findOne({ email }).select('password _id');
@@ -29,9 +27,9 @@ export async function signInUser({ email, password }: signInUserParams) {
 
     if (isValidPassword) {
       // FIX: Ensure JWT_SECRET is defined. If not, use a fallback to prevent "Illegal arguments"
-      const secret = process.env.JWT_SECRET || 'your-fallback-secret-key-here'; 
+      const secret = process.env.JWT_SECRET || 'fallback-secret-key-for-testing';
       
-      console.log('JWT Secret loaded:', secret ? 'Yes' : 'No'); // Debug log
+      console.log('JWT Secret loaded:', secret ? 'Yes' : 'No'); 
 
       const token = sign({ userId: user._id }, secret, { expiresIn: MAX_TOKEN_AGE });
       
