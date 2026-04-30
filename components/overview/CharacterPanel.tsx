@@ -3,6 +3,7 @@ import Image from 'next/image';
 import StatBar from '@/components/shared/StatBar';
 import { stats } from '@/constants';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
+import { calculateNextLevelExperience } from '@/lib/utils';
 import {
   calculateStatBreakdown,
   StatBreakdown,
@@ -27,6 +28,12 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
   const currentHealth = (user as any).health || maxHealth;
   const healthPercent = Math.min((currentHealth / maxHealth) * 100, 100);
 
+  const experience = user.experience || 0;
+  const xpForNextLevel = calculateNextLevelExperience(level);
+  const xpPercent = xpForNextLevel > 0
+    ? Math.min((experience / xpForNextLevel) * 100, 100)
+    : 0;
+
   return (
     <div className='flex flex-col items-center gap-3 p-4 text-brown2'>
 
@@ -42,6 +49,11 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
         className='drop-shadow-xl'
       />
 
+      <div className='w-full flex justify-between text-sm font-semibold'>
+        <span>Level</span>
+        <span className='text-red3'>{level}</span>
+      </div>
+
       <div className='w-full'>
         <div className='flex justify-between text-xs font-semibold mb-1'>
           <span>Health</span>
@@ -51,6 +63,19 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
           <div
             className='absolute top-0 left-0 h-full'
             style={{ width: `${healthPercent}%`, backgroundColor: '#a32626' }}
+          />
+        </div>
+      </div>
+
+      <div className='w-full'>
+        <div className='flex justify-between text-xs font-semibold mb-1'>
+          <span>Experience</span>
+          <span>{experience} / {xpForNextLevel} ({xpPercent.toFixed(1)}%)</span>
+        </div>
+        <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
+          <div
+            className='absolute top-0 left-0 h-full'
+            style={{ width: `${xpPercent}%`, backgroundColor: '#d4af37' }}
           />
         </div>
       </div>

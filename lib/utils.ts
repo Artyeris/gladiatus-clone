@@ -21,8 +21,16 @@ export function extractUserId(token: RequestCookie) {
   return userId;
 }
 
+// XP required to advance from `level` to `level + 1`.
+// Levels 1-79 follow the linear curve `10 * level - 5` (matches the
+// observed Gladiatus progression: 1->2 = 5 XP, 10->11 = 95 XP,
+// 79->80 = 785 XP). Past level 80 the curve softly accelerates so
+// hitting late levels takes longer, the same trend the original game
+// shows after level ~84.
 export function calculateNextLevelExperience(level: number) {
-  return (10 * (level + 1 ) - 5) - 10;
+  const linear = 10 * level - 5;
+  if (level < 80) return linear;
+  return Math.floor(linear * Math.pow(1.08, level - 79));
 }
 
 export function calculateProgressPercent(first: number, second: number) {
