@@ -47,8 +47,8 @@ const FighterCard = ({ name, level, strength, endurance, dexterity, agility, int
           </div>
         </div>
 
-        {stats.map((stat, index) => (
-          <div className='border-cream2 px-2 border-b-[2px]'>
+        {stats.map((stat) => (
+          <div key={stat.id} className='border-cream2 px-2 border-b-[2px]'>
             <div className='flex justify-between text-sm'>
               {stat.name}:
               <span className='flex justify-center items-center font-semibold gap-2 text-red3'>

@@ -1,6 +1,8 @@
 'use client'
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import DescriptionCard from '@/components/cards/DescriptionCard';
@@ -13,11 +15,48 @@ import { calculateStatBreakdown, StatId } from '@/lib/utils/statUtils';
 const calculateStatCost = (stat: number) => Math.pow(stat, 2) + stat + 1;
 
 const TrainingContent = ({ character }: { character: CharacterInterface }) => {
-  const handleClick = async (stat: string) => {
-    const response = await trainCharacter(stat);
+  const router = useRouter();
+  const [currentCharacter, setCurrentCharacter] = useState(character);
+  const [pendingStat, setPendingStat] = useState<string | null>(null);
 
-    if (response && response.error) return toast.error(response.error.message);
-  }
+  useEffect(() => {
+    setCurrentCharacter(character);
+  }, [character]);
+
+  const handleClick = async (stat: string) => {
+    if (pendingStat) return;
+
+    setPendingStat(stat);
+
+    try {
+      const response = await trainCharacter(stat);
+
+      if (response?.error) {
+        toast.error(response.error.message);
+        return;
+      }
+
+      if (response?.character) {
+        setCurrentCharacter(response.character);
+      } else {
+        const statValue = currentCharacter[stat] as number;
+        const cost = calculateStatCost(statValue);
+
+        setCurrentCharacter((prev) => ({
+          ...prev,
+          [stat]: statValue + 1,
+          crowns: prev.crowns - cost,
+        }));
+      }
+
+      toast.success('Stat trained');
+      router.refresh();
+    } catch {
+      toast.error('Training failed');
+    } finally {
+      setPendingStat(null);
+    }
+  };
 
   return (
     <>
@@ -35,7 +74,7 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
             Within the city&apos;s barracks, you can observe robust soldiers training, who are willing to impart their skills in exchange for a generous sum of crowns.
           </p>
           <div className='flex items-center gap-1'>
-            Your balance: {character.crowns}
+            Your balance: {currentCharacter.crowns}
             <Image
               src={'/images/crowns.png'}
               width={12}
@@ -47,8 +86,8 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
       </div>
       <div className='brown-card flex flex-col text-sm rounded-sm'>
         {stats.map((stat, index) => {
-          const statValue = character[stat.id] as number;
-          const breakdown = calculateStatBreakdown(character, stat.id as StatId);
+          const statValue = currentCharacter[stat.id] as number;
+          const breakdown = calculateStatBreakdown(currentCharacter, stat.id as StatId);
 
           return (
             <TrainStat
@@ -58,7 +97,9 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
               breakdown={breakdown}
               handleClick={() => handleClick(stat.id)}
               crownsValue={calculateStatCost(statValue)}
-              characterCrowns={character.crowns}
+              characterCrowns={currentCharacter.crowns}
+              disabled={Boolean(pendingStat)}
+              isPending={pendingStat === stat.id}
               last={index === stats.length - 1}
             />
           );

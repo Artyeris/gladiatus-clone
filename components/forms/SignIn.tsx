@@ -19,7 +19,10 @@ const SignIn = () => {
 
     const response = await signInUser(payload);
 
-    if (response && response.error) return toast.error(response.error.message);
+    if (response && response.error) {
+      toast.error(response.error.message);
+      return;
+    }
 
     router.push('/game/overview');
   }
@@ -62,7 +65,7 @@ const SignIn = () => {
         </Button>
       </div>
       <span className='text-sm flex justify-center'>
-        Don't have an account?
+        Don&apos;t have an account?
           <Link 
             className='text-red cursor-pointer mx-1'
             href='/sign-up'

@@ -23,7 +23,7 @@ export default function Home() {
                 <p>
                   <Link href='https://gladiatus.gameforge.com' className='text-red3 underline'>Gladiatus</Link> is a web browser-based MMORPG (Massively Multiplayer Online Role-Playing Game) developed by <Link href='https://gameforge.com' className='text-red3 underline'>Gameforge</Link> and released in 2009. 
                   In the game, players create and customize their own gladiator characters. They embark on adventures, fight against various enemies and creatures, acquire new skills and equipment, 
-                  and progress through different levels. This project aims to clone a significant portion of the original game's functionality into a newer stack using technologies like <Link href='https://nextjs.org' className='text-red3 underline'>Next.js 14</Link> with Server Side Rendering,
+                  and progress through different levels. This project aims to clone a significant portion of the original game&apos;s functionality into a newer stack using technologies like <Link href='https://nextjs.org' className='text-red3 underline'>Next.js 14</Link> with Server Side Rendering,
                   Server Actions, <Link href='https://www.mongodb.com/' className='text-red3 underline'>MongoDB</Link> and <Link href='https://www.typescriptlang.org' className='text-red3 underline'>Typescript</Link> without any commercial purpose, only learning.
                 </p>
                 <p>

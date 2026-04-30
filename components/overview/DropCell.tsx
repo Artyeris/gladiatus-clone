@@ -18,7 +18,11 @@ const DropCell = ({ x, y, handleDropItem, children }: DropCellProps) => {
   }));
 
   return (
-    <div ref={drop}>
+    <div
+      ref={(node) => {
+        drop(node);
+      }}
+    >
       {children}
     </div>
   );

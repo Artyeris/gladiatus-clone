@@ -19,6 +19,29 @@ export interface StatBreakdown {
 
 // Default value of an untrained stat.
 const BASE_STAT = 5;
+const DEFAULT_VISUAL_MAX = 20;
+
+function getUniqueCharacterItems(character: CharacterInterface): ItemInterface[] {
+  const inventory = character.inventory || [];
+  const seen = new Set<string>();
+  const items: ItemInterface[] = [];
+
+  for (const row of inventory) {
+    for (const cell of row) {
+      if (!cell || typeof cell !== 'object' || !('_id' in cell)) continue;
+
+      const item = cell as ItemInterface;
+      const id = String(item._id);
+
+      if (seen.has(id)) continue;
+
+      seen.add(id);
+      items.push(item);
+    }
+  }
+
+  return items;
+}
 
 // Each trained point adds +1 to max headroom (on top of also raising base by 1),
 // and each level beyond 1 adds +2 to max headroom. So a stat trained N times
@@ -29,8 +52,9 @@ export function calculateStatBreakdown(
   equippedItems: ItemInterface[] = []
 ): StatBreakdown {
   const base = ((character[stat] as number | undefined) ?? BASE_STAT);
+  const items = equippedItems.length > 0 ? equippedItems : getUniqueCharacterItems(character);
 
-  const fromItems = equippedItems.reduce(
+  const fromItems = items.reduce(
     (sum, item) => sum + ((item?.[stat] as number | undefined) ?? 0),
     0
   );
@@ -39,7 +63,7 @@ export function calculateStatBreakdown(
   const levelBonus = Math.max(((character.level ?? 1) - 1) * 2, 0);
   const maxFromItems = trainedPoints + levelBonus;
   const total = base + fromItems;
-  const max = base + maxFromItems;
+  const max = Math.max(base + maxFromItems, base + fromItems, DEFAULT_VISUAL_MAX);
 
   return {
     base,

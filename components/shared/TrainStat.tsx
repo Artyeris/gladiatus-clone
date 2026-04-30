@@ -13,6 +13,8 @@ interface TrainStatProps {
   crownsValue: number;
   breakdown: StatBreakdown;
   handleClick: () => void;
+  disabled?: boolean;
+  isPending?: boolean;
 }
 
 const TrainStat = ({
@@ -22,9 +24,11 @@ const TrainStat = ({
   handleClick,
   crownsValue,
   breakdown,
+  disabled = false,
+  isPending = false,
   last = false,
 }: TrainStatProps) => {
-  const canTrain = characterCrowns > crownsValue;
+  const canTrain = characterCrowns >= crownsValue && !disabled;
 
   return (
     <div
@@ -49,18 +53,24 @@ const TrainStat = ({
             alt='crowns'
           />
         </div>
-        <div
-          className={`${canTrain ? 'cursor-pointer hover:brightness-110' : ''} ml-2`}
-          onClick={canTrain ? handleClick : () => {}}
+        <button
+          type='button'
+          className={`${canTrain ? 'cursor-pointer hover:brightness-110' : 'cursor-not-allowed'} relative ml-2`}
+          onClick={handleClick}
+          disabled={!canTrain}
+          aria-label={`Train ${statName}`}
         >
           <Image
             src='/images/train-stat.jpg'
             width={25}
             height={25}
-            alt='train'
-            className={`shadow-sm ${!canTrain && 'grayscale'}`}
+            alt=''
+            className={`shadow-sm ${!canTrain && 'grayscale opacity-60'}`}
           />
-        </div>
+          {isPending && (
+            <span className='absolute inset-1 rounded-full border-2 border-cream2 border-t-red3 animate-spin' />
+          )}
+        </button>
       </div>
     </div>
   )

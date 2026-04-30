@@ -50,7 +50,7 @@ const EquipmentSlots = () => {
 };
 
 // Helper component for a single slot
-const EquipmentSlot = ({ type }) => (
+const EquipmentSlot = ({ type }: { type: string }) => (
   <div style={{ 
     width: '60px', 
     height: '60px', 

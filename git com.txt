@@ -1,0 +1,4 @@
+git status                              # confirm which branch you're on
+git stash push -m "wip"                 # only if status shows uncommitted changes
+git checkout claude/fix-training-stats-7jwWU
+git pull

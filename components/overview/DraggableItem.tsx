@@ -25,7 +25,9 @@ const DraggableItem = ({ item, index }: Props) => {
 
   return (
     <div
-      ref={drag}
+      ref={(node) => {
+        drag(node);
+      }}
       className={`w-14 h-14 border-2 border-[#5c4033] bg-[#f5e8c7] flex items-center justify-center text-3xl cursor-grab active:cursor-grabbing transition-all hover:bg-yellow-200
         ${isDragging ? 'opacity-50 scale-95' : ''}`}
     >

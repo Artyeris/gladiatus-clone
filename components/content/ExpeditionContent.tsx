@@ -26,7 +26,7 @@ const ExpeditionContent = ({ enemies, expeditionName, character }: ExpeditionCon
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [character.expeditionLastBattle]);
 
   return (
     <div className='flex flex-row gap-4'>

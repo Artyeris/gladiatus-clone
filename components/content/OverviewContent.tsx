@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import CharacterPanel from '../overview/CharacterPanel';
 import EquipmentSlots from '../overview/EquipmentSlots';
@@ -41,7 +39,7 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
              backgroundColor: '#e8dcc0'
            }}>
               <h3>Inventory (Bag)</h3>
-              <InventoryGrid />
+              <InventoryGrid inventory={character.inventory} />
            </div>
 
         </div>

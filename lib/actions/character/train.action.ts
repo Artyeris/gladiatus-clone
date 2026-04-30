@@ -27,7 +27,7 @@ export async function trainCharacter(stat: string) {
 
     await connectToDB();
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('character');
     if (!user || !user.character) {
       return { error: { message: 'Character not found' } };
     }
@@ -37,21 +37,26 @@ export async function trainCharacter(stat: string) {
       return { error: { message: 'Character not found' } };
     }
 
-    const currentStatValue = character[stat] ?? 5;
+    const currentStatValue = Number((character as any)[stat] ?? 5);
     const cost = calculateStatCost(currentStatValue);
 
     if (character.crowns < cost) {
       return { error: { message: 'Not enough crowns' } };
     }
 
-    character[stat] = currentStatValue + 1;
+    (character as any)[stat] = currentStatValue + 1;
     character.crowns -= cost;
     await character.save();
 
     revalidatePath('/game/training');
     revalidatePath('/game/overview');
+    revalidatePath('/game/arena');
+    revalidatePath('/game/expeditions');
 
-    return { message: 'Stat trained successfully' };
+    return {
+      message: 'Stat trained successfully',
+      character: JSON.parse(JSON.stringify(character)),
+    };
   } catch (error) {
     console.error(`${new Date()} - Failed to train stat - ${error}`);
     return { error: { message: 'Failed to train stat' } };
