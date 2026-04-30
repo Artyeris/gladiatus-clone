@@ -22,7 +22,7 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
       <div style={{ display: 'flex', gap: '20px' }}>
 
         {/* LEFT COLUMN: Character Info (Pic 1 content) */}
-        <div style={{ flex: 1, borderRight: '2px solid #5c3a21', paddingRight: '20px' }}>
+        <div style={{ flex: '0 0 300px', borderRight: '2px solid #5c3a21', paddingRight: '20px' }}>
            <CharacterPanel user={character} />
         </div>
 
