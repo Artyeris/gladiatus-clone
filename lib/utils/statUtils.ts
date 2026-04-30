@@ -20,9 +20,9 @@ export interface StatBreakdown {
 // Default value of an untrained stat.
 const BASE_STAT = 5;
 
-// Each trained point bumps both base and max by 1 (it's already baked into
-// `base`, since base = 5 + trainings). Each level beyond 1 adds +2 to max,
-// which is the headroom that items can fill.
+// Each trained point adds +1 to max headroom (on top of also raising base by 1),
+// and each level beyond 1 adds +2 to max headroom. So a stat trained N times
+// at level L has max = base + N + (L - 1) * 2.
 export function calculateStatBreakdown(
   character: CharacterInterface,
   stat: StatId,
@@ -35,7 +35,9 @@ export function calculateStatBreakdown(
     0
   );
 
-  const maxFromItems = Math.max(((character.level ?? 1) - 1) * 2, 0);
+  const trainedPoints = Math.max(base - BASE_STAT, 0);
+  const levelBonus = Math.max(((character.level ?? 1) - 1) * 2, 0);
+  const maxFromItems = trainedPoints + levelBonus;
   const total = base + fromItems;
   const max = base + maxFromItems;
 
