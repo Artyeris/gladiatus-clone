@@ -85,8 +85,8 @@ function StatRow({ label, breakdown, last = false }: StatRowProps) {
         !last && 'border-b-[3px] border-cream2'
       }`}
     >
-      <span className='w-24'>{label}</span>
-      <div className='flex-1'>
+      <span className='w-20'>{label}</span>
+      <div className='flex-1 min-w-0'>
         <StatBar statName={label} breakdown={breakdown} />
       </div>
       <span className='font-semibold text-red3 w-8 text-right'>
