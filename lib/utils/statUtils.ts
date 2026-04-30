@@ -19,7 +19,6 @@ export interface StatBreakdown {
 
 // Default value of an untrained stat.
 const BASE_STAT = 5;
-const DEFAULT_VISUAL_MAX = 20;
 
 function getUniqueCharacterItems(character: CharacterInterface): ItemInterface[] {
   const inventory = character.inventory || [];
@@ -43,9 +42,12 @@ function getUniqueCharacterItems(character: CharacterInterface): ItemInterface[]
   return items;
 }
 
-// Each trained point adds +1 to max headroom (on top of also raising base by 1),
-// and each level beyond 1 adds +2 to max headroom. So a stat trained N times
-// at level L has max = base + N + (L - 1) * 2.
+// Per the design rule:
+//   - every training point grows max by 2 (the +1 to base plus +1 of headroom)
+//   - every level beyond 1 grows max by 4 (the +2 to base allowance plus +2
+//     of headroom that items can fill)
+// Closed form: max = 2 * base + (level - 1) * 4.
+// Examples: base 10 at level 1 -> max 20; base 10 at level 2 -> max 24.
 export function calculateStatBreakdown(
   character: CharacterInterface,
   stat: StatId,
@@ -59,11 +61,10 @@ export function calculateStatBreakdown(
     0
   );
 
-  const trainedPoints = Math.max(base - BASE_STAT, 0);
-  const levelBonus = Math.max(((character.level ?? 1) - 1) * 2, 0);
-  const maxFromItems = trainedPoints + levelBonus;
+  const levelBonus = Math.max(((character.level ?? 1) - 1) * 4, 0);
+  const max = base * 2 + levelBonus;
+  const maxFromItems = Math.max(max - base, 0);
   const total = base + fromItems;
-  const max = Math.max(base + maxFromItems, base + fromItems, DEFAULT_VISUAL_MAX);
 
   return {
     base,
