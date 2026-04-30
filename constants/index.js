@@ -20,11 +20,11 @@ export const stats = [
     id: 'dexterity',
   },
   {
-    name: 'Intelligence',
-    id: 'intelligence',
-  },
-  {
     name: 'Charisma',
     id: 'charisma',
+  },
+  {
+    name: 'Intelligence',
+    id: 'intelligence',
   },
 ]
