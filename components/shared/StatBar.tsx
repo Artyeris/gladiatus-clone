@@ -26,11 +26,12 @@ const StatBar = ({ statName, breakdown, className, trigger }: StatBarProps) => {
 
   const bar = trigger ?? (
     <div
-      className={`relative h-2 rounded-sm bg-black/30 overflow-hidden cursor-help ${className ?? ''}`}
+      className={`relative h-3 rounded-sm overflow-hidden cursor-help ${className ?? ''}`}
+      style={{ backgroundColor: '#3e2714' }}
     >
       <div
-        className='absolute top-0 left-0 h-full bg-green-700'
-        style={{ width: `${fillPercent}%` }}
+        className='absolute top-0 left-0 h-full'
+        style={{ width: `${fillPercent}%`, backgroundColor: '#6b8e23' }}
       />
     </div>
   );
