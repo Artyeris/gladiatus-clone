@@ -1,5 +1,6 @@
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
+import { EQUIPMENT_SLOTS } from '@/lib/utils/equipment';
 
 export type StatId =
   | 'strength'
@@ -20,23 +21,14 @@ export interface StatBreakdown {
 // Default value of an untrained stat.
 const BASE_STAT = 5;
 
-function getUniqueCharacterItems(character: CharacterInterface): ItemInterface[] {
-  const inventory = character.inventory || [];
-  const seen = new Set<string>();
+function getEquippedItems(character: CharacterInterface): ItemInterface[] {
+  const equipment = (character.equipment ?? {}) as Record<string, unknown>;
   const items: ItemInterface[] = [];
 
-  for (const row of inventory) {
-    for (const cell of row) {
-      if (!cell || typeof cell !== 'object' || !('_id' in cell)) continue;
-
-      const item = cell as ItemInterface;
-      const id = String(item._id);
-
-      if (seen.has(id)) continue;
-
-      seen.add(id);
-      items.push(item);
-    }
+  for (const slot of EQUIPMENT_SLOTS) {
+    const cell = equipment[slot];
+    if (!cell || typeof cell !== 'object' || !('_id' in (cell as object))) continue;
+    items.push(cell as ItemInterface);
   }
 
   return items;
@@ -54,7 +46,7 @@ export function calculateStatBreakdown(
   equippedItems: ItemInterface[] = []
 ): StatBreakdown {
   const base = ((character[stat] as number | undefined) ?? BASE_STAT);
-  const items = equippedItems.length > 0 ? equippedItems : getUniqueCharacterItems(character);
+  const items = equippedItems.length > 0 ? equippedItems : getEquippedItems(character);
 
   const fromItems = items.reduce(
     (sum, item) => sum + ((item?.[stat] as number | undefined) ?? 0),

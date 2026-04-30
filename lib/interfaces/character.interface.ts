@@ -1,6 +1,7 @@
 import { UserInterface } from '@/lib/interfaces/user.interface';
 import { BattleReport } from '@/lib/interfaces/battleReport.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
+import { EquipmentMap } from '@/lib/utils/equipment';
 
 export interface CharacterInterface {
   _id: string;
@@ -24,4 +25,5 @@ export interface CharacterInterface {
   expeditionLastBattle: Date,
   arenaLastBattle: Date,
   inventory: null[][] | ItemInterface[][] | string[][],
+  equipment?: EquipmentMap,
 }

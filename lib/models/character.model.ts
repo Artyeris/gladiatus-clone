@@ -83,6 +83,19 @@ const characterSchema = new mongoose.Schema({
       [null, null, null, null, null],
       [null, null, null, null, null],
     ]
+  },
+  equipment: {
+    head:     { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    chest:    { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    legs:     { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    gloves:   { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    cloak:    { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    boots:    { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    mainHand: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    offHand:  { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    necklace: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    ring1:    { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+    ring2:    { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
   }
 }, {
   timestamps: true

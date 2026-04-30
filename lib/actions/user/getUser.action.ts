@@ -42,7 +42,21 @@ export async function getUser(getInventory = false) {
         }
       }
     }
-    
+
+    if (character?.equipment) {
+      const slots: string[] = [
+        'head', 'chest', 'legs', 'gloves', 'cloak', 'boots',
+        'mainHand', 'offHand', 'necklace', 'ring1', 'ring2',
+      ];
+      for (const slot of slots) {
+        const ref = character.equipment[slot];
+        if (ref && typeof ref === 'object' && !('name' in ref)) {
+          const item = await Item.findById(ref);
+          character.equipment[slot] = item;
+        }
+      }
+    }
+
     return JSON.parse(JSON.stringify(user));
 
   } catch (error) {
