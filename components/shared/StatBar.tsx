@@ -18,10 +18,10 @@ interface StatBarProps {
 }
 
 const StatBar = ({ statName, breakdown, className, trigger }: StatBarProps) => {
-  const { base, fromItems, maxFromItems, total } = breakdown;
+  const { base, fromItems, maxFromItems, total, max } = breakdown;
 
-  const fillPercent = maxFromItems > 0
-    ? Math.min((fromItems / maxFromItems) * 100, 100)
+  const fillPercent = max > 0
+    ? Math.min((total / max) * 100, 100)
     : 0;
 
   const bar = trigger ?? (
@@ -48,8 +48,12 @@ const StatBar = ({ statName, breakdown, className, trigger }: StatBarProps) => {
             <span className='font-semibold'>{base}</span>
           </span>
           <span className='flex justify-between gap-4'>
-            Maximum:
+            Total:
             <span className='font-semibold'>{total}</span>
+          </span>
+          <span className='flex justify-between gap-4'>
+            Maximum:
+            <span className='font-semibold'>{max}</span>
           </span>
           <span className='flex justify-between gap-4'>
             From items:

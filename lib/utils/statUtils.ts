@@ -10,17 +10,19 @@ export type StatId =
   | 'charisma';
 
 export interface StatBreakdown {
-  base: number;
-  fromItems: number;
-  maxFromItems: number;
-  total: number;
+  base: number;        // trained value stored on the character
+  fromItems: number;   // current sum of equipped-item bonuses for this stat
+  maxFromItems: number; // how much items can still add on top of the base
+  total: number;       // base + fromItems (current effective stat)
+  max: number;         // base + maxFromItems (cap if every item slot is filled)
 }
 
 // Default value of an untrained stat.
 const BASE_STAT = 5;
 
-// Each trained point grants +1 to the cap an item can contribute,
-// and each level beyond level 1 grants +2 to that cap.
+// Each trained point bumps both base and max by 1 (it's already baked into
+// `base`, since base = 5 + trainings). Each level beyond 1 adds +2 to max,
+// which is the headroom that items can fill.
 export function calculateStatBreakdown(
   character: CharacterInterface,
   stat: StatId,
@@ -33,14 +35,15 @@ export function calculateStatBreakdown(
     0
   );
 
-  const trainedPoints = Math.max(base - BASE_STAT, 0);
-  const levelBonus = Math.max(((character.level ?? 1) - 1) * 2, 0);
-  const maxFromItems = trainedPoints + levelBonus;
+  const maxFromItems = Math.max(((character.level ?? 1) - 1) * 2, 0);
+  const total = base + fromItems;
+  const max = base + maxFromItems;
 
   return {
     base,
     fromItems,
     maxFromItems,
-    total: base + fromItems,
+    total,
+    max,
   };
 }
