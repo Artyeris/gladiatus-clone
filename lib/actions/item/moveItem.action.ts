@@ -84,8 +84,13 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
     const item = await Item.findById(itemId);
     if (!item) return { error: { message: 'Item not found' } };
 
-    const inventory: any[][] = character.inventory;
-    const equipment = character.equipment ?? {};
+    // Deep-copy so Mongoose Mixed change tracking sees a brand new value when
+    // we reassign at the end. Reading character.inventory directly returns
+    // the tracked array which doesn't always notice nested mutations.
+    const inventory: any[][] = (character.inventory ?? []).map((row: any[]) =>
+      row.map((cell) => (cell == null ? null : cell))
+    );
+    const equipment = { ...(character.equipment ?? {}) } as Record<string, any>;
 
     // Validate source matches reality.
     if (source.kind === 'equipment') {
@@ -142,11 +147,19 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
       character.markModified('inventory');
       character.markModified('equipment');
     } else if (source.kind === 'equipment' && target.kind === 'inventory') {
-      if (!canInsertItem({ inventory, item, x: target.x, y: target.y })) {
-        return { error: { message: 'Target cell occupied' } };
+      // Try the requested cell, then fall back to any free cell so a stale
+      // partial state doesn't make unequip impossible.
+      let placeAt: { x: number; y: number } | null = null;
+      if (canInsertItem({ inventory, item, x: target.x, y: target.y })) {
+        placeAt = { x: target.x, y: target.y };
+      } else {
+        const free = findFreeCell(inventory, item);
+        if (free) placeAt = free;
       }
+      if (!placeAt) return { error: { message: 'No room in inventory' } };
+
       equipment[source.slot] = null;
-      insertItem({ inventory, item, x: target.x, y: target.y });
+      insertItem({ inventory, item, x: placeAt.x, y: placeAt.y });
       character.inventory = inventory;
       character.equipment = equipment;
       character.markModified('inventory');

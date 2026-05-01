@@ -33,11 +33,32 @@ export async function getUser(getInventory = false) {
 
     if (getInventory && character?.inventory) {
       const inventory = character.inventory;
+      // Track ids that are still alive so non-anchor string cells from dead
+      // multi-cell items can be cleared too.
+      const liveItemIds = new Set<string>();
       for (let i = 0; i < inventory.length; i++) {
         for (let j = 0; j < inventory[i].length; j++) {
-          if (inventory[i][j] && typeof inventory[i][j] === 'object' && !('name' in inventory[i][j])) {
-            const item = await Item.findById(inventory[i][j]);
-            inventory[i][j] = item;
+          const cell = inventory[i][j];
+          if (cell && typeof cell === 'object' && !('name' in cell)) {
+            const item = await Item.findById(cell);
+            if (item) {
+              inventory[i][j] = item;
+              if (item.id) liveItemIds.add(item.id);
+            } else {
+              // Dead reference -> blank it.
+              inventory[i][j] = null;
+            }
+          } else if (cell && typeof cell === 'object' && 'id' in cell && cell.id) {
+            liveItemIds.add(cell.id);
+          }
+        }
+      }
+      // Clear non-anchor (string) cells whose anchor is gone.
+      for (let i = 0; i < inventory.length; i++) {
+        for (let j = 0; j < inventory[i].length; j++) {
+          const cell = inventory[i][j];
+          if (typeof cell === 'string' && !liveItemIds.has(cell)) {
+            inventory[i][j] = null;
           }
         }
       }
@@ -52,7 +73,7 @@ export async function getUser(getInventory = false) {
         const ref = character.equipment[slot];
         if (ref && typeof ref === 'object' && !('name' in ref)) {
           const item = await Item.findById(ref);
-          character.equipment[slot] = item;
+          character.equipment[slot] = item ?? null;
         }
       }
     }

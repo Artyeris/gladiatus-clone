@@ -31,8 +31,12 @@ function getEquippedItems(user: CharacterInterface): ItemInterface[] {
 function armorAbsorption(armor: number) {
   if (armor <= 0) return { min: 0, max: 0 };
   const a74 = armor / 74;
-  const min = Math.max(Math.ceil(a74 - a74 / 660 + 1), 0);
-  const max = Math.floor(armor / 66 + armor / 660);
+  const rawMin = Math.max(Math.ceil(a74 - a74 / 660 + 1), 0);
+  const rawMax = Math.max(Math.floor(armor / 66 + armor / 660), 0);
+  // The fan formula's +1 baseline can push min above max at low armor.
+  // Clamp min to never exceed max so the displayed range is always sensible.
+  const max = rawMax;
+  const min = Math.min(rawMin, rawMax);
   return { min, max };
 }
 

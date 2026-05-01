@@ -277,7 +277,9 @@ function EquipmentDropSlot({
         justifyContent: 'center',
         position: 'relative',
       }}
-      title={SLOT_LABELS[slot]}
+      // Native title only when the slot is empty so it doesn't double up
+      // with ItemTooltip when an item is equipped.
+      title={item ? undefined : SLOT_LABELS[slot]}
     >
       {item ? (
         <DraggableItem
@@ -293,8 +295,9 @@ function EquipmentDropSlot({
             alignItems: 'center',
             justifyContent: 'center',
             gap: '2px',
-            opacity: 0.55,
+            opacity: 0.45,
             pointerEvents: 'none',
+            filter: 'grayscale(1) contrast(0.85)',
           }}
         >
           <span style={{ fontSize: '24px', lineHeight: 1 }}>{SLOT_ICON[slot]}</span>
