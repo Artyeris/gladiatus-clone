@@ -1,47 +1,15 @@
 import Image from 'next/image';
 
 import StatBar from '@/components/shared/StatBar';
+import CombatRows from '@/components/overview/CombatRows';
 import { stats } from '@/constants';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import { ItemInterface } from '@/lib/interfaces/item.interface';
 import { calculateNextLevelExperience } from '@/lib/utils';
-import { EQUIPMENT_SLOTS } from '@/lib/utils/equipment';
 import {
   calculateStatBreakdown,
   StatBreakdown,
   StatId,
 } from '@/lib/utils/statUtils';
-
-function equippedItems(user: CharacterInterface): ItemInterface[] {
-  const equipment = (user.equipment ?? {}) as Record<string, unknown>;
-  const items: ItemInterface[] = [];
-  for (const slot of EQUIPMENT_SLOTS) {
-    const cell = equipment[slot];
-    if (cell && typeof cell === 'object' && '_id' in (cell as object)) {
-      items.push(cell as ItemInterface);
-    }
-  }
-  return items;
-}
-
-function combatTotals(user: CharacterInterface) {
-  const items = equippedItems(user);
-  let armor = 0;
-  let damageMin = 0;
-  let damageMax = 0;
-  for (const item of items) {
-    armor += item.armor ?? 0;
-    if (item.damage && item.damage.length === 2) {
-      damageMin += item.damage[0];
-      damageMax += item.damage[1];
-    }
-  }
-  // Strength contributes a bit of damage even bare-handed.
-  const strBonus = Math.floor((user.strength ?? 5) / 2);
-  damageMin += strBonus;
-  damageMax += strBonus;
-  return { armor, damageMin, damageMax };
-}
 
 interface CharacterPanelProps {
   user: CharacterInterface;
@@ -128,23 +96,6 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
       </div>
 
       <CombatRows user={user} />
-    </div>
-  );
-}
-
-function CombatRows({ user }: { user: CharacterInterface }) {
-  const { armor, damageMin, damageMax } = combatTotals(user);
-
-  return (
-    <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
-      <div className='flex items-center justify-between gap-2 px-2 py-1 border-b-[3px] border-cream2'>
-        <span className='w-[72px] shrink-0'>Armor</span>
-        <span className='font-semibold text-red3'>{armor}</span>
-      </div>
-      <div className='flex items-center justify-between gap-2 px-2 py-1'>
-        <span className='w-[72px] shrink-0'>Damage</span>
-        <span className='font-semibold text-red3'>{damageMin} - {damageMax}</span>
-      </div>
     </div>
   );
 }
