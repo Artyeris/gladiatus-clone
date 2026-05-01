@@ -10,10 +10,22 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
   return (
     <div className="game-container">
 
-      <div className="game-header">
-        <div className="header-tab active">Bendras vaizdas</div>
-        <div className="header-tab">Statistika</div>
-        <div className="header-tab">Pergalės</div>
+      <div className='flex gap-2 px-2 mb-3 text-sm font-semibold text-brown2'>
+        <a
+          href='/game/overview'
+          className='px-4 py-1 border-b-[3px] border-red3 text-red3'
+        >
+          Overview
+        </a>
+        <a
+          href='/game/statistics'
+          className='px-4 py-1 border-b-[3px] border-transparent hover:text-red3'
+        >
+          Statistics
+        </a>
+        <span className='px-4 py-1 border-b-[3px] border-transparent opacity-60 cursor-not-allowed'>
+          Victories
+        </span>
       </div>
 
       <div style={{ display: 'flex', gap: '20px' }}>

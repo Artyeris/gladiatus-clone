@@ -31,6 +31,8 @@ export async function getUser(getInventory = false) {
 
     const character = user.character as any;
 
+    let dirty = false;
+
     if (getInventory && character?.inventory) {
       const inventory = character.inventory;
       // Track ids that are still alive so non-anchor string cells from dead
@@ -47,6 +49,7 @@ export async function getUser(getInventory = false) {
             } else {
               // Dead reference -> blank it.
               inventory[i][j] = null;
+              dirty = true;
             }
           } else if (cell && typeof cell === 'object' && 'id' in cell && cell.id) {
             liveItemIds.add(cell.id);
@@ -59,6 +62,7 @@ export async function getUser(getInventory = false) {
           const cell = inventory[i][j];
           if (typeof cell === 'string' && !liveItemIds.has(cell)) {
             inventory[i][j] = null;
+            dirty = true;
           }
         }
       }
@@ -73,8 +77,25 @@ export async function getUser(getInventory = false) {
         const ref = character.equipment[slot];
         if (ref && typeof ref === 'object' && !('name' in ref)) {
           const item = await Item.findById(ref);
-          character.equipment[slot] = item ?? null;
+          if (item) {
+            character.equipment[slot] = item;
+          } else {
+            character.equipment[slot] = null;
+            dirty = true;
+          }
         }
+      }
+    }
+
+    if (dirty && character) {
+      // Persist the cleanup so future writes (moveItem, etc.) load a clean
+      // baseline. Mark Mixed paths so Mongoose actually serializes.
+      character.markModified('inventory');
+      character.markModified('equipment');
+      try {
+        await character.save();
+      } catch (err) {
+        console.log(`${new Date()} - Failed to persist inventory cleanup - ${err}`);
       }
     }
 

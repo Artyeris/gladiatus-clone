@@ -11,6 +11,7 @@ import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import { canInsertItem } from '@/lib/utils/inventory/canInsertItem';
 import { insertItem } from '@/lib/utils/inventory/insertItem';
+import { cleanupCharacterRefs } from '@/lib/utils/inventory/cleanup';
 import { EQUIPMENT_SLOTS, EquipmentSlot, slotAcceptsItem } from '@/lib/utils/equipment';
 
 type Location =
@@ -91,6 +92,10 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
       row.map((cell) => (cell == null ? null : cell))
     );
     const equipment = { ...(character.equipment ?? {}) } as Record<string, any>;
+
+    // Sweep dead references before doing the move so phantom cells from
+    // earlier failed mutations can't make canInsertItem report false-occupied.
+    await cleanupCharacterRefs({ inventory, equipment, Item });
 
     // Validate source matches reality.
     if (source.kind === 'equipment') {
