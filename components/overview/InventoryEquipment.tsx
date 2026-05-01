@@ -15,6 +15,7 @@ import {
   slotAcceptsItem,
 } from '@/lib/utils/equipment';
 import { moveItemAction } from '@/lib/actions/item/moveItem.action';
+import ItemTooltip from '@/components/overview/ItemTooltip';
 
 const DRAG_TYPE = 'ITEM';
 
@@ -407,25 +408,26 @@ function DraggableItem({
   );
 
   return (
-    <div
-      ref={(node) => {
-        drag(node);
-      }}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        cursor: 'grab',
-        opacity: isDragging ? 0.4 : 1,
-      }}
-      title={item.name}
-    >
-      <Image
-        src={`/items/${item.image}.webp`}
-        alt={item.name}
-        width={size}
-        height={size}
-        style={{ objectFit: 'contain', width: '100%', height: '100%', padding: '2px' }}
-      />
-    </div>
+    <ItemTooltip item={item}>
+      <div
+        ref={(node) => {
+          drag(node);
+        }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          cursor: 'grab',
+          opacity: isDragging ? 0.4 : 1,
+        }}
+      >
+        <Image
+          src={`/items/${item.image}.webp`}
+          alt={item.name}
+          width={size}
+          height={size}
+          style={{ objectFit: 'contain', width: '100%', height: '100%', padding: '2px' }}
+        />
+      </div>
+    </ItemTooltip>
   );
 }

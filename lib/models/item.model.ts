@@ -63,7 +63,18 @@ const itemSchema = new mongoose.Schema({
   height: {
     type: Number,
     required: true,
-  }
+  },
+  quality: {
+    type: String,
+    enum: ['common', 'common_plus', 'green', 'green_plus', 'blue', 'blue_plus', 'purple', 'purple_plus', 'orange', 'orange_plus', 'red'],
+    default: 'common',
+  },
+  prefix: { type: String },
+  suffix: { type: String },
+  durability: { type: Number },
+  durabilityMax: { type: Number },
+  conditioning: { type: Number },
+  conditioningMax: { type: Number },
 }, {
   timestamps: true
 });
