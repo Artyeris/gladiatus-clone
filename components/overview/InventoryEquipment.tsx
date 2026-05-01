@@ -83,18 +83,22 @@ function Board({ character }: Props) {
     const nextInventory = inventory.map((row) => row.slice());
     const nextEquipment = { ...equipment };
 
-    const clearItemFromInventory = (id: string) => {
+    const itemId = item._id;
+    const itemHumanId = item.id;
+
+    const clearItemFromInventory = () => {
       for (let i = 0; i < nextInventory.length; i++) {
         for (let j = 0; j < nextInventory[i].length; j++) {
           const cell = nextInventory[i][j];
           if (!cell) continue;
-          if (typeof cell === 'object' && cell._id === id) nextInventory[i][j] = null;
-          else if (typeof cell === 'string' && cell === id) nextInventory[i][j] = null;
+          if (typeof cell === 'object' && cell._id === itemId) {
+            nextInventory[i][j] = null;
+          } else if (typeof cell === 'string' && (cell === itemHumanId || cell === itemId)) {
+            nextInventory[i][j] = null;
+          }
         }
       }
     };
-
-    const itemId = item._id;
 
     if (source.kind === 'inventory' && target.kind === 'inventory') {
       const targetCell = nextInventory[target.x]?.[target.y];
@@ -102,11 +106,11 @@ function Board({ character }: Props) {
         toast.error('Target cell occupied');
         return;
       }
-      clearItemFromInventory(itemId);
+      clearItemFromInventory();
       nextInventory[target.x][target.y] = item;
     } else if (source.kind === 'inventory' && target.kind === 'equipment') {
       const previously = nextEquipment[target.slot] as ItemInterface | null | undefined;
-      clearItemFromInventory(itemId);
+      clearItemFromInventory();
       nextEquipment[target.slot] = item;
       if (previously) {
         if (!nextInventory[source.x]?.[source.y]) {
@@ -157,11 +161,26 @@ function Board({ character }: Props) {
   );
 }
 
+// Icon hint shown in empty slots so the player can tell which gear goes where.
+const SLOT_ICON: Record<EquipmentSlot, string> = {
+  head: '🪖',
+  chest: '🥋',
+  legs: '👖',
+  gloves: '🧤',
+  cloak: '🧥',
+  boots: '👢',
+  mainHand: '⚔️',
+  offHand: '🛡️',
+  necklace: '📿',
+  ring1: '💍',
+  ring2: '💍',
+};
+
 const EQUIPMENT_LAYOUT: (EquipmentSlot | null)[][] = [
-  [null, 'head', null, 'cloak'],
-  ['mainHand', 'chest', 'offHand', 'gloves'],
-  [null, 'legs', null, 'boots'],
-  ['ring1', null, 'ring2', 'necklace'],
+  [null,        'head',  null,        'cloak'   ],
+  ['mainHand',  'chest', 'offHand',   'gloves'  ],
+  [null,        'legs',  null,        'necklace'],
+  [null,        'boots', 'ring1',     'ring2'   ],
 ];
 
 function EquipmentBoard({
@@ -267,7 +286,22 @@ function EquipmentDropSlot({
           size={56}
         />
       ) : (
-        <span style={{ fontSize: '10px', color: '#3e2714' }}>{SLOT_LABELS[slot]}</span>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '2px',
+            opacity: 0.55,
+            pointerEvents: 'none',
+          }}
+        >
+          <span style={{ fontSize: '24px', lineHeight: 1 }}>{SLOT_ICON[slot]}</span>
+          <span style={{ fontSize: '9px', color: '#3e2714', fontWeight: 600 }}>
+            {SLOT_LABELS[slot]}
+          </span>
+        </div>
       )}
     </div>
   );

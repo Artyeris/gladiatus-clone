@@ -26,15 +26,27 @@ interface MoveItemParams {
 const isValidSlot = (s: string): s is EquipmentSlot =>
   (EQUIPMENT_SLOTS as readonly string[]).includes(s);
 
-function clearInventoryItem(inventory: any[][], itemId: string) {
+function clearInventoryItem(inventory: any[][], item: any) {
+  const idMongo = item._id?.toString();
+  const idHuman = item.id;
+
   for (let i = 0; i < inventory.length; i++) {
     for (let j = 0; j < inventory[i].length; j++) {
       const cell = inventory[i][j];
       if (!cell) continue;
-      if (typeof cell === 'object' && cell._id?.toString() === itemId) {
-        inventory[i][j] = null;
-      } else if (typeof cell === 'string' && cell === itemId) {
-        inventory[i][j] = null;
+
+      // Anchor cell can be: populated Item ({_id}), raw ObjectId, or its string form.
+      if (typeof cell === 'object') {
+        const cellId = cell._id?.toString?.() ?? cell.toString?.();
+        if (cellId === idMongo) {
+          inventory[i][j] = null;
+          continue;
+        }
+      } else if (typeof cell === 'string') {
+        // Non-anchor cells store item.id; anchor cells may also serialize to a string ObjectId.
+        if (cell === idHuman || cell === idMongo) {
+          inventory[i][j] = null;
+        }
       }
     }
   }
@@ -95,16 +107,16 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
 
     // Apply the move.
     if (source.kind === 'inventory' && target.kind === 'inventory') {
-      clearInventoryItem(inventory, itemId);
+      clearInventoryItem(inventory, item);
       const inserted = insertItem({ inventory, item, x: target.x, y: target.y });
       if (!inserted) {
         insertItem({ inventory, item, x: source.x, y: source.y });
         return { error: { message: 'Target cell occupied' } };
       }
       character.inventory = inserted;
+      character.markModified('inventory');
     } else if (source.kind === 'inventory' && target.kind === 'equipment') {
-      // Equip. Clear from inventory, swap any existing equipped item back to source position.
-      clearInventoryItem(inventory, itemId);
+      clearInventoryItem(inventory, item);
       const previouslyEquipped = equipment[target.slot];
       equipment[target.slot] = item._id;
       if (previouslyEquipped) {
@@ -127,6 +139,7 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
       }
       character.inventory = inventory;
       character.equipment = equipment;
+      character.markModified('inventory');
       character.markModified('equipment');
     } else if (source.kind === 'equipment' && target.kind === 'inventory') {
       if (!canInsertItem({ inventory, item, x: target.x, y: target.y })) {
@@ -136,6 +149,7 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
       insertItem({ inventory, item, x: target.x, y: target.y });
       character.inventory = inventory;
       character.equipment = equipment;
+      character.markModified('inventory');
       character.markModified('equipment');
     } else if (source.kind === 'equipment' && target.kind === 'equipment') {
       const otherEquipped = equipment[target.slot];
