@@ -1,27 +1,18 @@
-import Image from 'next/image';
+import { redirect } from 'next/navigation';
 
-import DescriptionCard from '@/components/cards/DescriptionCard';
+import MarketContent from '@/components/content/MarketContent';
+import { listMarketAction } from '@/lib/actions/market/market.action';
+import { getUser } from '@/lib/actions/user/getUser.action';
 
-const Page = () => {
-  return (
-    <div className='px-8 gap-4 flex flex-col'>
-      <div className='flex gap-4'>
-        <Image
-          width={168}
-          height={194}
-          src='/images/barracks.jpg'
-          alt='market'
-        />
-        <DescriptionCard title='Market'>
-          <p>
-            The traders haven&apos;t arrived in town yet. The market will open
-            once the first merchants set up their stalls.
-          </p>
-          <p className='text-xs italic mt-2'>Coming soon.</p>
-        </DescriptionCard>
-      </div>
-    </div>
-  );
+const Page = async () => {
+  const user = await getUser(true).catch(() => redirect('/'));
+  if (!user) return null;
+  if (!user.character) redirect('/onboarding');
+
+  const market = await listMarketAction();
+  const listings = 'listings' in market ? market.listings : [];
+
+  return <MarketContent character={user.character} listings={listings} />;
 };
 
 export default Page;

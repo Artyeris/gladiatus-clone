@@ -72,17 +72,15 @@ const characterSchema = new mongoose.Schema({
     default: new Date(Date.now() - 10 * 60 * 1000),
   },
   inventory: {
-    type: [[{ type: mongoose.Schema.Types.Mixed }]],
-    default: [
-      [null, null, null, null, null],
-      [null, null, null, null, null],
-      [null, null, null, null, null],
-      [null, null, null, null, null],
-      [null, null, null, null, null],
-      [null, null, null, null, null],
-      [null, null, null, null, null],
-      [null, null, null, null, null],
-    ]
+    type: [
+      {
+        _id: false,
+        item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item' },
+        x: { type: Number, default: 0 },
+        y: { type: Number, default: 0 },
+      },
+    ],
+    default: [],
   },
   equipment: {
     head:     { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },

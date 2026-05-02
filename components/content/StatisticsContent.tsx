@@ -26,11 +26,21 @@ function gatherEquipped(user: CharacterInterface): ItemInterface[] {
 }
 
 function gatherInventory(user: CharacterInterface): ItemInterface[] {
-  const inv = user.inventory ?? [];
+  const inv = (user.inventory ?? []) as any;
   const out: ItemInterface[] = [];
+  if (!Array.isArray(inv)) return out;
+  // New flat list: [{ item, x, y }]
+  if (inv.length === 0 || !Array.isArray(inv[0])) {
+    for (const entry of inv) {
+      const it = entry?.item;
+      if (it && typeof it === 'object' && 'name' in it) out.push(it as ItemInterface);
+    }
+    return out;
+  }
+  // Legacy 2-D form (transitional).
   for (const row of inv as any[][]) {
     for (const cell of row) {
-      if (cell && typeof cell === 'object' && '_id' in cell && 'name' in cell) {
+      if (cell && typeof cell === 'object' && 'name' in cell) {
         out.push(cell as ItemInterface);
       }
     }

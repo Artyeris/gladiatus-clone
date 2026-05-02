@@ -8,7 +8,6 @@ import Journal from '@/lib/models/journal.model';
 import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils';
-import { insertItem } from '@/lib/utils/inventory/insertItem';
 import { cookies } from 'next/headers';
 
 interface CreateCharacterParams {
@@ -61,8 +60,11 @@ export async function createCharacter({ name, gender }: CreateCharacterParams) {
     initialShield.id = `${shield.itemId}-${initialShield._id}`;
     await initialShield.save();
 
-    character.inventory = insertItem({ inventory: character.inventory, item: initialSword, x: 0, y: 0 });
-    character.inventory = insertItem({ inventory: character.inventory, item: initialShield, x: 1, y: 0 });
+    character.inventory = [
+      { item: initialSword._id, x: 0, y: 0 },
+      { item: initialShield._id, x: 0, y: 1 },
+    ];
+    character.markModified('inventory');
 
     const journal = await Journal.create({
       owner: character._id,

@@ -9,9 +9,15 @@ import Item from '@/lib/models/item.model';
 import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
-import { canInsertItem } from '@/lib/utils/inventory/canInsertItem';
-import { insertItem } from '@/lib/utils/inventory/insertItem';
-import { cleanupCharacterRefs } from '@/lib/utils/inventory/cleanup';
+import {
+  InventoryEntry,
+  canPlaceItem,
+  findEntry,
+  findFreePosition,
+  migrateLegacyInventory,
+  placeItem,
+  removeItem,
+} from '@/lib/utils/inventory/grid';
 import { EQUIPMENT_SLOTS, EquipmentSlot, slotAcceptsItem } from '@/lib/utils/equipment';
 
 type Location =
@@ -27,44 +33,17 @@ interface MoveItemParams {
 const isValidSlot = (s: string): s is EquipmentSlot =>
   (EQUIPMENT_SLOTS as readonly string[]).includes(s);
 
-function clearInventoryItem(inventory: any[][], item: any) {
-  const idMongo = item._id?.toString();
-  const idHuman = item.id;
-
-  for (let i = 0; i < inventory.length; i++) {
-    for (let j = 0; j < inventory[i].length; j++) {
-      const cell = inventory[i][j];
-      if (!cell) continue;
-
-      // Anchor cell can be: populated Item ({_id}), raw ObjectId, or its string form.
-      if (typeof cell === 'object') {
-        const cellId = cell._id?.toString?.() ?? cell.toString?.();
-        if (cellId === idMongo) {
-          inventory[i][j] = null;
-          continue;
-        }
-      } else if (typeof cell === 'string') {
-        // Non-anchor cells store item.id; anchor cells may also serialize to a string ObjectId.
-        if (cell === idHuman || cell === idMongo) {
-          inventory[i][j] = null;
-        }
-      }
-    }
-  }
-}
-
-function findFreeCell(
-  inventory: any[][],
-  item: any
-): { x: number; y: number } | null {
-  for (let i = 0; i < inventory.length; i++) {
-    for (let j = 0; j < inventory[i].length; j++) {
-      if (canInsertItem({ inventory, item, x: i, y: j })) {
-        return { x: i, y: j };
-      }
-    }
-  }
-  return null;
+function loadInventoryEntries(character: any): InventoryEntry[] {
+  const inv = character.inventory;
+  // Defensive migration in case an older 2-D doc slipped through getUser.
+  const migrated = migrateLegacyInventory(inv);
+  if (migrated) return migrated;
+  if (!Array.isArray(inv)) return [];
+  return inv.map((e: any) => ({
+    item: e?.item,
+    x: e?.x ?? 0,
+    y: e?.y ?? 0,
+  }));
 }
 
 export async function moveItemAction({ itemId, source, target }: MoveItemParams) {
@@ -85,23 +64,8 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
     const item = await Item.findById(itemId);
     if (!item) return { error: { message: 'Item not found' } };
 
-    // Deep-copy so Mongoose Mixed change tracking sees a brand new value when
-    // we reassign at the end. Reading character.inventory directly returns
-    // the tracked array which doesn't always notice nested mutations.
-    const inventory: any[][] = (character.inventory ?? []).map((row: any[]) =>
-      row.map((cell) => (cell == null ? null : cell))
-    );
+    let entries = loadInventoryEntries(character);
     const equipment = { ...(character.equipment ?? {}) } as Record<string, any>;
-
-    // Sweep dead references before doing the move so phantom cells from
-    // earlier failed mutations can't make canInsertItem report false-occupied.
-    const cleanupChanged = await cleanupCharacterRefs({ inventory, equipment, Item });
-    if (cleanupChanged) {
-      character.set('inventory', inventory);
-      character.set('equipment', equipment);
-      character.markModified('inventory');
-      character.markModified('equipment');
-    }
 
     // Validate source matches reality.
     if (source.kind === 'equipment') {
@@ -111,9 +75,13 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
       if (equippedId !== itemId) {
         return { error: { message: 'Item not in source slot' } };
       }
+    } else {
+      // Source is inventory; the item must actually live in entries.
+      if (!findEntry(entries, itemId)) {
+        return { error: { message: 'Item not in inventory' } };
+      }
     }
 
-    // Validate target slot type matches.
     if (target.kind === 'equipment') {
       if (!isValidSlot(target.slot)) return { error: { message: 'Invalid target slot' } };
       if (!slotAcceptsItem(target.slot, item)) {
@@ -123,66 +91,54 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
 
     // Apply the move.
     if (source.kind === 'inventory' && target.kind === 'inventory') {
-      clearInventoryItem(inventory, item);
-      const inserted = insertItem({ inventory, item, x: target.x, y: target.y });
-      if (!inserted) {
-        insertItem({ inventory, item, x: source.x, y: source.y });
-        return { error: { message: 'Target cell occupied' } };
+      if (!canPlaceItem(entries, item, target.x, target.y, itemId)) {
+        const free = findFreePosition(entries, item, itemId);
+        if (!free) return { error: { message: 'Target cell occupied' } };
+        target = { kind: 'inventory', x: free.x, y: free.y };
       }
-      character.set('inventory', inserted);
-      character.markModified('inventory');
+      entries = placeItem(entries, item, target.x, target.y);
     } else if (source.kind === 'inventory' && target.kind === 'equipment') {
-      clearInventoryItem(inventory, item);
-      const previouslyEquipped = equipment[target.slot];
+      const previously = equipment[target.slot];
+      entries = removeItem(entries, itemId);
       equipment[target.slot] = item._id;
-      if (previouslyEquipped) {
-        const prevId = previouslyEquipped._id ?? previouslyEquipped;
+
+      if (previously) {
+        const prevId = previously._id ?? previously;
         const prevItem = await Item.findById(prevId);
         if (prevItem) {
-          let placed = false;
-          if (canInsertItem({ inventory, item: prevItem, x: source.x, y: source.y })) {
-            insertItem({ inventory, item: prevItem, x: source.x, y: source.y });
-            placed = true;
-          } else {
-            const free = findFreeCell(inventory, prevItem);
-            if (free) {
-              insertItem({ inventory, item: prevItem, x: free.x, y: free.y });
-              placed = true;
-            }
-          }
-          if (!placed) return { error: { message: 'No room to swap items' } };
+          let placeAt = canPlaceItem(entries, prevItem, source.x, source.y)
+            ? { x: source.x, y: source.y }
+            : findFreePosition(entries, prevItem);
+          if (!placeAt) return { error: { message: 'No room to swap items' } };
+          entries = placeItem(entries, prevItem, placeAt.x, placeAt.y);
         }
       }
-      character.set('inventory', inventory);
-      character.set('equipment', equipment);
-      character.markModified('inventory');
-      character.markModified('equipment');
     } else if (source.kind === 'equipment' && target.kind === 'inventory') {
-      let placeAt: { x: number; y: number } | null = null;
-      if (canInsertItem({ inventory, item, x: target.x, y: target.y })) {
-        placeAt = { x: target.x, y: target.y };
-      } else {
-        const free = findFreeCell(inventory, item);
-        if (free) placeAt = free;
-      }
+      let placeAt = canPlaceItem(entries, item, target.x, target.y)
+        ? { x: target.x, y: target.y }
+        : findFreePosition(entries, item);
       if (!placeAt) return { error: { message: 'No room in inventory' } };
 
       equipment[source.slot] = null;
-      insertItem({ inventory, item, x: placeAt.x, y: placeAt.y });
-      character.set('inventory', inventory);
-      character.set('equipment', equipment);
-      character.markModified('inventory');
-      character.markModified('equipment');
+      entries = placeItem(entries, item, placeAt.x, placeAt.y);
     } else if (source.kind === 'equipment' && target.kind === 'equipment') {
       const otherEquipped = equipment[target.slot];
       equipment[source.slot] = otherEquipped ?? null;
       equipment[target.slot] = item._id;
-      character.set('equipment', equipment);
-      character.markModified('equipment');
     }
+
+    character.set('inventory', entries.map((e) => ({
+      item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
+      x: e.x,
+      y: e.y,
+    })));
+    character.set('equipment', equipment);
+    character.markModified('inventory');
+    character.markModified('equipment');
 
     await character.save();
     revalidatePath('/game/overview');
+    revalidatePath('/game/market');
     return { ok: true };
   } catch (error: any) {
     console.log(`${new Date()} - Failed to move item - ${error}`);

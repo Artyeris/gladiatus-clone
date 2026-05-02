@@ -15,6 +15,16 @@ import {
   slotAcceptsItem,
 } from '@/lib/utils/equipment';
 import { moveItemAction } from '@/lib/actions/item/moveItem.action';
+import {
+  INVENTORY_COLS,
+  INVENTORY_ROWS,
+  InventoryEntry,
+  buildGrid,
+  canPlaceItem,
+  findEntry,
+  placeItem,
+  removeItem,
+} from '@/lib/utils/inventory/grid';
 import ItemTooltip from '@/components/overview/ItemTooltip';
 
 const DRAG_TYPE = 'ITEM';
@@ -32,9 +42,6 @@ interface Props {
   character: CharacterInterface;
 }
 
-const isItem = (cell: any): cell is ItemInterface =>
-  !!cell && typeof cell === 'object' && 'image' in cell;
-
 const InventoryEquipment = ({ character }: Props) => {
   return (
     <DndProvider backend={HTML5Backend}>
@@ -45,28 +52,50 @@ const InventoryEquipment = ({ character }: Props) => {
 
 export default InventoryEquipment;
 
+function entriesFromCharacter(character: CharacterInterface): InventoryEntry[] {
+  const inv = character.inventory as any;
+  if (!Array.isArray(inv)) return [];
+  // New flat list.
+  if (inv.length > 0 && !Array.isArray(inv[0])) {
+    return inv
+      .filter((e: any) => e && e.item)
+      .map((e: any) => ({ item: e.item, x: e.x ?? 0, y: e.y ?? 0 }));
+  }
+  // Legacy 2-D form (will be migrated server-side, but tolerate here too).
+  const out: InventoryEntry[] = [];
+  for (let x = 0; x < inv.length; x++) {
+    const row = inv[x];
+    if (!Array.isArray(row)) continue;
+    for (let y = 0; y < row.length; y++) {
+      const cell = row[y];
+      if (cell && typeof cell === 'object' && 'name' in cell) {
+        out.push({ item: cell, x, y });
+      }
+    }
+  }
+  return out;
+}
+
 function Board({ character }: Props) {
-  const [inventory, setInventory] = useState<any[][]>(character.inventory ?? []);
+  const [entries, setEntries] = useState<InventoryEntry[]>(entriesFromCharacter(character));
   const [equipment, setEquipment] = useState<EquipmentMap>(character.equipment ?? {});
 
   useEffect(() => {
-    setInventory(character.inventory ?? []);
+    setEntries(entriesFromCharacter(character));
     setEquipment(character.equipment ?? {});
   }, [character]);
 
   const onDrop = async (payload: DragPayload, target: Source) => {
     const { item, source } = payload;
 
-    // No-op drop on same source.
     if (
-      source.kind === target.kind &&
-      ((source.kind === 'inventory' &&
+      (source.kind === 'inventory' &&
         target.kind === 'inventory' &&
         source.x === target.x &&
         source.y === target.y) ||
-        (source.kind === 'equipment' &&
-          target.kind === 'equipment' &&
-          source.slot === target.slot))
+      (source.kind === 'equipment' &&
+        target.kind === 'equipment' &&
+        source.slot === target.slot)
     ) {
       return;
     }
@@ -76,79 +105,49 @@ function Board({ character }: Props) {
       return;
     }
 
-    // Optimistic update.
-    const prevInventory = inventory.map((row) => row.slice());
+    const prevEntries = entries.map((e) => ({ ...e }));
     const prevEquipment = { ...equipment };
 
-    const nextInventory = inventory.map((row) => row.slice());
+    let nextEntries = entries.map((e) => ({ ...e }));
     const nextEquipment = { ...equipment };
-
     const itemId = item._id;
-    const itemHumanId = item.id;
-
-    const clearItemFromInventory = () => {
-      for (let i = 0; i < nextInventory.length; i++) {
-        for (let j = 0; j < nextInventory[i].length; j++) {
-          const cell = nextInventory[i][j];
-          if (!cell) continue;
-          if (typeof cell === 'object' && cell._id === itemId) {
-            nextInventory[i][j] = null;
-          } else if (typeof cell === 'string' && (cell === itemHumanId || cell === itemId)) {
-            nextInventory[i][j] = null;
-          }
-        }
-      }
-    };
 
     if (source.kind === 'inventory' && target.kind === 'inventory') {
-      const targetCell = nextInventory[target.x]?.[target.y];
-      if (targetCell) {
+      if (!canPlaceItem(nextEntries, item, target.x, target.y, itemId)) {
         toast.error('Target cell occupied');
         return;
       }
-      clearItemFromInventory();
-      nextInventory[target.x][target.y] = item;
+      nextEntries = placeItem(nextEntries, item, target.x, target.y);
     } else if (source.kind === 'inventory' && target.kind === 'equipment') {
       const previously = nextEquipment[target.slot] as ItemInterface | null | undefined;
-      clearItemFromInventory();
+      nextEntries = removeItem(nextEntries, itemId);
       nextEquipment[target.slot] = item;
       if (previously) {
-        if (!nextInventory[source.x]?.[source.y]) {
-          nextInventory[source.x][source.y] = previously;
-        } else {
-          // First free cell.
-          let placed = false;
-          for (let i = 0; i < nextInventory.length && !placed; i++) {
-            for (let j = 0; j < nextInventory[i].length && !placed; j++) {
-              if (!nextInventory[i][j]) {
-                nextInventory[i][j] = previously;
-                placed = true;
-              }
-            }
-          }
+        // Best-effort: try the source cell, otherwise let the server pick.
+        if (canPlaceItem(nextEntries, previously, source.x, source.y)) {
+          nextEntries = placeItem(nextEntries, previously, source.x, source.y);
         }
       }
     } else if (source.kind === 'equipment' && target.kind === 'inventory') {
-      if (nextInventory[target.x]?.[target.y]) {
+      if (!canPlaceItem(nextEntries, item, target.x, target.y)) {
         toast.error('Target cell occupied');
         return;
       }
       nextEquipment[source.slot] = null;
-      nextInventory[target.x][target.y] = item;
+      nextEntries = placeItem(nextEntries, item, target.x, target.y);
     } else if (source.kind === 'equipment' && target.kind === 'equipment') {
       const other = nextEquipment[target.slot] ?? null;
       nextEquipment[source.slot] = other;
       nextEquipment[target.slot] = item;
     }
 
-    setInventory(nextInventory);
+    setEntries(nextEntries);
     setEquipment(nextEquipment);
 
     const response = await moveItemAction({ itemId, source, target });
     if (response?.error) {
       toast.error(response.error.message);
-      // Roll back.
-      setInventory(prevInventory);
+      setEntries(prevEntries);
       setEquipment(prevEquipment);
     }
   };
@@ -156,12 +155,11 @@ function Board({ character }: Props) {
   return (
     <div className='flex flex-col gap-5'>
       <EquipmentBoard equipment={equipment} onDrop={onDrop} />
-      <InventoryBoard inventory={inventory} onDrop={onDrop} />
+      <InventoryBoard entries={entries} onDrop={onDrop} />
     </div>
   );
 }
 
-// Icon hint shown in empty slots so the player can tell which gear goes where.
 const SLOT_ICON: Record<EquipmentSlot, string> = {
   head: '🪖',
   chest: '🥋',
@@ -277,8 +275,6 @@ function EquipmentDropSlot({
         justifyContent: 'center',
         position: 'relative',
       }}
-      // Native title only when the slot is empty so it doesn't double up
-      // with ItemTooltip when an item is equipped.
       title={item ? undefined : SLOT_LABELS[slot]}
     >
       {item ? (
@@ -311,14 +307,13 @@ function EquipmentDropSlot({
 }
 
 function InventoryBoard({
-  inventory,
+  entries,
   onDrop,
 }: {
-  inventory: any[][];
+  entries: InventoryEntry[];
   onDrop: (payload: DragPayload, target: Source) => void;
 }) {
-  const rows = inventory.length ? inventory : Array.from({ length: 8 }, () => Array(5).fill(null));
-  const cols = rows[0]?.length || 5;
+  const grid = buildGrid(entries);
 
   return (
     <div
@@ -341,18 +336,19 @@ function InventoryBoard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${cols}, 40px)`,
+          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 40px)`,
           gap: '5px',
           justifyContent: 'center',
         }}
       >
-        {rows.flatMap((row, ri) =>
-          row.map((cell, ci) => (
+        {Array.from({ length: INVENTORY_ROWS }).flatMap((_, x) =>
+          Array.from({ length: INVENTORY_COLS }).map((__, y) => (
             <InventoryDropCell
-              key={`${ri}-${ci}`}
-              x={ri}
-              y={ci}
-              cell={cell}
+              key={`${x}-${y}`}
+              x={x}
+              y={y}
+              cell={grid[x]?.[y]}
+              entries={entries}
               onDrop={onDrop}
             />
           ))
@@ -366,31 +362,27 @@ function InventoryDropCell({
   x,
   y,
   cell,
+  entries,
   onDrop,
 }: {
   x: number;
   y: number;
-  cell: any;
+  cell: { item: ItemInterface | null; isAnchor: boolean } | undefined;
+  entries: InventoryEntry[];
   onDrop: (payload: DragPayload, target: Source) => void;
 }) {
   const [{ isOver, canAccept }, drop] = useDrop(
     () => ({
       accept: DRAG_TYPE,
-      canDrop: (payload: DragPayload) => {
-        if (cell) {
-          // Same item dropped back onto itself is OK.
-          if (typeof cell === 'object' && cell._id === payload.item._id) return true;
-          return false;
-        }
-        return true;
-      },
+      canDrop: (payload: DragPayload) =>
+        canPlaceItem(entries, payload.item, x, y, payload.item._id),
       drop: (payload: DragPayload) => onDrop(payload, { kind: 'inventory', x, y }),
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canAccept: monitor.canDrop(),
       }),
     }),
-    [x, y, cell]
+    [x, y, entries]
   );
 
   const bg = isOver
@@ -413,9 +405,9 @@ function InventoryDropCell({
         borderRadius: '2px',
       }}
     >
-      {isItem(cell) && (
+      {cell?.isAnchor && cell.item && (
         <DraggableItem
-          item={cell}
+          item={cell.item}
           source={{ kind: 'inventory', x, y }}
           size={36}
         />
