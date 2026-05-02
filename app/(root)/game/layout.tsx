@@ -38,6 +38,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className='footer w-[640px] h-[50px] orange-gradient' />
           </div>
         </div>
+        <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none'>
+          v0.06
+        </span>
       </div>
     </body>
 )

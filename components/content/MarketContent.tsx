@@ -2,7 +2,9 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import toast from 'react-hot-toast';
 
 import ItemTooltip from '@/components/overview/ItemTooltip';
@@ -13,7 +15,15 @@ import {
   cancelMarketListing,
   placeMarketListing,
 } from '@/lib/actions/market/market.action';
+import {
+  INVENTORY_COLS,
+  INVENTORY_ROWS,
+  InventoryEntry,
+  buildGrid,
+} from '@/lib/utils/inventory/grid';
 import { fullItemName, QUALITY_COLOR } from '@/lib/utils/itemUtils';
+
+const DRAG_TYPE = 'MARKET_ITEM';
 
 export interface MarketListingView {
   _id: string;
@@ -28,44 +38,65 @@ interface Props {
   listings: MarketListingView[];
 }
 
-function ownInventoryItems(character: CharacterInterface): ItemInterface[] {
-  const inv = (character.inventory ?? []) as any;
+function entriesFromCharacter(character: CharacterInterface): InventoryEntry[] {
+  const inv = character.inventory as any;
   if (!Array.isArray(inv)) return [];
-  if (inv.length === 0) return [];
-  if (Array.isArray(inv[0])) {
-    const out: ItemInterface[] = [];
-    for (const row of inv as any[][]) {
-      for (const cell of row) {
-        if (cell && typeof cell === 'object' && 'name' in cell) out.push(cell);
+  if (inv.length > 0 && !Array.isArray(inv[0])) {
+    return inv
+      .filter((e: any) => e && e.item)
+      .map((e: any) => ({ item: e.item, x: e.x ?? 0, y: e.y ?? 0 }));
+  }
+  const out: InventoryEntry[] = [];
+  for (let x = 0; x < inv.length; x++) {
+    const row = inv[x];
+    if (!Array.isArray(row)) continue;
+    for (let y = 0; y < row.length; y++) {
+      const cell = row[y];
+      if (cell && typeof cell === 'object' && 'name' in cell) {
+        out.push({ item: cell, x, y });
       }
     }
-    return out;
   }
-  return inv
-    .map((e: any) => e?.item)
-    .filter((it: any) => it && typeof it === 'object' && 'name' in it);
+  return out;
 }
 
 const MarketContent = ({ character, listings }: Props) => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Board character={character} listings={listings} />
+    </DndProvider>
+  );
+};
+
+export default MarketContent;
+
+function Board({ character, listings }: Props) {
   const router = useRouter();
-  const [selectedItemId, setSelectedItemId] = useState<string>('');
+  const [entries, setEntries] = useState<InventoryEntry[]>(entriesFromCharacter(character));
+  const [pickedItem, setPickedItem] = useState<ItemInterface | null>(null);
   const [price, setPrice] = useState<string>('');
   const [busy, setBusy] = useState(false);
 
-  const myItems = ownInventoryItems(character);
+  useEffect(() => {
+    setEntries(entriesFromCharacter(character));
+  }, [character]);
+
+  const onItemDropped = (item: ItemInterface) => {
+    setPickedItem(item);
+  };
 
   const onPlace = async () => {
-    if (!selectedItemId) return toast.error('Pick an item to list');
+    if (!pickedItem) return toast.error('Drop an item into the sell slot first');
     const numPrice = Number(price);
-    if (!Number.isFinite(numPrice) || numPrice < 0) {
+    if (!Number.isFinite(numPrice) || numPrice <= 0) {
       return toast.error('Enter a valid price');
     }
     setBusy(true);
-    const res = await placeMarketListing({ itemId: selectedItemId, price: numPrice });
+    const res = await placeMarketListing({ itemId: pickedItem._id, price: numPrice });
     setBusy(false);
     if (res?.error) return toast.error(res.error.message);
     toast.success('Listed for sale');
-    setSelectedItemId('');
+    setPickedItem(null);
     setPrice('');
     router.refresh();
   };
@@ -90,69 +121,276 @@ const MarketContent = ({ character, listings }: Props) => {
 
   return (
     <div className='px-6 flex flex-col gap-4 text-brown2'>
-      <div className='red-card text-cream2 font-semibold text-sm px-3 py-1 rounded-sm'>
-        Market
-      </div>
-
-      <div className='brown-card rounded-sm p-3 text-sm flex flex-col gap-2'>
-        <div className='font-semibold'>Your balance: {character.crowns}</div>
-        <div className='font-semibold border-t border-cream2 pt-2'>Sell an item</div>
-        <div className='flex flex-wrap items-center gap-2'>
-          <select
-            value={selectedItemId}
-            onChange={(e) => setSelectedItemId(e.target.value)}
-            className='border border-brown2 px-2 py-1 rounded-sm bg-cream-card'
-          >
-            <option value=''>-- pick an item from inventory --</option>
-            {myItems.map((item) => (
-              <option key={item._id} value={item._id}>
-                {fullItemName(item)} (lvl {item.level})
-              </option>
-            ))}
-          </select>
-          <input
-            type='number'
-            min={0}
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder='Price'
-            className='border border-brown2 px-2 py-1 rounded-sm w-28'
+      <Section title='Description'>
+        <div className='flex gap-3 px-3 py-2 text-sm'>
+          <Image
+            src='/images/barracks.jpg'
+            alt='market'
+            width={120}
+            height={120}
+            className='rounded-sm shrink-0'
           />
-          <button
-            onClick={onPlace}
-            disabled={busy}
-            className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50'
-          >
-            List
-          </button>
+          <div className='flex flex-col gap-1'>
+            <p>
+              The bustle of the market grows louder as you approach. Hundreds
+              of traders gather here every day, haggling and selling goods from
+              all over the world.
+            </p>
+            <p>Drag an item from your bag into the sell slot, set a price, and confirm.</p>
+            <div className='font-semibold mt-1'>
+              Your balance: {character.crowns}
+            </div>
+          </div>
         </div>
-      </div>
+      </Section>
 
-      <div className='brown-card rounded-sm flex flex-col text-sm'>
-        <div className='red-card text-cream2 font-semibold text-sm px-3 py-1'>
-          Listings
+      <Section title='Sell'>
+        <div className='flex gap-3 px-3 py-3 text-sm'>
+          <SellPanel
+            picked={pickedItem}
+            price={price}
+            setPrice={setPrice}
+            onPlace={onPlace}
+            onClear={() => setPickedItem(null)}
+            busy={busy}
+          />
+          <InventoryView entries={entries} pickedItemId={pickedItem?._id} onPick={onItemDropped} />
         </div>
-        {listings.length === 0 && (
-          <div className='px-3 py-3 italic opacity-80'>
+      </Section>
+
+      <Section title='Listings'>
+        {listings.length === 0 ? (
+          <div className='px-3 py-3 italic opacity-80 text-sm'>
             Nothing for sale right now.
           </div>
+        ) : (
+          listings.map((listing, idx) => (
+            <ListingRow
+              key={listing._id}
+              listing={listing}
+              last={idx === listings.length - 1}
+              busy={busy}
+              onCancel={onCancel}
+              onBuy={onBuy}
+            />
+          ))
         )}
-        {listings.map((listing, idx) => (
-          <ListingRow
-            key={listing._id}
-            listing={listing}
-            last={idx === listings.length - 1}
-            busy={busy}
-            onCancel={onCancel}
-            onBuy={onBuy}
-          />
-        ))}
+      </Section>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className='brown-card rounded-sm flex flex-col text-sm overflow-hidden'>
+      <div className='red-card text-cream2 font-semibold text-sm px-3 py-1'>{title}</div>
+      <div className='flex flex-col'>{children}</div>
+    </div>
+  );
+}
+
+function SellPanel({
+  picked,
+  price,
+  setPrice,
+  onPlace,
+  onClear,
+  busy,
+}: {
+  picked: ItemInterface | null;
+  price: string;
+  setPrice: (s: string) => void;
+  onPlace: () => void;
+  onClear: () => void;
+  busy: boolean;
+}) {
+  const [{ isOver, canAccept }, drop] = useDrop(
+    () => ({
+      accept: DRAG_TYPE,
+      drop: () => ({ accepted: true }),
+      collect: (monitor) => ({
+        isOver: monitor.isOver(),
+        canAccept: monitor.canDrop(),
+      }),
+    }),
+    []
+  );
+
+  const slotBg = isOver && canAccept ? '#5c8a3a' : '#3e2714';
+
+  return (
+    <div
+      className='flex flex-col gap-2 shrink-0'
+      style={{ width: '160px' }}
+    >
+      <div
+        ref={(node) => {
+          drop(node);
+        }}
+        style={{
+          width: '120px',
+          height: '120px',
+          background: slotBg,
+          border: '2px solid #5c3a21',
+          borderRadius: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
+      >
+        {picked ? (
+          <ItemTooltip item={picked}>
+            <div
+              style={{ position: 'absolute', inset: 0, cursor: 'help' }}
+              onClick={onClear}
+              title='Click to clear'
+            >
+              <Image
+                src={`/items/${picked.image}.webp`}
+                alt={picked.name}
+                fill
+                sizes='120px'
+                style={{ objectFit: 'contain', padding: '6px' }}
+              />
+            </div>
+          </ItemTooltip>
+        ) : (
+          <span style={{ fontSize: '11px', color: '#cdb88a', fontWeight: 600 }}>
+            Drop item here
+          </span>
+        )}
+      </div>
+
+      <label className='text-xs font-semibold mt-1'>Market price</label>
+      <div className='flex items-center gap-1'>
+        <input
+          type='number'
+          min={1}
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className='border border-brown2 px-2 py-1 rounded-sm w-full bg-cream-card'
+          placeholder='0'
+        />
+        <Image src='/images/crowns.png' width={14} height={14} alt='crowns' />
+      </div>
+
+      <button
+        onClick={onPlace}
+        disabled={busy || !picked}
+        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50'
+      >
+        Confirm
+      </button>
+    </div>
+  );
+}
+
+function InventoryView({
+  entries,
+  pickedItemId,
+  onPick,
+}: {
+  entries: InventoryEntry[];
+  pickedItemId: string | undefined;
+  onPick: (item: ItemInterface) => void;
+}) {
+  // Hide the item that's currently parked in the sell slot.
+  const visibleEntries = pickedItemId
+    ? entries.filter((e) => {
+        const it = e.item as any;
+        const id = it?._id ?? it;
+        return String(id) !== String(pickedItemId);
+      })
+    : entries;
+  const grid = buildGrid(visibleEntries);
+
+  return (
+    <div
+      style={{
+        background: '#5c3a21',
+        padding: '8px',
+        borderRadius: '5px',
+      }}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 36px)`,
+          gap: '4px',
+        }}
+      >
+        {Array.from({ length: INVENTORY_ROWS }).flatMap((_, x) =>
+          Array.from({ length: INVENTORY_COLS }).map((__, y) => {
+            const cell = grid[x]?.[y];
+            return (
+              <div
+                key={`${x}-${y}`}
+                style={{
+                  position: 'relative',
+                  width: '36px',
+                  height: '36px',
+                  background: '#3e2714',
+                  border: '1px solid #8b5a2b',
+                  borderRadius: '2px',
+                }}
+              >
+                {cell?.isAnchor && cell.item && (
+                  <DraggableInventoryItem item={cell.item} onPick={onPick} />
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
-};
+}
 
-export default MarketContent;
+function DraggableInventoryItem({
+  item,
+  onPick,
+}: {
+  item: ItemInterface;
+  onPick: (item: ItemInterface) => void;
+}) {
+  const [{ isDragging }, drag] = useDrag(
+    () => ({
+      type: DRAG_TYPE,
+      item: { item },
+      end: (_dragged, monitor) => {
+        const result = monitor.getDropResult() as { accepted?: boolean } | null;
+        if (result?.accepted) onPick(item);
+      },
+      collect: (monitor) => ({ isDragging: monitor.isDragging() }),
+    }),
+    [item]
+  );
+
+  return (
+    <ItemTooltip item={item}>
+      <div
+        ref={(node) => {
+          drag(node);
+        }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          cursor: 'grab',
+          opacity: isDragging ? 0.4 : 1,
+        }}
+      >
+        <Image
+          src={`/items/${item.image}.webp`}
+          alt={item.name}
+          fill
+          sizes='36px'
+          style={{ objectFit: 'contain', padding: '2px' }}
+        />
+      </div>
+    </ItemTooltip>
+  );
+}
 
 function ListingRow({
   listing,
