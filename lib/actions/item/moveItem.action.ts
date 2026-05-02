@@ -95,7 +95,13 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
 
     // Sweep dead references before doing the move so phantom cells from
     // earlier failed mutations can't make canInsertItem report false-occupied.
-    await cleanupCharacterRefs({ inventory, equipment, Item });
+    const cleanupChanged = await cleanupCharacterRefs({ inventory, equipment, Item });
+    if (cleanupChanged) {
+      character.set('inventory', inventory);
+      character.set('equipment', equipment);
+      character.markModified('inventory');
+      character.markModified('equipment');
+    }
 
     // Validate source matches reality.
     if (source.kind === 'equipment') {
@@ -123,7 +129,7 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
         insertItem({ inventory, item, x: source.x, y: source.y });
         return { error: { message: 'Target cell occupied' } };
       }
-      character.inventory = inserted;
+      character.set('inventory', inserted);
       character.markModified('inventory');
     } else if (source.kind === 'inventory' && target.kind === 'equipment') {
       clearInventoryItem(inventory, item);
@@ -147,13 +153,11 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
           if (!placed) return { error: { message: 'No room to swap items' } };
         }
       }
-      character.inventory = inventory;
-      character.equipment = equipment;
+      character.set('inventory', inventory);
+      character.set('equipment', equipment);
       character.markModified('inventory');
       character.markModified('equipment');
     } else if (source.kind === 'equipment' && target.kind === 'inventory') {
-      // Try the requested cell, then fall back to any free cell so a stale
-      // partial state doesn't make unequip impossible.
       let placeAt: { x: number; y: number } | null = null;
       if (canInsertItem({ inventory, item, x: target.x, y: target.y })) {
         placeAt = { x: target.x, y: target.y };
@@ -165,15 +169,15 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
 
       equipment[source.slot] = null;
       insertItem({ inventory, item, x: placeAt.x, y: placeAt.y });
-      character.inventory = inventory;
-      character.equipment = equipment;
+      character.set('inventory', inventory);
+      character.set('equipment', equipment);
       character.markModified('inventory');
       character.markModified('equipment');
     } else if (source.kind === 'equipment' && target.kind === 'equipment') {
       const otherEquipped = equipment[target.slot];
       equipment[source.slot] = otherEquipped ?? null;
       equipment[target.slot] = item._id;
-      character.equipment = equipment;
+      character.set('equipment', equipment);
       character.markModified('equipment');
     }
 

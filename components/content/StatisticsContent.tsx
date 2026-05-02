@@ -50,7 +50,7 @@ const StatisticsContent = ({ character }: Props) => {
       <div className='flex gap-2'>
         <Tab href='/game/overview' label='Overview' />
         <Tab href='/game/statistics' label='Statistics' active />
-        <Tab href='#' label='Victories' />
+        <Tab href='/game/victories' label='Victories' />
       </div>
 
       <Section title='Combat Stats - Arena'>

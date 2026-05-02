@@ -23,9 +23,12 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
         >
           Statistics
         </a>
-        <span className='px-4 py-1 border-b-[3px] border-transparent opacity-60 cursor-not-allowed'>
+        <a
+          href='/game/victories'
+          className='px-4 py-1 border-b-[3px] border-transparent hover:text-red3'
+        >
           Victories
-        </span>
+        </a>
       </div>
 
       <div style={{ display: 'flex', gap: '20px' }}>
