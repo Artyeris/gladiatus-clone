@@ -71,6 +71,14 @@ const characterSchema = new mongoose.Schema({
     type: Date,
     default: new Date(Date.now() - 10 * 60 * 1000),
   },
+  isBot: {
+    type: Boolean,
+    default: false,
+  },
+  arenaTier: {
+    type: String,
+    default: null,
+  },
   inventory: {
     type: [
       {

@@ -9,17 +9,29 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
+interface ArenaTierInfo {
+  id: string;
+  name: string;
+  minLevel: number;
+  maxLevel: number | null;
+}
+
 interface ArenaContentProps {
   arenaRivals: {
     name: string;
     _id: string;
     honor: number;
+    level?: number;
+    isBot?: boolean;
     rank: number;
+    isMe?: boolean;
   }[],
+  tier: ArenaTierInfo;
+  myRank: number;
   character: CharacterInterface;
 }
 
-const ArenaContent = ({ arenaRivals, character }: ArenaContentProps) => {
+const ArenaContent = ({ arenaRivals, character, tier, myRank }: ArenaContentProps) => {
   const [canCharacterFight, setCanCharacterFight] = useState(canFight({ time: new Date(character.arenaLastBattle).getTime(), fight: 'arena' }));
   const router = useRouter();
 
@@ -44,59 +56,61 @@ const ArenaContent = ({ arenaRivals, character }: ArenaContentProps) => {
     return () => clearInterval(interval);
   }, [character.arenaLastBattle]);
 
+  const levelRange = tier.maxLevel
+    ? `Levels ${tier.minLevel}-${tier.maxLevel}`
+    : `Levels ${tier.minLevel}+`;
+
   return (
     <>
-      <h1 className='text-xl font-bold border-b-[3px] border-brown2 text-center text-brown2'>
-        League of Balenos
-      </h1>
+      <div className='border-b-[3px] border-brown2 text-center text-brown2 pb-1'>
+        <h1 className='text-xl font-bold'>{tier.name}</h1>
+        <div className='text-xs opacity-80'>
+          {levelRange} &middot; Your rank: <span className='font-semibold'>#{myRank}</span>
+        </div>
+      </div>
       <div className='flex gap-4'>
         <DescriptionCard title='Arena Ranking'>
-          <div className='flex flex-col w-full justify-between'>
-            <div className='flex w-full gap-2 font-semibold'>
-              <div className='min-w-[50px]'>
-                Rank
-              </div>
-              <div className='min-w-[50px]'>
-                Honor
-              </div>
-              <div className='w-[200px]'>
-                Name
-              </div>
+          <div className='flex flex-col w-full justify-between text-sm'>
+            <div className='flex w-full gap-2 font-semibold border-b border-brown2 pb-1'>
+              <div className='min-w-[50px]'>Rank</div>
+              <div className='min-w-[50px]'>Honor</div>
+              <div className='min-w-[40px]'>Lvl</div>
+              <div className='w-[160px]'>Name</div>
             </div>
-            {arenaRivals.map((rival) => (
-              <div 
-                className='flex flex-col w-full justify-between'
-                key={rival._id}
-              >
-                <div className='flex w-full gap-2'>
-                <div className='min-w-[50px] font-semibold'>
-                    {rival.rank}
+            {arenaRivals.map((rival) => {
+              const isMe = rival.isMe || rival._id === character._id;
+              return (
+                <div
+                  className={`flex flex-col w-full justify-between ${isMe && 'bg-cream2/30 rounded-sm'}`}
+                  key={rival._id}
+                >
+                  <div className='flex w-full gap-2 items-center'>
+                    <div className='min-w-[50px] font-semibold'>{rival.rank}</div>
+                    <div className='min-w-[50px] font-semibold'>{rival.honor}</div>
+                    <div className='min-w-[40px]'>{rival.level ?? '-'}</div>
+                    <div
+                      className={`w-[160px] ${!isMe && 'font-semibold underline cursor-pointer'}`}
+                      onClick={!isMe ? () => router.push(`/character/${rival._id}`) : () => {}}
+                    >
+                      {rival.name}
+                      {rival.isBot && <span className='ml-1 text-[10px] opacity-70 italic'>NPC</span>}
+                    </div>
+                    {!isMe && (
+                      <div className='cursor-pointer'>
+                        <Image
+                          src={`/images/fight.png`}
+                          width={55}
+                          height={22}
+                          alt='fight'
+                          onClick={canCharacterFight ? () => handleClick(rival._id) : () => {}}
+                          className={canCharacterFight ? '' : 'cursor-not-allowed grayscale'}
+                        />
+                      </div>
+                    )}
                   </div>
-                  <div className='min-w-[50px] font-semibold'>
-                    {rival.honor}
-                  </div>
-                  <div
-                    className={`w-[130px] ${rival._id !== character._id && 'font-semibold underline cursor-pointer'}`}
-                    onClick={rival._id !== character._id ? () => router.push(`/character/${rival._id}`) : () => {}}
-                  >
-                    {rival.name}
-                  </div>
-                  {rival._id !== character._id &&
-                    <div className='cursor-pointer'>
-                      <Image 
-                        src={`/images/fight.png`}
-                        width={55}
-                        height={22}
-                        alt='fight'
-                        key={`${rival._id}-${rival.name}`}
-                        onClick={canCharacterFight ? () => handleClick(rival._id) : () => {}}
-                        className={canCharacterFight ? '' : 'cursor-not-allowed grayscale'}
-                      />
-                    </div> 
-                  }
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </DescriptionCard>
       </div>

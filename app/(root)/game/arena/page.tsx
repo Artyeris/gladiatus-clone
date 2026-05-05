@@ -7,17 +7,17 @@ import DescriptionCard from '@/components/cards/DescriptionCard';
 
 const Page = async () => {
   const user = await getUser().catch(() => redirect('/'));
-  const arenaRivals = await getArenaRivals();
-  const character = user.character;
+  const data = await getArenaRivals();
+  const character = user?.character;
 
-  if (!user || !arenaRivals) return null;
+  if (!user || !data) return null;
 
   if (!user.character) redirect('/onboarding');
 
   return (
     <div className='px-8 gap-4 flex flex-col'>
       <div className='flex gap-4'>
-        <Image 
+        <Image
           width={168}
           height={194}
           src={`/images/arena.jpg`}
@@ -32,9 +32,11 @@ const Page = async () => {
           </p>
         </DescriptionCard>
       </div>
-      <ArenaContent 
+      <ArenaContent
         character={character}
-        arenaRivals={arenaRivals}
+        arenaRivals={data.rivals}
+        tier={data.tier}
+        myRank={data.myRank}
       />
     </div>
   )
