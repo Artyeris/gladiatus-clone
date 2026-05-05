@@ -19,6 +19,10 @@ export const villageRoutes = [
     link: '/training',
   },
   {
+    name: 'Work',
+    link: '/work',
+  },
+  {
     name: 'Market',
     link: '/market',
   },

@@ -82,6 +82,16 @@ const characterSchema = new mongoose.Schema({
     ],
     default: [],
   },
+  currentWork: {
+    type: {
+      _id: false,
+      jobId: { type: String, required: true },
+      hours: { type: Number, required: true },
+      startedAt: { type: Date, required: true },
+      endsAt: { type: Date, required: true },
+    },
+    default: null,
+  },
   equipment: {
     head:     { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
     chest:    { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },

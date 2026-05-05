@@ -26,4 +26,10 @@ export interface CharacterInterface {
   arenaLastBattle: Date,
   inventory: null[][] | ItemInterface[][] | string[][],
   equipment?: EquipmentMap,
+  currentWork?: {
+    jobId: string;
+    hours: number;
+    startedAt: string | Date;
+    endsAt: string | Date;
+  } | null,
 }
