@@ -19,7 +19,6 @@ import {
   removeItem,
 } from '@/lib/utils/inventory/grid';
 import {
-  AUCTION_TOTAL_SECONDS,
   auctionPhase,
   minNextBid,
   newAuctionEndsAt,
@@ -283,5 +282,3 @@ export async function cancelAuctionAction({ auctionId }: { auctionId: string }) 
   }
 }
 
-// Re-export for convenience.
-export { AUCTION_TOTAL_SECONDS };
