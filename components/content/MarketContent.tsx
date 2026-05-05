@@ -7,6 +7,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import toast from 'react-hot-toast';
 
+import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
@@ -246,8 +247,8 @@ function SellPanel({
               onClick={onClear}
               title='Click to clear'
             >
-              <Image
-                src={`/items/${picked.image}.webp`}
+              <ItemImage
+                imageId={picked.image}
                 alt={picked.name}
                 fill
                 sizes='120px'
@@ -380,8 +381,8 @@ function DraggableInventoryItem({
           opacity: isDragging ? 0.4 : 1,
         }}
       >
-        <Image
-          src={`/items/${item.image}.webp`}
+        <ItemImage
+          imageId={item.image}
           alt={item.name}
           fill
           sizes='36px'
@@ -424,8 +425,8 @@ function ListingRow({
               cursor: 'help',
             }}
           >
-            <Image
-              src={`/items/${item.image}.webp`}
+            <ItemImage
+              imageId={item.image}
               alt={item.name}
               fill
               sizes='40px'

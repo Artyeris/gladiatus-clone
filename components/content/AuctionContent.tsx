@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
+import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
@@ -163,8 +164,8 @@ function AuctionRow({
               cursor: 'help',
             }}
           >
-            <Image
-              src={`/items/${item.image}.webp`}
+            <ItemImage
+              imageId={item.image}
               alt={item.name}
               fill
               sizes='48px'

@@ -25,6 +25,7 @@ import {
   placeItem,
   removeItem,
 } from '@/lib/utils/inventory/grid';
+import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
 
 const DRAG_TYPE = 'ITEM';
@@ -449,12 +450,12 @@ function DraggableItem({
           opacity: isDragging ? 0.4 : 1,
         }}
       >
-        <Image
-          src={`/items/${item.image}.webp`}
+        <ItemImage
+          imageId={item.image}
           alt={item.name}
-          width={size}
-          height={size}
-          style={{ objectFit: 'contain', width: '100%', height: '100%', padding: '2px' }}
+          fill
+          sizes='80px'
+          style={{ objectFit: 'contain', padding: '2px' }}
         />
       </div>
     </ItemTooltip>
