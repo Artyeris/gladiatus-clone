@@ -22,6 +22,10 @@ export const villageRoutes = [
     name: 'Market',
     link: '/market',
   },
+  {
+    name: 'Auction',
+    link: '/auction',
+  },
 ]
 
 export const expeditionRoutes = [
