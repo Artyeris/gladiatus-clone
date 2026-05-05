@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
 import { COOKIE_NAME } from '@/constants';
+import { items as ITEM_CATALOG } from '@/constants/items';
 import Auction from '@/lib/models/auction.model';
 import Character from '@/lib/models/character.model';
 import Item from '@/lib/models/item.model';
@@ -12,11 +13,9 @@ import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import {
   InventoryEntry,
-  findEntry,
   findFreePosition,
   migrateLegacyInventory,
   placeItem,
-  removeItem,
 } from '@/lib/utils/inventory/grid';
 import {
   auctionPhase,
@@ -24,19 +23,14 @@ import {
   newAuctionEndsAt,
 } from '@/lib/utils/auction';
 
+const POOL_SIZE = 12;
+
 function loadEntries(character: any): InventoryEntry[] {
   const inv = character.inventory;
   const migrated = migrateLegacyInventory(inv);
   if (migrated) return migrated;
   if (!Array.isArray(inv)) return [];
   return inv.map((e: any) => ({ item: e?.item, x: e?.x ?? 0, y: e?.y ?? 0 }));
-}
-
-function entryItemId(it: any): string | null {
-  if (!it) return null;
-  if (typeof it === 'string') return it;
-  if (it._id) return String(it._id);
-  return null;
 }
 
 function serializeInventory(entries: InventoryEntry[]) {
@@ -57,15 +51,53 @@ async function getMyCharacter() {
   return { character: user.character as any };
 }
 
-// Settle any auctions whose timer has expired. Winner gets the item, seller
-// gets the gold (already withheld at bid time), losing bidders were already
-// refunded by placeBid. Idempotent.
+// Spawn a fresh Item document and a matching Auction. The item's owner is
+// null while the auction runs; on settlement the winner becomes the owner.
+async function spawnOneAuction(): Promise<void> {
+  const catalog = Object.values(ITEM_CATALOG);
+  if (catalog.length === 0) return;
+  const template = catalog[Math.floor(Math.random() * catalog.length)] as any;
+
+  const created = await Item.create({
+    ...template,
+    owner: null,
+  });
+  if (template.itemId && created._id) {
+    created.id = `${template.itemId}-${created._id}`;
+    await created.save();
+  }
+
+  const baseValue = Math.max(1, template.sellPrice ?? template.power * 10 ?? 50);
+  // Markup 0% .. 100%, mirroring the original "Value + X (100%-200%)" line.
+  const markup = Math.floor(baseValue * Math.random());
+  const startingPrice = baseValue + markup;
+  const buyoutPrice = startingPrice * 2;
+
+  await Auction.create({
+    item: created._id,
+    startingPrice,
+    currentBid: startingPrice,
+    buyoutPrice,
+    highestBidder: null,
+    endsAt: newAuctionEndsAt(),
+    status: 'open',
+  });
+}
+
+async function refillAuctionPool() {
+  const openCount = await Auction.countDocuments({ status: 'open' });
+  const missing = POOL_SIZE - openCount;
+  for (let i = 0; i < missing; i++) {
+    await spawnOneAuction();
+  }
+}
+
 async function settleExpiredAuctions() {
   const now = new Date();
   const expired = await Auction.find({ status: 'open', endsAt: { $lte: now } });
+
   for (const auction of expired) {
     if (auction.highestBidder) {
-      // Winner -> deliver item.
       const winner = await Character.findById(auction.highestBidder);
       const item = await Item.findById(auction.item);
       if (winner && item) {
@@ -79,27 +111,10 @@ async function settleExpiredAuctions() {
           await item.save();
           await winner.save();
         }
-        // Pay seller.
-        const seller = await Character.findById(auction.seller);
-        if (seller) {
-          seller.crowns = (seller.crowns ?? 0) + auction.currentBid;
-          await seller.save();
-        }
       }
     } else {
-      // Nobody bid -> return item to seller.
-      const seller = await Character.findById(auction.seller);
-      const item = await Item.findById(auction.item);
-      if (seller && item) {
-        const sellerEntries = loadEntries(seller);
-        const free = findFreePosition(sellerEntries, item);
-        if (free) {
-          const next = placeItem(sellerEntries, item, free.x, free.y);
-          seller.set('inventory', serializeInventory(next));
-          seller.markModified('inventory');
-          await seller.save();
-        }
-      }
+      // Nobody bid -> item disappears (the auction house keeps it).
+      await Item.findByIdAndDelete(auction.item);
     }
     auction.status = 'settled';
     await auction.save();
@@ -110,10 +125,10 @@ export async function listAuctionsAction() {
   try {
     await connectToDB();
     await settleExpiredAuctions();
+    await refillAuctionPool();
 
     const auctions = await Auction.find({ status: 'open' })
       .populate({ path: 'item', model: Item })
-      .populate({ path: 'seller', model: Character, select: 'name' })
       .populate({ path: 'highestBidder', model: Character, select: 'name' })
       .sort({ endsAt: 1 })
       .lean();
@@ -127,60 +142,19 @@ export async function listAuctionsAction() {
         item: a.item ? JSON.parse(JSON.stringify(a.item)) : null,
         startingPrice: a.startingPrice,
         currentBid: a.currentBid,
+        buyoutPrice: a.buyoutPrice,
         hasBids: !!a.highestBidder,
-        seller: a.seller ? { _id: String(a.seller._id), name: a.seller.name } : null,
-        highestBidder: a.highestBidder ? { _id: String(a.highestBidder._id), name: a.highestBidder.name } : null,
+        highestBidder: a.highestBidder
+          ? { _id: String(a.highestBidder._id), name: a.highestBidder.name }
+          : null,
         endsAt: a.endsAt,
         phase: auctionPhase(a.endsAt),
-        isMine: myId != null && a.seller && String(a.seller._id) === myId,
         isLeading: myId != null && a.highestBidder && String(a.highestBidder._id) === myId,
       })),
     };
   } catch (error: any) {
     console.log(`${new Date()} - listAuctionsAction failed - ${error}`);
     return { error: { message: error?.message || 'Failed to load auctions' } };
-  }
-}
-
-export async function placeAuctionAction({
-  itemId,
-  startingPrice,
-}: { itemId: string; startingPrice: number }) {
-  if (!Number.isFinite(startingPrice) || startingPrice <= 0) {
-    return { error: { message: 'Starting price must be positive' } };
-  }
-  const me = await getMyCharacter();
-  if ('error' in me) return me;
-  const character = me.character;
-
-  try {
-    let entries = loadEntries(character);
-    if (!findEntry(entries, itemId)) {
-      return { error: { message: 'Item not in your inventory' } };
-    }
-
-    entries = removeItem(entries, itemId);
-
-    await Auction.create({
-      seller: character._id,
-      item: itemId,
-      startingPrice: Math.floor(startingPrice),
-      currentBid: Math.floor(startingPrice),
-      highestBidder: null,
-      endsAt: newAuctionEndsAt(),
-      status: 'open',
-    });
-
-    character.set('inventory', serializeInventory(entries));
-    character.markModified('inventory');
-    await character.save();
-
-    revalidatePath('/game/auction');
-    revalidatePath('/game/overview');
-    return { ok: true };
-  } catch (error: any) {
-    console.log(`${new Date()} - placeAuctionAction failed - ${error}`);
-    return { error: { message: error?.message || 'Failed to list auction' } };
   }
 }
 
@@ -203,9 +177,6 @@ export async function placeAuctionBid({
     if (auction.endsAt.getTime() <= Date.now()) {
       return { error: { message: 'Auction already ended' } };
     }
-    if (String(auction.seller) === String(bidder._id)) {
-      return { error: { message: "Can't bid on your own auction" } };
-    }
 
     const required = minNextBid(auction.currentBid, !!auction.highestBidder);
     if (!Number.isFinite(amount) || amount < required) {
@@ -223,7 +194,7 @@ export async function placeAuctionBid({
         await previous.save();
       }
     } else if (auction.highestBidder && String(auction.highestBidder) === String(bidder._id)) {
-      // Same bidder raises their own bid -- refund their previous lock.
+      // Same bidder raises -> refund their previous lock first.
       bidder.crowns = (bidder.crowns ?? 0) + auction.currentBid;
     }
 
@@ -242,43 +213,67 @@ export async function placeAuctionBid({
   }
 }
 
-export async function cancelAuctionAction({ auctionId }: { auctionId: string }) {
+export async function buyoutAuctionAction({ auctionId }: { auctionId: string }) {
   const me = await getMyCharacter();
   if ('error' in me) return me;
-  const character = me.character;
+  const buyer = me.character;
 
   try {
+    await connectToDB();
+    await settleExpiredAuctions();
+
     const auction = await Auction.findById(auctionId);
     if (!auction || auction.status !== 'open') {
-      return { error: { message: 'Auction not found' } };
+      return { error: { message: 'Auction is not open' } };
     }
-    if (String(auction.seller) !== String(character._id)) {
-      return { error: { message: 'Not your auction' } };
+    if (auction.endsAt.getTime() <= Date.now()) {
+      return { error: { message: 'Auction already ended' } };
     }
-    if (auction.highestBidder) {
-      return { error: { message: 'Cannot cancel after a bid has been placed' } };
+    if ((buyer.crowns ?? 0) < auction.buyoutPrice) {
+      return { error: { message: 'Not enough crowns to buy out' } };
     }
 
     const item = await Item.findById(auction.item);
-    if (item) {
-      let entries = loadEntries(character);
-      const free = findFreePosition(entries, item);
-      if (!free) return { error: { message: 'No room in inventory' } };
-      entries = placeItem(entries, item, free.x, free.y);
-      character.set('inventory', serializeInventory(entries));
-      character.markModified('inventory');
-      await character.save();
+    if (!item) {
+      await auction.deleteOne();
+      return { error: { message: 'Item no longer exists' } };
     }
 
-    auction.status = 'cancelled';
+    const buyerEntries = loadEntries(buyer);
+    const free = findFreePosition(buyerEntries, item);
+    if (!free) return { error: { message: 'No room in your inventory' } };
+
+    // Refund the prior leading bidder if it isn't the buyer themselves.
+    if (auction.highestBidder && String(auction.highestBidder) !== String(buyer._id)) {
+      const prior = await Character.findById(auction.highestBidder);
+      if (prior) {
+        prior.crowns = (prior.crowns ?? 0) + auction.currentBid;
+        await prior.save();
+      }
+    } else if (auction.highestBidder && String(auction.highestBidder) === String(buyer._id)) {
+      // Buyer was the leading bidder — refund their lock first.
+      buyer.crowns = (buyer.crowns ?? 0) + auction.currentBid;
+    }
+
+    buyer.crowns = (buyer.crowns ?? 0) - auction.buyoutPrice;
+    const next = placeItem(buyerEntries, item, free.x, free.y);
+    buyer.set('inventory', serializeInventory(next));
+    buyer.markModified('inventory');
+
+    item.owner = buyer._id;
+    await item.save();
+    await buyer.save();
+
+    auction.status = 'settled';
+    auction.currentBid = auction.buyoutPrice;
+    auction.highestBidder = buyer._id as any;
     await auction.save();
 
     revalidatePath('/game/auction');
     revalidatePath('/game/overview');
     return { ok: true };
   } catch (error: any) {
-    console.log(`${new Date()} - cancelAuctionAction failed - ${error}`);
-    return { error: { message: error?.message || 'Failed to cancel auction' } };
+    console.log(`${new Date()} - buyoutAuctionAction failed - ${error}`);
+    return { error: { message: error?.message || 'Failed to buy out' } };
   }
 }
-
