@@ -18,6 +18,7 @@ import {
   placeItem,
   removeItem,
 } from '@/lib/utils/inventory/grid';
+import { tickBotMarket } from '@/lib/actions/arena/botMarketTick.action';
 
 function loadEntries(character: any): InventoryEntry[] {
   const inv = character.inventory;
@@ -43,6 +44,9 @@ async function getMyCharacter() {
 export async function listMarketAction() {
   try {
     await connectToDB();
+    // Tick the bot economy so the market feels alive: bots may list items
+    // and buy from real sellers each time someone opens the market.
+    await tickBotMarket();
     const listings = await MarketListing.find({})
       .populate({ path: 'item', model: Item })
       .populate({ path: 'seller', model: Character, select: 'name' })

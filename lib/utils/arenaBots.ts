@@ -1,4 +1,7 @@
 import { ARENA_TIERS, BOTS_PER_TIER, ArenaTier, tierLevelRange } from '@/lib/utils/arena';
+import { items as ITEM_CATALOG } from '@/constants/items';
+import { EQUIPMENT_SLOTS, EquipmentSlot } from '@/lib/utils/equipment';
+import { ItemInterface } from '@/lib/interfaces/item.interface';
 
 const FIRST_NAMES = [
   'Aelius', 'Brutus', 'Cassius', 'Decimus', 'Ennius', 'Flavius', 'Galba',
@@ -101,4 +104,66 @@ export function planBotsForTier(tier: ArenaTier, seedOffset = 0): BotPlan[] {
 
 export function planAllBots(): BotPlan[] {
   return ARENA_TIERS.flatMap((tier, i) => planBotsForTier(tier, i));
+}
+
+// Map slot -> item.type accepted by that slot.
+const SLOT_TO_TYPE: Record<EquipmentSlot, ItemInterface['type']> = {
+  head: 'head', chest: 'chest', legs: 'legs', gloves: 'gloves', cloak: 'cloak',
+  boots: 'boots', mainHand: 'mainHand', offHand: 'offHand', necklace: 'necklace',
+  ring1: 'ring', ring2: 'ring',
+};
+
+function templatesByType(type: ItemInterface['type']) {
+  return Object.values(ITEM_CATALOG).filter((it: any) => it.type === type);
+}
+
+function pickFor(level: number, type: ItemInterface['type'], rng: () => number): any | null {
+  const pool = templatesByType(type)
+    .filter((it: any) => it.level <= level + 2);
+  if (pool.length === 0) return null;
+  // Weight toward higher-level, lower-quality items first; the catalog
+  // is small enough that uniform sampling is fine.
+  return pool[Math.floor(rng() * pool.length)];
+}
+
+// Pick a small but coherent equipment kit for a level. Each slot is filled
+// with chance proportional to the slot priority (weapon/armor/helmet first).
+export function pickBotEquipment(level: number, rng: () => number): Partial<Record<EquipmentSlot, any>> {
+  const out: Partial<Record<EquipmentSlot, any>> = {};
+  // Slot order + base equip chance (drops as we go down the list).
+  const order: { slot: EquipmentSlot; chance: number }[] = [
+    { slot: 'mainHand', chance: 0.95 },
+    { slot: 'chest',    chance: 0.90 },
+    { slot: 'head',     chance: 0.80 },
+    { slot: 'offHand',  chance: 0.70 },
+    { slot: 'boots',    chance: 0.70 },
+    { slot: 'gloves',   chance: 0.60 },
+    { slot: 'legs',     chance: 0.55 },
+    { slot: 'necklace', chance: 0.35 },
+    { slot: 'ring1',    chance: 0.30 },
+    { slot: 'ring2',    chance: 0.20 },
+    { slot: 'cloak',    chance: 0.20 },
+  ];
+  for (const { slot, chance } of order) {
+    if (rng() > chance) continue;
+    const tpl = pickFor(level, SLOT_TO_TYPE[slot], rng);
+    if (tpl) out[slot] = tpl;
+  }
+  return out;
+}
+
+// A handful of inventory templates the bot can later list to the market.
+export function pickBotInventory(level: number, rng: () => number, count = 3): any[] {
+  const allPool = Object.values(ITEM_CATALOG).filter((it: any) => it.level <= level + 2);
+  if (allPool.length === 0) return [];
+  const picks: any[] = [];
+  for (let i = 0; i < count; i++) {
+    if (rng() < 0.35) continue; // not every slot fills
+    picks.push(allPool[Math.floor(rng() * allPool.length)]);
+  }
+  return picks;
+}
+
+export function botRng(seed: number): () => number {
+  return makeRng(seed);
 }
