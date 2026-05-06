@@ -25,7 +25,7 @@ const NavigationBanner = () => {
         isOnboarding && 'hidden'
       }`}
       style={{
-        backgroundImage: 'url("/images/sidebar-frame.png")',
+        backgroundImage: 'url("/images/sidebar.webp")',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 100%',
         backgroundPosition: 'center',
@@ -44,13 +44,13 @@ const NavigationBanner = () => {
 
         <div className='grid grid-cols-2 gap-2 mt-3'>
           <TabButton
-            icon='/images/icon-town.png'
+            icon='/images/town.webp'
             label='Town'
             active={tab === 'town'}
             onClick={() => setTab('town')}
           />
           <TabButton
-            icon='/images/icon-expedition.png'
+            icon='/images/expedition.webp'
             label='Expedition'
             active={tab === 'expedition'}
             onClick={() => setTab('expedition')}
@@ -99,7 +99,7 @@ function NavLink({
       href={href}
       className='relative h-9 flex items-center justify-center text-cream2 font-semibold text-sm tracking-wide drop-shadow'
       style={{
-        backgroundImage: 'url("/images/banner-active.png")',
+        backgroundImage: 'url("/images/marked.webp")',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 100%',
         backgroundPosition: 'center',
