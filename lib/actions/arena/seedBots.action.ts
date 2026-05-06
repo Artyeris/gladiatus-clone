@@ -6,10 +6,12 @@ import { connectToDB } from '@/lib/mongoose';
 import { ARENA_TIERS, BOTS_PER_TIER } from '@/lib/utils/arena';
 import { findFreePosition, placeItem, InventoryEntry } from '@/lib/utils/inventory/grid';
 import { pickBotEquipment, pickBotInventory, planBotsForTier, botRng } from '@/lib/utils/arenaBots';
+import { scaleItemTemplate } from '@/lib/utils/itemUtils';
 import { EquipmentSlot } from '@/lib/utils/equipment';
 
-async function createItem(template: any, ownerId: any) {
-  const created = await Item.create({ ...template, owner: ownerId });
+async function createItem(template: any, ownerId: any, level: number) {
+  const scaled = scaleItemTemplate(template, level);
+  const created = await Item.create({ ...scaled, owner: ownerId });
   if (template.itemId && created._id) {
     created.id = `${template.itemId}-${created._id}`;
     await created.save();
@@ -22,14 +24,14 @@ async function dressBot(bot: any, level: number, seed: number) {
   const equipPicks = pickBotEquipment(level, rng);
   const equipment: Record<string, any> = {};
   for (const [slot, template] of Object.entries(equipPicks)) {
-    const it = await createItem(template, bot._id);
+    const it = await createItem(template, bot._id, level);
     equipment[slot] = it._id;
   }
 
   const invTemplates = pickBotInventory(level, rng, 3);
   const entries: InventoryEntry[] = [];
   for (const tpl of invTemplates) {
-    const it = await createItem(tpl, bot._id);
+    const it = await createItem(tpl, bot._id, level);
     const free = findFreePosition(entries, it);
     if (!free) continue;
     const next = placeItem(entries, it, free.x, free.y);
@@ -50,46 +52,60 @@ async function dressBot(bot: any, level: number, seed: number) {
   await bot.save();
 }
 
-// Find bots that were seeded before the dressing logic existed and give
-// them gear in place. Their _id, name, level, honor, arenaTier all stay
-// the same so the leaderboard doesn't reshuffle.
-async function dressUndressedBots() {
-  // A bot is "undressed" if it has no equipment fields populated AND its
-  // inventory is empty / nullish.
-  const candidates = await Character.find({
-    isBot: true,
-    $or: [
-      { equipment: { $exists: false } },
-      { equipment: null },
-      // All slot fields are missing/nullish.
-      {
-        $and: [
-          { 'equipment.head': null },     { 'equipment.chest': null },
-          { 'equipment.mainHand': null }, { 'equipment.offHand': null },
-          { 'equipment.legs': null },     { 'equipment.boots': null },
-          { 'equipment.gloves': null },   { 'equipment.necklace': null },
-          { 'equipment.ring1': null },    { 'equipment.ring2': null },
-          { 'equipment.cloak': null },
-        ],
-      },
-    ],
-  });
-
+// Detect bots whose equipped weapon is much weaker than their level (left
+// over from before the level-scaling pass). Strip + rebuild their gear so
+// a level-120 bot stops fighting with a level-2 sword. Identity stays the
+// same -- only items move.
+async function rebalanceBotGear() {
+  const candidates = await Character.find({ isBot: true });
   for (const bot of candidates) {
-    // Skip bots that already have an inventory list -- they were dressed
-    // already; the equipment-null match above can include them on first
-    // run because the slots were truly null, but inventory presence is
-    // the reliable "already dressed" signal.
+    const level: number = bot.level ?? 1;
+    let needsRebuild = false;
+
+    // No inventory list at all -> never been dressed.
     const hasInventoryItems =
       Array.isArray(bot.inventory) &&
       bot.inventory.length > 0 &&
       bot.inventory.some((e: any) => e && (e.item || (Array.isArray(e) && e.some(Boolean))));
-    if (hasInventoryItems) continue;
+    if (!hasInventoryItems) needsRebuild = true;
+
+    // Or: any equipped item is more than ~5 levels below the bot.
+    if (!needsRebuild && bot.equipment) {
+      for (const slot of Object.keys(bot.equipment.toObject?.() ?? bot.equipment)) {
+        const ref = (bot.equipment as any)[slot];
+        if (!ref) continue;
+        const item = await Item.findById(ref);
+        if (!item) continue;
+        if ((item.level ?? 1) + 5 < level) {
+          needsRebuild = true;
+          break;
+        }
+      }
+    }
+
+    if (!needsRebuild) continue;
 
     try {
-      await dressBot(bot, bot.level ?? 1, (bot.level ?? 1) * 31 + (bot.honor ?? 0));
+      // Wipe the existing item documents so we don't leak orphans.
+      const oldItemIds: any[] = [];
+      if (bot.equipment) {
+        for (const slot of Object.keys(bot.equipment.toObject?.() ?? bot.equipment)) {
+          const ref = (bot.equipment as any)[slot];
+          if (ref) oldItemIds.push(ref);
+        }
+      }
+      if (Array.isArray(bot.inventory)) {
+        for (const entry of bot.inventory) {
+          if (entry?.item) oldItemIds.push(entry.item);
+        }
+      }
+      if (oldItemIds.length) {
+        await Item.deleteMany({ _id: { $in: oldItemIds } });
+      }
+
+      await dressBot(bot, level, level * 31 + (bot.honor ?? 0));
     } catch (err) {
-      console.log(`${new Date()} - failed to redress bot ${bot._id} - ${err}`);
+      console.log(`${new Date()} - failed to rebalance bot ${bot._id} - ${err}`);
     }
   }
 }
@@ -118,6 +134,7 @@ export async function ensureArenaBots() {
     }
   }
 
-  // After top-up, retroactively dress anyone who was naked.
-  await dressUndressedBots();
+  // After top-up, retroactively re-dress anyone whose gear is mismatched
+  // with their level (e.g. legacy bots seeded before scaleItemTemplate).
+  await rebalanceBotGear();
 }
