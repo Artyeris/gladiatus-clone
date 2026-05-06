@@ -39,7 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </div>
         <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none'>
-          v0.08
+          v0.9
         </span>
       </div>
     </body>

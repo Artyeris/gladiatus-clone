@@ -49,7 +49,7 @@ export async function battleArena(defenderId: string) {
     if (!defender) throw new Error('Rival not found');
 
     const attackerJournal = attacker.journal;
-    const defenderJournal = defender.journal;
+    const defenderJournal = defender.journal; // null for NPC bots, that's fine.
 
     const { rounds, result } = fight({ attacker, defender });
 
@@ -68,9 +68,9 @@ export async function battleArena(defenderId: string) {
     await BattleReport.findByIdAndDelete(defender.battleReport);
 
     if (result.winner === 'Draw') {
-      attackerJournal.arena.draws++;
-      defenderJournal.arena.draws++;
-    } 
+      if (attackerJournal) attackerJournal.arena.draws++;
+      if (defenderJournal) defenderJournal.arena.draws++;
+    }
     // Attacker won.
     else if (result.winner == attacker._id) {
       // Calculate honor using the Elo system, the first parameter is the character who won.
@@ -82,8 +82,8 @@ export async function battleArena(defenderId: string) {
       battleReport.result.honorEarned = earnedHonor;
       battleReport.result.honorLost = lostHonor;
 
-      attackerJournal.arena.wins++;
-      defenderJournal.arena.defeats++;
+      if (attackerJournal) attackerJournal.arena.wins++;
+      if (defenderJournal) defenderJournal.arena.defeats++;
 
       attacker.honor += earnedHonor;
       defender.honor += lostHonor;
@@ -98,21 +98,24 @@ export async function battleArena(defenderId: string) {
       battleReport.result.honorEarned = earnedHonor;
       battleReport.result.honorLost = lostHonor;
 
-      attackerJournal.arena.defeats++;
-      defenderJournal.arena.wins++;
+      if (attackerJournal) attackerJournal.arena.defeats++;
+      if (defenderJournal) defenderJournal.arena.wins++;
 
       defender.honor += earnedHonor;
       attacker.honor += lostHonor;
     }
 
-    // Update both characters journals.
-    attackerJournal.arena.battles++;
-    attackerJournal.arena.damageInflicted += result.attackerTotalDamage;
-    attackerJournal.arena.damageReceived += result.defenderTotalDamage;
+    if (attackerJournal) {
+      attackerJournal.arena.battles++;
+      attackerJournal.arena.damageInflicted += result.attackerTotalDamage;
+      attackerJournal.arena.damageReceived += result.defenderTotalDamage;
+    }
 
-    defenderJournal.arena.battles++;
-    defenderJournal.arena.damageInflicted += result.defenderTotalDamage;
-    defenderJournal.arena.damageReceived += result.attackerTotalDamage;
+    if (defenderJournal) {
+      defenderJournal.arena.battles++;
+      defenderJournal.arena.damageInflicted += result.defenderTotalDamage;
+      defenderJournal.arena.damageReceived += result.attackerTotalDamage;
+    }
 
     const savedBattleReport = await BattleReport.create(battleReport);
 
@@ -121,12 +124,12 @@ export async function battleArena(defenderId: string) {
     if (attacker.honor < 0) attacker.honor = 0;
     attacker.battleReport = savedBattleReport._id;
     await attacker.save();
-    await attackerJournal.save();
+    if (attackerJournal) await attackerJournal.save();
 
     if (defender.honor < 0) defender.honor = 0;
     defender.battleReport = savedBattleReport._id;
     await defender.save();
-    await defenderJournal.save();
+    if (defenderJournal) await defenderJournal.save();
 
     revalidatePath('/game/arena');
     return JSON.parse(JSON.stringify(savedBattleReport._id));

@@ -88,10 +88,7 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank }: ArenaContentProp
                     <div className='min-w-[50px] font-semibold'>{rival.rank}</div>
                     <div className='min-w-[50px] font-semibold'>{rival.honor}</div>
                     <div className='min-w-[40px]'>{rival.level ?? '-'}</div>
-                    <div
-                      className={`w-[160px] ${!isMe && 'font-semibold underline cursor-pointer'}`}
-                      onClick={!isMe ? () => router.push(`/character/${rival._id}`) : () => {}}
-                    >
+                    <div className={`w-[160px] ${!isMe && 'font-semibold'}`}>
                       {rival.name}
                       {rival.isBot && <span className='ml-1 text-[10px] opacity-70 italic'>NPC</span>}
                     </div>

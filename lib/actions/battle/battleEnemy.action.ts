@@ -13,6 +13,17 @@ import BattleReport from '@/lib/models/battleReport.model';
 import { calculateExperience } from '@/lib/utils/characterUtils';
 import { expeditions } from '@/constants/expeditions';
 import { expeditionEnemies } from '@/constants/enemies';
+import Item from '@/lib/models/item.model';
+import {
+  enemyTypeFromIndex,
+  rollExpeditionDrop,
+} from '@/lib/utils/expeditionDrop';
+import {
+  InventoryEntry,
+  findFreePosition,
+  migrateLegacyInventory,
+  placeItem,
+} from '@/lib/utils/inventory/grid';
 import { revalidatePath } from 'next/cache';
 
 interface BattleEnemyParams {
@@ -58,6 +69,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     journal.expeditions[expeditionName][enemyName].battles++;
 
     // If the character won.
+    let droppedItemSummary: { name: string; quality: string } | null = null;
     if (battleSummary.result.winner === character._id) {
       journal.world.battles++;
       journal.world.wins++;
@@ -67,6 +79,53 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
       // Calculate probability of obtaining knowledge only if knowledge is not greater than 3.
       if (journal.expeditions[expeditionName][enemyName].knowledge < 3 && randomBoolean(30)) {
         journal.expeditions[expeditionName][enemyName].knowledge++;
+      }
+
+      // Roll a possible loot drop and place it in the inventory.
+      const enemyIndex = typeof pickedEnemy.id === 'number' ? pickedEnemy.id : 0;
+      const drop = rollExpeditionDrop({
+        playerLevel: character.level ?? 1,
+        enemyType: enemyTypeFromIndex(enemyIndex),
+      });
+      if (drop.dropped && drop.template) {
+        try {
+          const created = await Item.create({
+            ...drop.template,
+            level: drop.itemLevel ?? drop.template.level,
+            quality: drop.quality ?? drop.template.quality ?? 'common',
+            owner: character._id,
+          });
+          if (drop.template.itemId && created._id) {
+            created.id = `${drop.template.itemId}-${created._id}`;
+            await created.save();
+          }
+
+          const migrated = migrateLegacyInventory(character.inventory);
+          const entries: InventoryEntry[] = migrated
+            ? migrated
+            : (Array.isArray(character.inventory)
+              ? (character.inventory as any[]).map((e: any) => ({
+                  item: e?.item, x: e?.x ?? 0, y: e?.y ?? 0,
+                }))
+              : []);
+
+          const free = findFreePosition(entries, created);
+          if (free) {
+            const next = placeItem(entries, created, free.x, free.y);
+            character.set('inventory', next.map((e) => ({
+              item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
+              x: e.x,
+              y: e.y,
+            })));
+            character.markModified('inventory');
+            droppedItemSummary = { name: created.name, quality: created.quality ?? 'common' };
+          } else {
+            // Inventory full -- drop on floor (delete the item).
+            await Item.findByIdAndDelete(created._id);
+          }
+        } catch (err) {
+          console.log(`${new Date()} - Failed to apply expedition drop - ${err}`);
+        }
       }
     }
 
