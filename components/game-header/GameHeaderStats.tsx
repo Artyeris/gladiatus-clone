@@ -15,7 +15,7 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
             src={'/images/crowns.png'}
             width={13}
             height={13}
-            alt='crowns'
+            alt='crowns' style={{ width: 'auto', height: 'auto' }}
           />
           <span>
             {character.crowns}
@@ -26,7 +26,7 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
             src={'/images/power-rank.png'}
             width={13}
             height={13}
-            alt='power rank'
+            alt='power rank' style={{ width: 'auto', height: 'auto' }}
           />
           <span>
             {calculatePower(character)}
@@ -40,7 +40,7 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
             src={'/images/honor.png'}
             width={13}
             height={13}
-            alt='honor'
+            alt='honor' style={{ width: 'auto', height: 'auto' }}
           />
           <span>
             {character.honor}
@@ -51,7 +51,7 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
             src={'/images/level.png'}
             width={13}
             height={13}
-            alt='level'
+            alt='level' style={{ width: 'auto', height: 'auto' }}
           />
           <span>
             {character.level}

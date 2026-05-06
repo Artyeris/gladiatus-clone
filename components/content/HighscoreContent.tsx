@@ -1,8 +1,5 @@
-'use client'
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import { redirect } from 'next/navigation';
 
 const HighscoreContent = ({ arenaHighscore }: { arenaHighscore: CharacterInterface[] }) => {
   return (
@@ -26,11 +23,11 @@ const HighscoreContent = ({ arenaHighscore }: { arenaHighscore: CharacterInterfa
               className='border-none'
             >
               <TableCell className='py-2 text-brown2 font-medium'>{index + 1}</TableCell>
-              <TableCell 
-                className='py-2 text-red3 underline font-medium cursor-pointer'
-                onClick={() => redirect(`/character/${character._id}`)}
-              >
+              <TableCell className='py-2 text-red3 font-medium'>
                 {character.name}
+                {(character as any).isBot && (
+                  <span className='ml-1 text-[10px] opacity-70 italic text-brown2'>NPC</span>
+                )}
               </TableCell>
               <TableCell className='py-2 text-brown2 font-medium'>{character.level}</TableCell>
               <TableCell className='py-2 text-brown2 font-medium'>{character.honor}</TableCell>

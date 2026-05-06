@@ -67,11 +67,12 @@ const Page = async ({ params }: { params: { id: string } }) => {
         >
           <p className='text-sm px-2 py-1 flex items-center gap-1'>
             <span className='font-semibold'>{attacker.name}</span> earned {battleReport.result.crownsDrop} 
-            <Image 
+            <Image
               src={'/images/crowns.png'}
               width={12}
               height={12}
               alt='crowns'
+              style={{ width: 'auto', height: 'auto' }}
             />
           </p>
           <p className='text-sm px-2 py-1'>
@@ -119,11 +120,12 @@ const Page = async ({ params }: { params: { id: string } }) => {
         />
 
         <div className='text-lg text-red3 font-bold items-center flex flex-col'>
-          <Image 
+          <Image
             src={`/images/fight.png`}
             width={55}
             height={22}
             alt='fight'
+            style={{ width: 'auto', height: 'auto' }}
           />
           Vs
         </div>

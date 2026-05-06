@@ -99,6 +99,7 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank }: ArenaContentProp
                           width={55}
                           height={22}
                           alt='fight'
+                          style={{ width: 'auto', height: 'auto' }}
                           onClick={canCharacterFight ? () => handleClick(rival._id) : () => {}}
                           className={canCharacterFight ? '' : 'cursor-not-allowed grayscale'}
                         />
