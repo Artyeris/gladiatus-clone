@@ -87,7 +87,7 @@ const WorkContent = ({ character }: Props) => {
       <Section title='Description'>
         <div className='flex gap-3 px-3 py-2 text-sm'>
           <Image
-            src='/images/barracks.jpg'
+            src='/images/work.webp'
             alt='work foreman'
             width={120}
             height={120}

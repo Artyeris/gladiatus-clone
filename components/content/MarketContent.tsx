@@ -125,7 +125,7 @@ function Board({ character, listings }: Props) {
       <Section title='Description'>
         <div className='flex gap-3 px-3 py-2 text-sm'>
           <Image
-            src='/images/barracks.jpg'
+            src='/images/market.webp'
             alt='market'
             width={120}
             height={120}

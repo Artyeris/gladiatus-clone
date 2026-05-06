@@ -64,7 +64,7 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
         <Image
           width={168}
           height={194}
-          src={`/images/barracks.jpg`}
+          src={`/images/barracks.webp`}
           alt='barrakcs'
         />
         <DescriptionCard

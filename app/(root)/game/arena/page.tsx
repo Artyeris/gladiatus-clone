@@ -20,7 +20,7 @@ const Page = async () => {
         <Image
           width={168}
           height={194}
-          src={`/images/arena.jpg`}
+          src={`/images/arena.webp`}
           alt='arena'
         />
         <DescriptionCard title='Arena'>

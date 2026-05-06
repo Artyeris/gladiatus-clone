@@ -70,7 +70,7 @@ const AuctionContent = ({ character, auctions }: Props) => {
       <Section title='Auction'>
         <div className='flex gap-3 px-3 py-2 text-sm'>
           <Image
-            src='/images/barracks.jpg'
+            src='/images/auction.webp'
             alt='auctioneer'
             width={120}
             height={120}
