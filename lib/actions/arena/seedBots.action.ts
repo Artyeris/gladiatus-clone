@@ -50,8 +50,53 @@ async function dressBot(bot: any, level: number, seed: number) {
   await bot.save();
 }
 
-// Idempotent: tops up each tier to its target bot count and never deletes
-// existing bots. Safe to call on every page load.
+// Find bots that were seeded before the dressing logic existed and give
+// them gear in place. Their _id, name, level, honor, arenaTier all stay
+// the same so the leaderboard doesn't reshuffle.
+async function dressUndressedBots() {
+  // A bot is "undressed" if it has no equipment fields populated AND its
+  // inventory is empty / nullish.
+  const candidates = await Character.find({
+    isBot: true,
+    $or: [
+      { equipment: { $exists: false } },
+      { equipment: null },
+      // All slot fields are missing/nullish.
+      {
+        $and: [
+          { 'equipment.head': null },     { 'equipment.chest': null },
+          { 'equipment.mainHand': null }, { 'equipment.offHand': null },
+          { 'equipment.legs': null },     { 'equipment.boots': null },
+          { 'equipment.gloves': null },   { 'equipment.necklace': null },
+          { 'equipment.ring1': null },    { 'equipment.ring2': null },
+          { 'equipment.cloak': null },
+        ],
+      },
+    ],
+  });
+
+  for (const bot of candidates) {
+    // Skip bots that already have an inventory list -- they were dressed
+    // already; the equipment-null match above can include them on first
+    // run because the slots were truly null, but inventory presence is
+    // the reliable "already dressed" signal.
+    const hasInventoryItems =
+      Array.isArray(bot.inventory) &&
+      bot.inventory.length > 0 &&
+      bot.inventory.some((e: any) => e && (e.item || (Array.isArray(e) && e.some(Boolean))));
+    if (hasInventoryItems) continue;
+
+    try {
+      await dressBot(bot, bot.level ?? 1, (bot.level ?? 1) * 31 + (bot.honor ?? 0));
+    } catch (err) {
+      console.log(`${new Date()} - failed to redress bot ${bot._id} - ${err}`);
+    }
+  }
+}
+
+// Idempotent: tops up each tier to its target bot count, never deletes
+// existing bots, and dresses any that were created before the dressing
+// pass existed.
 export async function ensureArenaBots() {
   await connectToDB();
 
@@ -72,4 +117,7 @@ export async function ensureArenaBots() {
       if (have >= target) break;
     }
   }
+
+  // After top-up, retroactively dress anyone who was naked.
+  await dressUndressedBots();
 }
