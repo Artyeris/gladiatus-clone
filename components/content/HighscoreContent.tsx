@@ -1,3 +1,7 @@
+'use client'
+
+import Link from 'next/link';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 
@@ -23,8 +27,13 @@ const HighscoreContent = ({ arenaHighscore }: { arenaHighscore: CharacterInterfa
               className='border-none'
             >
               <TableCell className='py-2 text-brown2 font-medium'>{index + 1}</TableCell>
-              <TableCell className='py-2 text-red3 font-medium'>
-                {character.name}
+              <TableCell className='py-2 font-medium'>
+                <Link
+                  href={`/game/character/${character._id}`}
+                  className='text-red3 underline hover:brightness-110'
+                >
+                  {character.name}
+                </Link>
                 {(character as any).isBot && (
                   <span className='ml-1 text-[10px] opacity-70 italic text-brown2'>NPC</span>
                 )}
