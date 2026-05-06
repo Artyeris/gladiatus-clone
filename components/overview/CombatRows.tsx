@@ -6,23 +6,10 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import { ItemInterface } from '@/lib/interfaces/item.interface';
-import { EQUIPMENT_SLOTS } from '@/lib/utils/equipment';
+import { calculateCombatStats } from '@/lib/utils/combatStats';
 
 interface CombatRowsProps {
   user: CharacterInterface;
-}
-
-function getEquippedItems(user: CharacterInterface): ItemInterface[] {
-  const equipment = (user.equipment ?? {}) as Record<string, unknown>;
-  const items: ItemInterface[] = [];
-  for (const slot of EQUIPMENT_SLOTS) {
-    const cell = equipment[slot];
-    if (cell && typeof cell === 'object' && '_id' in (cell as object)) {
-      items.push(cell as ItemInterface);
-    }
-  }
-  return items;
 }
 
 // Gladiatus armor -> flat absorption range.
@@ -41,24 +28,9 @@ function armorAbsorption(armor: number) {
 }
 
 const CombatRows = ({ user }: CombatRowsProps) => {
-  const items = getEquippedItems(user);
-
-  let armor = 0;
-  let weaponMin = 0;
-  let weaponMax = 0;
-  for (const item of items) {
-    armor += item.armor ?? 0;
-    if (item.damage && item.damage.length === 2) {
-      weaponMin += item.damage[0];
-      weaponMax += item.damage[1];
-    }
-  }
-
-  // 10 strength -> +1 damage (rounded down).
-  const strength = user.strength ?? 5;
-  const strBonus = Math.floor(strength / 10);
-  const damageMin = weaponMin + strBonus;
-  const damageMax = weaponMax + strBonus;
+  const {
+    armor, weaponMin, weaponMax, hasWeapon, strBonus, damageMin, damageMax,
+  } = calculateCombatStats(user);
 
   const { min: absorbMin, max: absorbMax } = armorAbsorption(armor);
 
@@ -110,7 +82,7 @@ const CombatRows = ({ user }: CombatRowsProps) => {
               <span className='text-yellow-300'>{damageMin} - {damageMax}</span>
             </div>
             <div className='flex justify-between gap-4'>
-              <span>From weapon</span>
+              <span>{hasWeapon ? 'From weapon' : 'Bare hands'}</span>
               <span className='font-semibold'>+{weaponMin} - {weaponMax}</span>
             </div>
             <div className='flex justify-between gap-4'>
@@ -118,7 +90,7 @@ const CombatRows = ({ user }: CombatRowsProps) => {
               <span className='font-semibold'>+{strBonus}</span>
             </div>
             <div className='text-[10px] opacity-80 italic mt-1'>
-              Strength grants +1 damage per 10 points.
+              Strength grants +1 damage per 10 points. Unarmed strikes do 0 - 2 damage.
             </div>
           </div>
         </HoverCardContent>

@@ -13,7 +13,8 @@ import { battleArena } from '@/lib/actions/battle/battleArena.action';
 import { calculateNextLevelExperience } from '@/lib/utils';
 import { calculatePower } from '@/lib/utils/characterUtils';
 import { stats as STATS } from '@/constants';
-import { EQUIPMENT_SLOTS, EquipmentSlot, SLOT_LABELS } from '@/lib/utils/equipment';
+import { EquipmentSlot, SLOT_LABELS } from '@/lib/utils/equipment';
+import { calculateCombatStats } from '@/lib/utils/combatStats';
 import {
   calculateStatBreakdown,
   StatId,
@@ -41,33 +42,6 @@ function avatarBucket(level: number) {
   return Math.floor(level / 10) * 10;
 }
 
-function getEquipped(character: CharacterInterface): ItemInterface[] {
-  const eq = (character.equipment ?? {}) as Record<string, unknown>;
-  const out: ItemInterface[] = [];
-  for (const slot of EQUIPMENT_SLOTS) {
-    const cell = eq[slot];
-    if (cell && typeof cell === 'object' && '_id' in (cell as object)) {
-      out.push(cell as ItemInterface);
-    }
-  }
-  return out;
-}
-
-function combatTotals(character: CharacterInterface) {
-  const items = getEquipped(character);
-  let armor = 0;
-  let weaponMin = 0;
-  let weaponMax = 0;
-  for (const it of items) {
-    armor += it.armor ?? 0;
-    if (it.damage && it.damage.length === 2) {
-      weaponMin += it.damage[0];
-      weaponMax += it.damage[1];
-    }
-  }
-  const strBonus = Math.floor((character.strength ?? 5) / 10);
-  return { armor, damageMin: weaponMin + strBonus, damageMax: weaponMax + strBonus };
-}
 
 const CharacterProfileContent = ({ character, isMine }: Props) => {
   const router = useRouter();
@@ -83,7 +57,7 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
     ? Math.min(((character.experience ?? 0) / xpForNext) * 100, 100)
     : 0;
 
-  const { armor, damageMin, damageMax } = combatTotals(character);
+  const { armor, damageMin, damageMax } = calculateCombatStats(character);
   const equipment = (character.equipment ?? {}) as Record<string, ItemInterface | null | undefined>;
 
   const onArenaFight = async () => {
