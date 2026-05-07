@@ -149,22 +149,48 @@ const Page = async ({ params }: { params: { id: string } }) => {
       <DescriptionCard
         title={`Statistics - ${formatDateTime(battleDate)}`}
       >
-        <div className='px-4 w-full flex justify-between'>
-          <div className='flex flex-col justify-center text-sm'>
-            <span className='font-semibold'>Name:</span>
+        <div className='px-4 w-full grid grid-cols-3 gap-2 text-sm py-2'>
+          <div className='flex flex-col'>
+            <span className='font-semibold border-b border-cream2 pb-1 mb-1'>Combatant</span>
             <span>{attacker.name}</span>
             <span>{defender.name}</span>
           </div>
-          <div className='flex flex-col items-center justify-center text-sm'>
-            <span className='font-semibold'>Damage Points:</span>
+          <div className='flex flex-col items-center'>
+            <span className='font-semibold border-b border-cream2 pb-1 mb-1'>Damage dealt</span>
             <span>{battleReport.result.attackerTotalDamage}</span>
             <span>{battleReport.result.defenderTotalDamage}</span>
           </div>
-          <div className='flex flex-col items-center justify-center text-sm'>
-            <span className='font-semibold'>Health Points:</span>
-            <span>{battleReport.result.attackerHealth}</span>
-            <span>{battleReport.result.defenderHealth}</span>
+          <div className='flex flex-col items-center'>
+            <span className='font-semibold border-b border-cream2 pb-1 mb-1'>Health left</span>
+            <span>{Math.max(0, Math.round(battleReport.result.attackerFinalHealth))} / {battleReport.result.attackerHealth}</span>
+            <span>{Math.max(0, Math.round(battleReport.result.defenderFinalHealth))} / {battleReport.result.defenderHealth}</span>
           </div>
+        </div>
+
+        <div className='px-4 w-full grid grid-cols-3 gap-2 text-xs pb-2 opacity-90'>
+          <div className='flex flex-col'>
+            <span className='font-semibold'>Hits / attempts</span>
+            <span>
+              {battleReport.result.attackerHitsLanded ?? 0} / {battleReport.result.attackerHitsAttempted ?? 0}
+            </span>
+            <span>
+              {battleReport.result.defenderHitsLanded ?? 0} / {battleReport.result.defenderHitsAttempted ?? 0}
+            </span>
+          </div>
+          <div className='flex flex-col items-center'>
+            <span className='font-semibold'>Critical hits</span>
+            <span>{battleReport.result.attackerCritsLanded ?? 0}</span>
+            <span>{battleReport.result.defenderCritsLanded ?? 0}</span>
+          </div>
+          <div className='flex flex-col items-center'>
+            <span className='font-semibold'>Damage absorbed</span>
+            <span>{battleReport.result.attackerArmorAbsorbed ?? 0}</span>
+            <span>{battleReport.result.defenderArmorAbsorbed ?? 0}</span>
+          </div>
+        </div>
+
+        <div className='px-4 pb-2 text-xs opacity-90'>
+          Total rounds: <strong>{battleReport.result.totalRounds ?? battleReport.rounds.length}</strong>
         </div>
       </DescriptionCard>
 

@@ -89,6 +89,16 @@ export interface Result {
   crownsDrop?: number;
   honorEarned?: number;
   honorLost?: number;
+  // Detailed combat counters (optional for backwards compat with old reports).
+  attackerHitsLanded?: number;
+  attackerHitsAttempted?: number;
+  attackerCritsLanded?: number;
+  attackerArmorAbsorbed?: number;
+  defenderHitsLanded?: number;
+  defenderHitsAttempted?: number;
+  defenderCritsLanded?: number;
+  defenderArmorAbsorbed?: number;
+  totalRounds?: number;
 }
 
 export interface Rival {
