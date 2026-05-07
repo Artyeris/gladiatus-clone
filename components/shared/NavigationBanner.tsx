@@ -21,14 +21,15 @@ const NavigationBanner = () => {
 
   return (
     <div
-      className={`relative min-h-full w-[230px] flex flex-col items-center pt-6 pb-10 px-3 ${
+      className={`relative w-[230px] flex flex-col items-center pt-6 pb-10 px-3 self-start ${
         isOnboarding && 'hidden'
       }`}
       style={{
         backgroundImage: 'url("/images/sidebar.webp")',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 100%',
-        backgroundPosition: 'center',
+        backgroundPosition: 'top center',
+        minHeight: '900px',
       }}
     >
       <div className='flex flex-col gap-2 w-[180px] mt-16'>
