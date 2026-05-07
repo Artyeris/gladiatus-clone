@@ -11,6 +11,10 @@ export const generalRoutes = [
 
 export const villageRoutes = [
   {
+    name: 'Work',
+    link: '/work',
+  },
+  {
     name: 'Arena',
     link: '/arena',
   },
@@ -19,16 +23,12 @@ export const villageRoutes = [
     link: '/training',
   },
   {
-    name: 'Work',
-    link: '/work',
+    name: 'Auction',
+    link: '/auction',
   },
   {
     name: 'Market',
     link: '/market',
-  },
-  {
-    name: 'Auction',
-    link: '/auction',
   },
 ]
 
