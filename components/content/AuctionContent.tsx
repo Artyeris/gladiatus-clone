@@ -75,6 +75,7 @@ const AuctionContent = ({ character, auctions }: Props) => {
             width={120}
             height={120}
             className='rounded-sm shrink-0'
+            style={{ width: 'auto', height: 'auto' }}
           />
           <div className='flex flex-col gap-1'>
             <p>

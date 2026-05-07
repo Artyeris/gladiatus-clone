@@ -19,12 +19,13 @@ const CharacterCard = ({ character }: { character: CharacterInterface }) => {
       <h2 className='font-semibold text-md red-card flex justify-center items-center text-cream2 h-10 px-4 w-full drop-shadow-xl truncate'>
         {character.name}
       </h2>
-      <Image 
+      <Image
         className='drop-shadow-xl'
         src={`/characters/${character.gender}/character-lvl-${roundDownToNearestMultipleOf10(character.level)}.jpg`}
         width={168}
         height={194}
         alt='character'
+        style={{ width: 'auto', height: 'auto' }}
       />
       <div className='brown-card w-full drop-shadow-xl rounded-sm text-brown2'>
 
@@ -33,11 +34,12 @@ const CharacterCard = ({ character }: { character: CharacterInterface }) => {
             Crowns:
             <span className='flex justify-center items-center font-semibold gap-2 text-red3'>
               {character.crowns}
-              <Image 
+              <Image
                 src={'/images/crowns.png'}
                 width={12}
                 height={12}
                 alt='crowns'
+                style={{ width: 'auto', height: 'auto' }}
               />
             </span>
           </div>

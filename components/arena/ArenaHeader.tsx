@@ -4,11 +4,12 @@ import DescriptionCard from '@/components/cards/DescriptionCard';
 const ArenaHeader = () => {
   return (
     <div className='flex gap-4'>
-      <Image 
+      <Image
         width={168}
         height={194}
         src={`/images/arena.webp`}
         alt='arena'
+        style={{ width: 'auto', height: 'auto' }}
       />
       <DescriptionCard title='Arena'>
         <p>

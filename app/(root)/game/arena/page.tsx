@@ -22,6 +22,7 @@ const Page = async () => {
           height={194}
           src={`/images/arena.webp`}
           alt='arena'
+          style={{ width: 'auto', height: 'auto' }}
         />
         <DescriptionCard title='Arena'>
           <p>

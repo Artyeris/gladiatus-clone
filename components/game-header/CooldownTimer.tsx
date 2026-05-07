@@ -56,11 +56,12 @@ const CooldownTimer = ({ name, message, cooldown, characterLastBattle, redirect 
 
   return (
     <div className='flex flex-row gap-1 font-semibold text-red3 items-center justify-between w-full px-2'>
-      <Image 
+      <Image
         src={`/images/${name}.png`}
         width={19}
         height={19}
         alt={name}
+        style={{ width: 'auto', height: 'auto' }}
       />
       <div 
         className={`progressbar bg-brown2 ${progressPercentage >= 100 && redirect && 'cursor-pointer hover:brightness-110'}`}
