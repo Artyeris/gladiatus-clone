@@ -154,7 +154,7 @@ function Board({ character }: Props) {
   };
 
   return (
-    <div className='flex flex-col gap-5'>
+    <div className='flex flex-col items-center gap-5'>
       <EquipmentBoard equipment={equipment} onDrop={onDrop} />
       <InventoryBoard entries={entries} onDrop={onDrop} />
     </div>
