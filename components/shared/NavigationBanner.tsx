@@ -94,25 +94,31 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 function NavLink({
   href, label, active,
 }: { href: string; label: string; active: boolean }) {
-  return active ? (
+  // Both states share the same wrapper height/padding so toggling active
+  // never makes the row jump or change perceived size. Only the
+  // background swaps: red-card pill when inactive, marked banner when
+  // active. The marked.webp is overlaid on a solid red-card base so the
+  // sidebar art behind never bleeds through and skews the look.
+  return (
     <Link
       href={href}
-      className='relative h-9 flex items-center justify-center text-cream2 font-semibold text-sm tracking-wide drop-shadow'
-      style={{
-        backgroundImage: 'url("/images/marked.webp")',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: '100% 100%',
-        backgroundPosition: 'center',
-      }}
+      className={`relative h-9 w-full flex items-center justify-center rounded-sm text-cream2 font-semibold text-sm tracking-wide drop-shadow hover:text-gold transition ${
+        active ? '' : 'red-card hover:border-gold'
+      }`}
     >
-      <span className='px-3'>{label}</span>
-    </Link>
-  ) : (
-    <Link
-      href={href}
-      className='red-card text-cream2 text-center font-semibold text-sm cursor-pointer hover:text-gold hover:border-gold transition rounded-sm py-1'
-    >
-      {label}
+      {active && (
+        <span
+          aria-hidden
+          className='absolute inset-0 rounded-sm'
+          style={{
+            backgroundImage: 'url("/images/marked.webp")',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '100% 100%',
+            backgroundPosition: 'center',
+          }}
+        />
+      )}
+      <span className='relative px-3'>{label}</span>
     </Link>
   );
 }
