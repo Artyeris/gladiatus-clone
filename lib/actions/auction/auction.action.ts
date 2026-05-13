@@ -22,6 +22,7 @@ import {
   minNextBid,
   newAuctionEndsAt,
 } from '@/lib/utils/auction';
+import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
 
 const POOL_SIZE = 12;
 
@@ -110,6 +111,12 @@ async function settleExpiredAuctions() {
           item.owner = winner._id;
           await item.save();
           await winner.save();
+          await sendMessageToCharacter(
+            String(winner._id),
+            'auction',
+            'You won an auction.',
+            `You won the auction for ${item.name} (level ${item.level}) for ${auction.currentBid} crowns. The item has been delivered to your inventory.`,
+          );
         }
       }
     } else {
@@ -192,6 +199,12 @@ export async function placeAuctionBid({
       if (previous) {
         previous.crowns = (previous.crowns ?? 0) + auction.currentBid;
         await previous.save();
+        await sendMessageToCharacter(
+          String(previous._id),
+          'auction',
+          'Your bid was raised.',
+          `Someone outbid you on an auction. Your previous bid of ${auction.currentBid} crowns has been refunded.`,
+        );
       }
     } else if (auction.highestBidder && String(auction.highestBidder) === String(bidder._id)) {
       // Same bidder raises -> refund their previous lock first.

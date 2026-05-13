@@ -145,7 +145,8 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
 
     await journal.save();
 
-     // Create the battle report and if there is already an existing one, delete it.
+     // Create the battle report. Old reports are kept so the player can
+     // browse their history under /game/reports.
      const savedBattleReport = await BattleReport.create({
       result: battleSummary.result,
       rounds: battleSummary.rounds,
@@ -153,8 +154,6 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
       defender: pickedEnemy,
       attacker: character._id,
     });
-
-    await BattleReport.findByIdAndDelete(character.battleReport);
 
     character.battleReport = savedBattleReport._id;
 

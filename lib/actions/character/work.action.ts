@@ -10,6 +10,7 @@ import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import { jobGoldReward } from '@/lib/utils/work';
+import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
 
 async function getMyCharacter() {
   const token = cookies().get(COOKIE_NAME);
@@ -89,8 +90,16 @@ export async function claimWorkAction() {
     character.markModified('currentWork');
     await character.save();
 
+    await sendMessageToCharacter(
+      String(character._id),
+      'work',
+      `Shift complete: ${job.name}`,
+      `You finished your ${work.hours}h shift as a ${job.name} and earned ${reward} crowns.`,
+    );
+
     revalidatePath('/game/work');
     revalidatePath('/game/overview');
+    revalidatePath('/game/messages');
     return { ok: true, reward };
   } catch (error: any) {
     console.log(`${new Date()} - claimWorkAction failed - ${error}`);

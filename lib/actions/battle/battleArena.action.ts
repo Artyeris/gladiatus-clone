@@ -63,9 +63,8 @@ export async function battleArena(defenderId: string) {
       defender: defender._id,
     }
 
-    // Delete both battle reports and then replace them later with the new one.
-    await BattleReport.findByIdAndDelete(attacker.battleReport);
-    await BattleReport.findByIdAndDelete(defender.battleReport);
+    // Old battle reports are kept so the player can browse their history
+    // under /game/reports.
 
     if (result.winner === 'Draw') {
       if (attackerJournal) attackerJournal.arena.draws++;

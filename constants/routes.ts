@@ -4,6 +4,14 @@ export const generalRoutes = [
     link: '/overview',
   },
   {
+    name: 'Messages',
+    link: '/messages',
+  },
+  {
+    name: 'Reports',
+    link: '/reports',
+  },
+  {
     name: 'Highscore',
     link: '/highscore',
   },

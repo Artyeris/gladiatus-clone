@@ -19,6 +19,7 @@ import {
   removeItem,
 } from '@/lib/utils/inventory/grid';
 import { tickBotMarket } from '@/lib/actions/arena/botMarketTick.action';
+import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
 
 function loadEntries(character: any): InventoryEntry[] {
   const inv = character.inventory;
@@ -190,6 +191,12 @@ export async function buyMarketListing({ listingId }: { listingId: string }) {
       buyer.crowns = (buyer.crowns ?? 0) - listing.price;
       seller.crowns = (seller.crowns ?? 0) + listing.price;
       await seller.save();
+      await sendMessageToCharacter(
+        String(seller._id),
+        'market',
+        'Your item was sold.',
+        `Your listing for ${item.name} sold for ${listing.price} crowns. The gold has been credited to your purse.`,
+      );
     }
 
     item.owner = buyer._id;
