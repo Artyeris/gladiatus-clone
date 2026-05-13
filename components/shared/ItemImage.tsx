@@ -13,9 +13,11 @@ interface Props {
   className?: string;
 }
 
-// Renders /items/<imageId>.webp; if it 404s, falls back to a stylised
-// placeholder so missing artwork doesn't show a broken-image icon or a
-// raw filename. The label is a short, readable hint (the alt text).
+// Renders /items/<imageId>.webp by default. If the catalog entry already
+// contains a file extension (e.g. "chainmail.png" or "/items/foo.svg"),
+// that exact path is used instead. If the request 404s, falls back to a
+// stylised placeholder so missing artwork doesn't show a broken-image
+// icon or a raw filename. The label is a short, readable hint (alt text).
 const ItemImage = ({ imageId, alt, size, fill, sizes, style, className }: Props) => {
   const [errored, setErrored] = useState(false);
 
@@ -46,7 +48,12 @@ const ItemImage = ({ imageId, alt, size, fill, sizes, style, className }: Props)
     );
   }
 
-  const src = `/items/${imageId}.webp`;
+  const hasExtension = /\.(webp|png|jpe?g|gif|svg)$/i.test(imageId);
+  const src = imageId.startsWith('/')
+    ? imageId
+    : hasExtension
+      ? `/items/${imageId}`
+      : `/items/${imageId}.webp`;
   if (fill) {
     return (
       <Image

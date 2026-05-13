@@ -108,7 +108,7 @@ export const items = {
   // ----- Chest armor (2x3) -----
   leather_armor:   armor('leather_armor', 'Leather Armor', 'leather-armor', 'chest', 1,  8,  50, [2, 3]),
   iron_chest:      armor('iron_chest',    'Iron Chest',    'iron-chest',    'chest', 1, 12,  60, [2, 3]),
-  chain_mail:      armor('chain_mail',    'Chain Mail',    'chain-mail',    'chest', 3, 18, 230, [2, 3], 'green_plus'),
+  chain_mail:      armor('chain_mail',    'Chain Mail',    'chainmail.png', 'chest', 3, 18, 230, [2, 3], 'green_plus'),
   plate_armor:     armor('plate_armor',   'Plate Armor',   'plate-armor',   'chest', 5, 26, 540, [2, 3], 'blue'),
   vanguard_breastplate: armor('vanguard_breastplate', 'Vanguard Breastplate', 'vanguard-breastplate', 'chest', 6, 30, 760, [2, 3], 'blue_plus', { endurance: 2 }),
 
