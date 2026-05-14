@@ -1,6 +1,7 @@
 import formatDateTime from '@/lib/utils/formatDateTime';
 import Image from 'next/image';
 import { calculatePower } from '@/lib/utils/characterUtils';
+import { combatProfile } from '@/lib/utils/combatProfile';
 import { BattleReport } from '@/lib/interfaces/battleReport.interface';
 import DescriptionCard from '@/components/cards/DescriptionCard';
 import FighterCard from '@/components/cards/FighterCard';
@@ -105,21 +106,15 @@ const Page = async ({ params }: { params: { id: string } }) => {
         </DescriptionCard>
       }
 
-      <div className='flex flex-row justify-between items-center w-full px-8'>
+      <div className='flex flex-row justify-between items-start w-full px-4 gap-2'>
         <FighterCard
-          image={attacker.gender} 
-          level={attacker.level}
+          image={attacker.gender}
           name={attacker.name}
-          strength={attacker.strength}
-          endurance={attacker.endurance}
-          agility={attacker.agility}
-          dexterity={attacker.dexterity}
-          intelligence={attacker.intelligence}
-          charisma={attacker.charisma}
           power={calculatePower(attacker)}
+          profile={combatProfile(attacker, defender)}
         />
 
-        <div className='text-lg text-red3 font-bold items-center flex flex-col'>
+        <div className='text-lg text-red3 font-bold items-center flex flex-col pt-20'>
           <Image
             src={`/images/fight.png`}
             width={55}
@@ -131,18 +126,12 @@ const Page = async ({ params }: { params: { id: string } }) => {
         </div>
 
         <FighterCard
-          image={isNpc ? defender.image : defender.gender} 
-          level={defender.level}
+          image={isNpc ? defender.image : defender.gender}
           name={defender.name}
-          strength={defender.strength}
-          endurance={defender.endurance}
-          agility={defender.agility}
-          dexterity={defender.dexterity}
-          intelligence={defender.intelligence}
-          charisma={defender.charisma}
           power={isNpc ? defender.power : calculatePower(defender)}
           expedition={battleReport.expedition}
           isEnemy={isNpc}
+          profile={combatProfile(defender, attacker)}
         />
       </div>
 
