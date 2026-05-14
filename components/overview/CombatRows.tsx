@@ -1,102 +1,134 @@
 'use client';
 
+import { ReactNode } from 'react';
+
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import { calculateCombatStats } from '@/lib/utils/combatStats';
+import { combatBreakdown } from '@/lib/utils/combatBreakdown';
 
 interface CombatRowsProps {
   user: CharacterInterface;
 }
 
-// Gladiatus armor -> flat absorption range.
-//   minAbsorb = ceil((armor/74) - (armor/74)/660 + 1), clamped at 0
-//   maxAbsorb = floor((armor/66) + (armor/660))
-function armorAbsorption(armor: number) {
-  if (armor <= 0) return { min: 0, max: 0 };
-  const a74 = armor / 74;
-  const rawMin = Math.max(Math.ceil(a74 - a74 / 660 + 1), 0);
-  const rawMax = Math.max(Math.floor(armor / 66 + armor / 660), 0);
-  // The fan formula's +1 baseline can push min above max at low armor.
-  // Clamp min to never exceed max so the displayed range is always sensible.
-  const max = rawMax;
-  const min = Math.min(rawMin, rawMax);
-  return { min, max };
-}
-
 const CombatRows = ({ user }: CombatRowsProps) => {
-  const {
-    armor, weaponMin, weaponMax, hasWeapon, strBonus, damageMin, damageMax,
-  } = calculateCombatStats(user);
-
-  const { min: absorbMin, max: absorbMax } = armorAbsorption(armor);
+  const b = combatBreakdown(user);
 
   return (
     <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
-      <HoverCard openDelay={120} closeDelay={0}>
-        <HoverCardTrigger asChild>
-          <div className='flex items-center justify-between gap-2 px-2 py-1 border-b-[3px] border-cream2 cursor-help'>
-            <span className='w-[72px] shrink-0'>Armor</span>
-            <span className='font-semibold text-red3'>{armor}</span>
-          </div>
-        </HoverCardTrigger>
-        <HoverCardContent
-          className='w-auto p-0 border-none shadow-md'
-          side='right'
-          align='start'
-        >
-          <div className='red-card flex flex-col min-w-[200px] px-3 py-2 text-cream2 text-xs gap-1'>
-            <div className='flex justify-between gap-4 font-semibold text-sm border-b border-cream2 pb-1 mb-1'>
-              <span>Armor</span>
-              <span className='text-yellow-300'>{armor}</span>
-            </div>
-            <div className='flex justify-between gap-4'>
-              <span>Damage absorbed</span>
-              <span className='font-semibold'>{absorbMin} - {absorbMax}</span>
-            </div>
-            <div className='text-[10px] opacity-80 italic mt-1'>
-              Each enemy hit is reduced by a value in this range.
-            </div>
-          </div>
-        </HoverCardContent>
-      </HoverCard>
+      <CombatRow label='Armor' value={String(b.armor)}>
+        <TooltipCard title='Armor' headline={String(b.armor)}>
+          <TipRow label='Damage absorbed' value={`${b.absorbMin} - ${b.absorbMax}`} />
+          <TipNote>Each enemy hit is reduced by a value in this range.</TipNote>
+        </TooltipCard>
+      </CombatRow>
 
-      <HoverCard openDelay={120} closeDelay={0}>
-        <HoverCardTrigger asChild>
-          <div className='flex items-center justify-between gap-2 px-2 py-1 cursor-help'>
-            <span className='w-[72px] shrink-0'>Damage</span>
-            <span className='font-semibold text-red3'>{damageMin} - {damageMax}</span>
-          </div>
-        </HoverCardTrigger>
-        <HoverCardContent
-          className='w-auto p-0 border-none shadow-md'
-          side='right'
-          align='start'
-        >
-          <div className='red-card flex flex-col min-w-[220px] px-3 py-2 text-cream2 text-xs gap-1'>
-            <div className='flex justify-between gap-4 font-semibold text-sm border-b border-cream2 pb-1 mb-1'>
-              <span>Damage</span>
-              <span className='text-yellow-300'>{damageMin} - {damageMax}</span>
-            </div>
-            <div className='flex justify-between gap-4'>
-              <span>{hasWeapon ? 'From weapon' : 'Bare hands'}</span>
-              <span className='font-semibold'>+{weaponMin} - {weaponMax}</span>
-            </div>
-            <div className='flex justify-between gap-4'>
-              <span>From strength</span>
-              <span className='font-semibold'>+{strBonus}</span>
-            </div>
-            <div className='text-[10px] opacity-80 italic mt-1'>
-              Strength grants +1 damage per 10 points. Unarmed strikes do 0 - 2 damage.
-            </div>
-          </div>
-        </HoverCardContent>
-      </HoverCard>
+      <CombatRow label='Damage' value={`${b.damageMin} - ${b.damageMax}`}>
+        <TooltipCard title='Damage' headline={`${b.damageMin} - ${b.damageMax}`}>
+          <TipRow
+            label={b.hasWeapon ? 'From weapon' : 'Bare hands'}
+            value={`${b.weaponMin} - ${b.weaponMax}`}
+          />
+          <TipRow label='From strength' value={`+${b.strDamageBonus}`} />
+          <TipNote>Strength grants +1 damage per 10 points.</TipNote>
+        </TooltipCard>
+      </CombatRow>
+
+      <CombatRow label='Critical hit' value={`${b.critChance}%`}>
+        <TooltipCard title='Critical hit' headline={`${b.critChance}%`}>
+          <TipRow label='Critical value' value={String(b.critValue)} />
+          <TipRow label='From dexterity' value={`+${b.critFromBase}`} />
+          <TipRow label='From items' value={`+${b.critFromItems}`} />
+          <TipNote>A critical hit deals double damage. Scales with dexterity.</TipNote>
+        </TooltipCard>
+      </CombatRow>
+
+      <CombatRow label='Block' value={`${b.blockChance}%`}>
+        <TooltipCard title='Block' headline={`${b.blockChance}%`}>
+          <TipRow label='Block value' value={String(b.blockValue)} />
+          <TipRow label='From strength' value={`+${b.blockFromBase}`} />
+          <TipRow label='From items' value={`+${b.blockFromItems}`} />
+          <TipNote>A blocked hit is fully negated. Scales with strength.</TipNote>
+        </TooltipCard>
+      </CombatRow>
+
+      <CombatRow label='Avoid critical' value={`${b.avoidCritChance}%`} last>
+        <TooltipCard title='Avoid critical' headline={`${b.avoidCritChance}%`}>
+          <TipRow label='Resilience value' value={String(b.avoidCritValue)} />
+          <TipRow label='From agility' value={`+${b.avoidCritFromBase}`} />
+          <TipRow label='From items' value={`+${b.avoidCritFromItems}`} />
+          <TipNote>Chance for an enemy critical to deal only normal damage. Scales with agility.</TipNote>
+        </TooltipCard>
+      </CombatRow>
     </div>
   );
 };
 
 export default CombatRows;
+
+interface CombatRowProps {
+  label: string;
+  value: string;
+  last?: boolean;
+  children: ReactNode;
+}
+
+function CombatRow({ label, value, last = false, children }: CombatRowProps) {
+  return (
+    <HoverCard openDelay={120} closeDelay={0}>
+      <HoverCardTrigger asChild>
+        <div
+          className={`flex items-center justify-between gap-2 px-2 py-1 cursor-help ${
+            !last && 'border-b-[3px] border-cream2'
+          }`}
+        >
+          <span className='w-[90px] shrink-0'>{label}</span>
+          <span className='font-semibold text-red3'>{value}</span>
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent
+        className='w-auto p-0 border-none shadow-md'
+        side='right'
+        align='start'
+      >
+        {children}
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+
+function TooltipCard({
+  title,
+  headline,
+  children,
+}: {
+  title: string;
+  headline: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className='red-card flex flex-col min-w-[210px] px-3 py-2 text-cream2 text-xs gap-1'>
+      <div className='flex justify-between gap-4 font-semibold text-sm border-b border-cream2 pb-1 mb-1'>
+        <span>{title}</span>
+        <span className='text-yellow-300'>{headline}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function TipRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className='flex justify-between gap-4'>
+      <span>{label}</span>
+      <span className='font-semibold'>{value}</span>
+    </div>
+  );
+}
+
+function TipNote({ children }: { children: ReactNode }) {
+  return <div className='text-[10px] opacity-80 italic mt-1'>{children}</div>;
+}

@@ -8,6 +8,7 @@ import { canFight, extractUserId } from '@/lib/utils';
 import { cookies } from 'next/headers';
 import Journal from '@/lib/models/journal.model';
 import { fight } from '@/lib/utils/simulateCombat';
+import { populateEquipment } from '@/lib/utils/populateEquipment';
 import BattleReport from '@/lib/models/battleReport.model';
 import { calculateHonor } from '@/lib/utils/battleUtils';
 import { revalidatePath } from 'next/cache';
@@ -50,6 +51,11 @@ export async function battleArena(defenderId: string) {
 
     const attackerJournal = attacker.journal;
     const defenderJournal = defender.journal; // null for NPC bots, that's fine.
+
+    // Resolve equipped-item refs for both fighters so item bonuses feed
+    // into the combat simulation.
+    await populateEquipment(attacker);
+    await populateEquipment(defender);
 
     const { rounds, result } = fight({ attacker, defender });
 

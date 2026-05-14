@@ -8,6 +8,7 @@ import { canFight, extractUserId } from '@/lib/utils';
 import { cookies } from 'next/headers';
 import Journal from '@/lib/models/journal.model';
 import { battleCreature } from '@/lib/utils/simulateCombat';
+import { populateEquipment } from '@/lib/utils/populateEquipment';
 import { randomBoolean } from '@/lib/utils/randomUtils';
 import BattleReport from '@/lib/models/battleReport.model';
 import { calculateExperience } from '@/lib/utils/characterUtils';
@@ -63,6 +64,10 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     const character = user.character;
 
     const journal = character.journal;
+
+    // Resolve equipped-item refs so item bonuses feed into the combat
+    // simulation (effective stats, armor, weapon damage).
+    await populateEquipment(character);
 
     const { battleSummary, pickedEnemy } = battleCreature({ character, enemy });
 

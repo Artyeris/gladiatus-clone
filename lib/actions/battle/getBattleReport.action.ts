@@ -7,6 +7,7 @@ import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils';
 import { cookies } from 'next/headers';
 import BattleReport from '@/lib/models/battleReport.model';
+import { populateEquipment } from '@/lib/utils/populateEquipment';
 
 export async function getBattleReport(battleReportId: string) {
   const token = cookies().get(COOKIE_NAME);
@@ -33,14 +34,17 @@ export async function getBattleReport(battleReportId: string) {
       })
 
     if (!battleReport) throw new Error('Battle report was not found');
-      
+
+    await populateEquipment(battleReport.attacker);
+
     // If defender has "_id" field (not "id"), then is a character and it should populate it.
     const isCharacter = '_id' in battleReport.defender;
 
     if (isCharacter) {
-      // For some reason populate method doesn't work, there might be some error in the "battleReport" schema but i couldn't figure out. 
+      // For some reason populate method doesn't work, there might be some error in the "battleReport" schema but i couldn't figure out.
       // This way it's a little bit sketchy but it works.
       const defender = await Character.findById(battleReport.defender);
+      await populateEquipment(defender);
       battleReport.defender = defender;
     }
 

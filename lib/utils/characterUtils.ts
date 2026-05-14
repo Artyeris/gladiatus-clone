@@ -1,4 +1,5 @@
 import { CharacterInterface } from "@/lib/interfaces/character.interface";
+import { effectiveStats } from "@/lib/utils/combatStats";
 
 export function calculateExperience(level: number) {
   return 10 * (level + 1) - 15;
@@ -21,9 +22,13 @@ interface Defender {
   _id?: number | undefined;
 }
 
-export const calculatePower = (character: CharacterInterface | Defender ) => {
-  const power = character.strength + character.endurance + character.agility + character.dexterity + 
-  character.intelligence + character.charisma + (character.level * 10);
-  
-  return power;
+// Power rank reflects effective stats -- equipped items raise it just
+// like trained stats do. NPCs have no equipment so this is their base.
+export const calculatePower = (character: CharacterInterface | Defender) => {
+  const s = effectiveStats(character);
+
+  return (
+    s.strength + s.endurance + s.agility + s.dexterity +
+    s.intelligence + s.charisma + (s.level * 10)
+  );
 }
