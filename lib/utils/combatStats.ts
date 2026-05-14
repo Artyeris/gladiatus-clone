@@ -2,10 +2,8 @@ import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import { EQUIPMENT_SLOTS } from '@/lib/utils/equipment';
 
-// Bare-handed baseline so unarmed characters never show "0 - 0" damage.
-// Strength contributes +1 damage per 10 points to both bounds.
+// Bare-handed minimum so the UI never reads "0 - 0" damage.
 export const UNARMED_DAMAGE_MIN = 0;
-export const UNARMED_DAMAGE_MAX = 2;
 
 export function getEquippedItems(character: CharacterInterface): ItemInterface[] {
   const equipment = (character.equipment ?? {}) as Record<string, unknown>;
@@ -17,6 +15,34 @@ export function getEquippedItems(character: CharacterInterface): ItemInterface[]
     }
   }
   return items;
+}
+
+export interface EffectiveStats {
+  level: number;
+  strength: number;
+  endurance: number;
+  agility: number;
+  dexterity: number;
+  intelligence: number;
+  charisma: number;
+}
+
+// Sum of base stats and stat bonuses contributed by equipped items.
+// NPC enemies (no equipment) just return their base stats unchanged.
+export function effectiveStats(combatant: any): EffectiveStats {
+  const items = getEquippedItems(combatant as CharacterInterface);
+  const sum = (key: keyof ItemInterface) =>
+    items.reduce((s, it) => s + ((it[key] as number | undefined) ?? 0), 0);
+
+  return {
+    level:        combatant.level ?? 1,
+    strength:     (combatant.strength ?? 5)     + sum('strength'),
+    endurance:    (combatant.endurance ?? 5)    + sum('endurance'),
+    agility:      (combatant.agility ?? 5)      + sum('agility'),
+    dexterity:    (combatant.dexterity ?? 5)    + sum('dexterity'),
+    intelligence: (combatant.intelligence ?? 5) + sum('intelligence'),
+    charisma:     (combatant.charisma ?? 5)     + sum('charisma'),
+  };
 }
 
 export interface CombatStats {
@@ -45,13 +71,18 @@ export function calculateCombatStats(character: CharacterInterface): CombatStats
     }
   }
 
-  // Fall back to fists when nothing is equipped, so the UI never shows 0 - 0.
+  // Use effective strength (base + item bonuses) so a strength ring lifts
+  // the displayed damage too.
+  const eff = effectiveStats(character);
+
   if (!hasWeapon) {
+    // Unarmed scales gently with strength so high-level NPCs without
+    // weapons aren't reduced to a 0-2 punch.
     weaponMin = UNARMED_DAMAGE_MIN;
-    weaponMax = UNARMED_DAMAGE_MAX;
+    weaponMax = Math.max(2, Math.floor(eff.strength * 0.15));
   }
 
-  const strBonus = Math.floor((character.strength ?? 5) / 10);
+  const strBonus = Math.floor(eff.strength / 10);
 
   return {
     armor,

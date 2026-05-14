@@ -1,8 +1,8 @@
 import { BattleCreatureParams, FightParams, Result, Round } from '@/lib/interfaces/battleReport.interface';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { EnemyInterface } from '@/lib/interfaces/enemy.interface';
-import { calculateCriticalDamage, calculateCriticalHitChance, calculateDamage, calculateHP, calculateHitChance, getRandomEnemyStats } from '@/lib/utils/battleUtils';
-import { calculateCombatStats } from '@/lib/utils/combatStats';
+import { calculateCriticalHitChance, calculateHP, calculateHitChance, getRandomEnemyStats } from '@/lib/utils/battleUtils';
+import { calculateCombatStats, effectiveStats } from '@/lib/utils/combatStats';
 import { getRandomNumber, randomBoolean } from '@/lib/utils/randomUtils';
 
 // Roll an absorption amount inside the same range CombatRows shows in the
@@ -17,50 +17,60 @@ function rollAbsorption(armor: number): number {
   return min + Math.floor(Math.random() * (rawMax - min + 1));
 }
 
-function combatArmorOf(combatant: any): number {
-  if (combatant && combatant.equipment) {
-    return calculateCombatStats(combatant).armor;
-  }
-  return 0;
+function rollDamageInRange(min: number, max: number): number {
+  if (max <= min) return Math.max(1, Math.round(min));
+  return Math.max(1, Math.round(min + Math.random() * (max - min)));
+}
+
+function rollCriticalDamage(weaponMax: number, strength: number): number {
+  // Crits roughly double the high end of the swing and add an extra
+  // strength kicker, matching the original calculateCriticalDamage feel.
+  const base = Math.max(1, Math.round(weaponMax * 1.5));
+  const kick = Math.floor(strength * 0.4);
+  const min = base + Math.floor(kick * 0.5);
+  const max = base + kick;
+  return Math.max(min, Math.round(min + Math.random() * (max - min)));
 }
 
 // Simulates a battle between a character and a creature or another character.
 export function fight({ attacker, defender }: FightParams): { rounds: Round[], result: Result } {
-  const attackerMaxHP = calculateHP({
-    level: attacker.level,
-    endurance: attacker.endurance,
-  });
-  const defenderMaxHP = calculateHP({
-    level: defender.level,
-    endurance: defender.endurance,
-  });
+  // Pull effective stats (base + equipped item bonuses). NPC creatures
+  // without equipment fall through unchanged.
+  const A = effectiveStats(attacker);
+  const D = effectiveStats(defender);
+
+  const attackerCombat = calculateCombatStats(attacker as CharacterInterface);
+  const defenderCombat = calculateCombatStats(defender as CharacterInterface);
+
+  const attackerMaxHP = calculateHP({ level: A.level, endurance: A.endurance });
+  const defenderMaxHP = calculateHP({ level: D.level, endurance: D.endurance });
 
   let attackerHP = attackerMaxHP;
   let defenderHP = defenderMaxHP;
 
   const attackerHitChance = calculateHitChance({
-    attackerDexterity: attacker.dexterity,
-    defenderAgility: defender.agility,
+    attackerDexterity: A.dexterity,
+    defenderAgility: D.agility,
   });
   const defenderHitChance = calculateHitChance({
-    attackerDexterity: defender.dexterity,
-    defenderAgility: attacker.agility,
+    attackerDexterity: D.dexterity,
+    defenderAgility: A.agility,
   });
   const attackerCriticalHitChance = calculateCriticalHitChance({
-    attackerCharisma: attacker.charisma,
-    attackerDexterity: attacker.dexterity,
-    defenderIntelligence: defender.intelligence,
-    defenderAgility: defender.agility,
+    attackerCharisma: A.charisma,
+    attackerDexterity: A.dexterity,
+    defenderIntelligence: D.intelligence,
+    defenderAgility: D.agility,
   });
   const defenderCriticalHitChance = calculateCriticalHitChance({
-    attackerCharisma: defender.charisma,
-    attackerDexterity: defender.dexterity,
-    defenderIntelligence: attacker.intelligence,
-    defenderAgility: attacker.agility,
+    attackerCharisma: D.charisma,
+    attackerDexterity: D.dexterity,
+    defenderIntelligence: A.intelligence,
+    defenderAgility: A.agility,
   });
 
-  const attackerArmor = combatArmorOf(attacker);
-  const defenderArmor = combatArmorOf(defender);
+  const attackerArmor = attackerCombat.armor;
+  const defenderArmor = defenderCombat.armor;
 
   const rounds: Round[] = [];
   let roundNumber = 1;
@@ -90,7 +100,7 @@ export function fight({ attacker, defender }: FightParams): { rounds: Round[], r
     // Attacker normal hit
     attackerHitsAttempted++;
     if (randomBoolean(attackerHitChance)) {
-      const raw = calculateDamage(attacker, defender);
+      const raw = rollDamageInRange(attackerCombat.damageMin, attackerCombat.damageMax);
       const absorbed = Math.min(raw - 1, rollAbsorption(defenderArmor));
       const dealt = Math.max(1, raw - absorbed);
       attackerTotalDamage += dealt;
@@ -109,7 +119,7 @@ export function fight({ attacker, defender }: FightParams): { rounds: Round[], r
     // Defender normal hit
     defenderHitsAttempted++;
     if (randomBoolean(defenderHitChance)) {
-      const raw = calculateDamage(defender, defender);
+      const raw = rollDamageInRange(defenderCombat.damageMin, defenderCombat.damageMax);
       const absorbed = Math.min(raw - 1, rollAbsorption(attackerArmor));
       const dealt = Math.max(1, raw - absorbed);
       defenderTotalDamage += dealt;
@@ -127,7 +137,7 @@ export function fight({ attacker, defender }: FightParams): { rounds: Round[], r
 
     // Attacker critical
     if (randomBoolean(attackerCriticalHitChance)) {
-      const raw = calculateCriticalDamage(attacker);
+      const raw = rollCriticalDamage(attackerCombat.weaponMax, A.strength);
       const absorbed = Math.min(raw - 1, rollAbsorption(defenderArmor));
       const dealt = Math.max(1, raw - absorbed);
       attackerTotalDamage += dealt;
@@ -143,7 +153,7 @@ export function fight({ attacker, defender }: FightParams): { rounds: Round[], r
 
     // Defender critical
     if (randomBoolean(defenderCriticalHitChance)) {
-      const raw = calculateCriticalDamage(defender);
+      const raw = rollCriticalDamage(defenderCombat.weaponMax, D.strength);
       const absorbed = Math.min(raw - 1, rollAbsorption(attackerArmor));
       const dealt = Math.max(1, raw - absorbed);
       defenderTotalDamage += dealt;

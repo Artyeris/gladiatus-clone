@@ -62,24 +62,6 @@ export function calculateCriticalHitChance({ attackerCharisma, attackerDexterity
   );
 }
 
-export function calculateDamage( attacker: CharacterInterface | EnemyInterface, defender: CharacterInterface | EnemyInterface) {
-  let minDamage = attacker.strength * 0.1;
-  let maxDamage = attacker.strength * 0.2;
-
-  const damage = Math.random() * (maxDamage - minDamage) + minDamage;
-
-  return parseInt(Math.max(damage, 1).toFixed(0));
-}
-
-export function calculateCriticalDamage(attacker: CharacterInterface | EnemyInterface) {
-  let minDamage = attacker.strength * 0.3;
-  let maxDamage = attacker.strength * 0.6;
-
-  const damage = Math.random() * (maxDamage - minDamage) + minDamage;
-
-  return parseInt(Math.max(damage, 1).toFixed(0));
-}
-
 // Calculates the honor earned and lost using Elo system.
 export function calculateHonor(attacker: CharacterInterface, defender: CharacterInterface) {
   const K = 40;
