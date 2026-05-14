@@ -4,17 +4,25 @@ import { ItemQuality } from '@/lib/interfaces/item.interface';
 export type ExpeditionEnemyType = 'normal_1' | 'normal_2' | 'normal_3' | 'boss';
 export type SearchMode = 'none' | 'quick' | 'thorough';
 
-// Map an enemy's slot in the region (id 0..3) to its drop class.
+// Map an enemy's slot in its region (0..2) to a drop class. Bosses are
+// detected separately via the enemy's `boss` flag.
 export function enemyTypeFromIndex(index: number): ExpeditionEnemyType {
-  if (index === 0) return 'normal_1';
+  if (index <= 0) return 'normal_1';
   if (index === 1) return 'normal_2';
-  if (index === 2) return 'normal_3';
-  return 'boss';
+  return 'normal_3';
 }
 
+// Per-slot base item drop chance (mid-point of the ranges in the design
+// spec). Bosses are generous but never a guaranteed drop.
+const DROP_CHANCE: Record<ExpeditionEnemyType, number> = {
+  normal_1: 0.33,
+  normal_2: 0.38,
+  normal_3: 0.43,
+  boss:     0.45,
+};
+
 export function getItemDropChance(enemyType: ExpeditionEnemyType, bonuses = 0) {
-  const base = enemyType === 'boss' ? 0.18 : 0.10;
-  return Math.min(base + bonuses, 0.80);
+  return Math.min(DROP_CHANCE[enemyType] + bonuses, 0.90);
 }
 
 export function getSearchModifier(mode: SearchMode) {
@@ -28,19 +36,41 @@ export function getSearchModifier(mode: SearchMode) {
   }
 }
 
-// Quality roll. Per the spec: normals can hit Green/Blue/Purple,
-// bosses minimally Blue with rare Orange/Red.
+// Cumulative quality tables per enemy slot (design spec). A boss never
+// drops Green -- if it drops at all, it's at least Blue.
+const QUALITY_TABLE: Record<ExpeditionEnemyType, { quality: ItemQuality; upTo: number }[]> = {
+  normal_1: [
+    { quality: 'green',  upTo: 0.75 },
+    { quality: 'blue',   upTo: 0.99 },
+    { quality: 'purple', upTo: 1.00 },
+  ],
+  normal_2: [
+    { quality: 'green',  upTo: 0.68 },
+    { quality: 'blue',   upTo: 0.97 },
+    { quality: 'purple', upTo: 1.00 },
+  ],
+  normal_3: [
+    { quality: 'green',  upTo: 0.60 },
+    { quality: 'blue',   upTo: 0.95 },
+    { quality: 'purple', upTo: 0.998 },
+    { quality: 'orange', upTo: 1.00 },
+  ],
+  boss: [
+    { quality: 'blue',   upTo: 0.88 },
+    { quality: 'purple', upTo: 0.975 },
+    { quality: 'orange', upTo: 0.9995 },
+    { quality: 'red',    upTo: 1.00 },
+  ],
+};
+
 export function rollQuality(enemyType: ExpeditionEnemyType, qualityBonus = 0): ItemQuality {
-  const r = Math.random() - qualityBonus;
-  if (enemyType === 'boss') {
-    if (r < 0.86)  return 'blue';
-    if (r < 0.97)  return 'purple';
-    if (r < 0.998) return 'orange';
-    return 'red';
+  // qualityBonus nudges the roll toward the rarer end of the table.
+  const r = Math.min(1, Math.max(0, Math.random() - qualityBonus));
+  const table = QUALITY_TABLE[enemyType];
+  for (const row of table) {
+    if (r <= row.upTo) return row.quality;
   }
-  if (r < 0.6858)            return 'green';
-  if (r < 0.6858 + 0.2740)   return 'blue';
-  return 'purple';
+  return table[table.length - 1].quality;
 }
 
 export function rollItemLevel(playerLevel: number, enemyType: ExpeditionEnemyType): number {

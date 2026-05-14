@@ -66,6 +66,17 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
 
     const { battleSummary, pickedEnemy } = battleCreature({ character, enemy });
 
+    // Lazily initialise the journal entry so newly added expeditions /
+    // enemies (and pre-existing journals) don't crash on a missing key.
+    if (!journal.expeditions) journal.expeditions = {};
+    if (!journal.expeditions[expeditionName]) journal.expeditions[expeditionName] = {};
+    if (!journal.expeditions[expeditionName][enemyName]) {
+      journal.expeditions[expeditionName][enemyName] = {
+        knowledge: 0, battles: 0, wins: 0, defeats: 0, draws: 0,
+      };
+    }
+    journal.markModified('expeditions');
+
     journal.expeditions[expeditionName][enemyName].battles++;
 
     // If the character won.
@@ -82,10 +93,17 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
       }
 
       // Roll a possible loot drop and place it in the inventory.
-      const enemyIndex = typeof pickedEnemy.id === 'number' ? pickedEnemy.id : 0;
+      // Classify the enemy by its slot within the region (0..2 = normal
+      // tiers) or by its boss flag -- the global `id` is not a clean
+      // index, so use the key order in the region instead.
+      const regionKeys = Object.keys(expeditionEnemies[expeditionName] ?? {});
+      const slotIndex = Math.max(0, regionKeys.indexOf(enemyName));
+      const enemyType = (pickedEnemy as any).boss
+        ? 'boss'
+        : enemyTypeFromIndex(slotIndex);
       const drop = rollExpeditionDrop({
         playerLevel: character.level ?? 1,
-        enemyType: enemyTypeFromIndex(enemyIndex),
+        enemyType,
       });
       if (drop.dropped && drop.template) {
         try {

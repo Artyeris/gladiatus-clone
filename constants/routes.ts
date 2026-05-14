@@ -53,4 +53,16 @@ export const expeditionRoutes = [
     name: 'Ancient Crypt',
     link: '/crypt',
   },
+  {
+    name: "Smuggler's Harbour",
+    link: '/harbour',
+  },
+  {
+    name: 'Frostpeak Pass',
+    link: '/frostpeak',
+  },
+  {
+    name: 'Sunken Ruins',
+    link: '/ruins',
+  },
 ]
