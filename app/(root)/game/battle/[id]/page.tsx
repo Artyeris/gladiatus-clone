@@ -62,12 +62,12 @@ const Page = async ({ params }: { params: { id: string } }) => {
         </div>
       </div>
 
-      {isNpc ? 
+      {isNpc ?
         <DescriptionCard
         title='Rewards'
         >
           <p className='text-sm px-2 py-1 flex items-center gap-1'>
-            <span className='font-semibold'>{attacker.name}</span> earned {battleReport.result.crownsDrop} 
+            <span className='font-semibold'>{attacker.name}</span> earned {battleReport.result.crownsDrop}
             <Image
               src={'/images/crowns.png'}
               width={12}
@@ -79,6 +79,14 @@ const Page = async ({ params }: { params: { id: string } }) => {
           <p className='text-sm px-2 py-1'>
             <span className='font-semibold'>{attacker.name}</span> has received {battleReport.result.experienceDrop} experience.
           </p>
+          {battleReport.loot && (
+            <p className='text-sm px-2 py-1 font-semibold text-red3'>
+              Loot:&nbsp;{battleReport.loot.name}
+              {battleReport.loot.quality && battleReport.loot.quality !== 'common' && (
+                <span className='opacity-80 font-normal'> ({battleReport.loot.quality.replace('_plus', '+')})</span>
+              )}
+            </p>
+          )}
         </DescriptionCard>
       :
         <DescriptionCard
@@ -103,6 +111,18 @@ const Page = async ({ params }: { params: { id: string } }) => {
             </p>
           </>
           }
+          {battleReport.potClaimed && battleReport.potClaimed > 0 && (
+            <p className='text-sm px-2 py-1 flex items-center gap-1 font-semibold text-red3'>
+              Champion pot claimed: {battleReport.potClaimed}
+              <Image
+                src={'/images/crowns.png'}
+                width={12}
+                height={12}
+                alt='crowns'
+                style={{ width: 'auto', height: 'auto' }}
+              />
+            </p>
+          )}
         </DescriptionCard>
       }
 

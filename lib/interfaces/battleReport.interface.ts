@@ -41,6 +41,8 @@ export interface BattleReport {
     honorLost: number;
   };
   attacker: CharacterInterface;
+  loot?: { name: string; quality: string; image?: string };
+  potClaimed?: number;
 }
 
 export interface CalculateHPParams {

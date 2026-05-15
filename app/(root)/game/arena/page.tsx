@@ -38,6 +38,8 @@ const Page = async () => {
         arenaRivals={data.rivals}
         tier={data.tier}
         myRank={data.myRank}
+        pot={data.pot}
+        salaryAwarded={data.salaryAwarded}
       />
     </div>
   )

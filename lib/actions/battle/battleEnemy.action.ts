@@ -96,12 +96,15 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     const isDraw = winnerKey === 'Draw';
 
     // If the character won.
-    let droppedItemSummary: { name: string; quality: string } | null = null;
+    let droppedItemSummary: { name: string; quality: string; image: string } | null = null;
     if (playerWon) {
       journal.world.battles++;
       journal.world.wins++;
-      journal.world.crownsEarned += battleSummary.result.crownsDrop;
+      journal.world.crownsEarned = (journal.world.crownsEarned ?? 0) + (battleSummary.result.crownsDrop ?? 0);
+      journal.world.damageInflicted = (journal.world.damageInflicted ?? 0) + (battleSummary.result.attackerTotalDamage ?? 0);
+      journal.world.damageReceived = (journal.world.damageReceived ?? 0) + (battleSummary.result.defenderTotalDamage ?? 0);
       journal.expeditions[expeditionName][enemyName].wins++;
+      journal.markModified('world');
 
       // Calculate probability of obtaining knowledge only if knowledge is not greater than 3.
       if (journal.expeditions[expeditionName][enemyName].knowledge < 3 && randomBoolean(30)) {
@@ -146,13 +149,19 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
           const free = findFreePosition(entries, created);
           if (free) {
             const next = placeItem(entries, created, free.x, free.y);
-            character.set('inventory', next.map((e) => ({
+            // Direct assignment (instead of doc.set(path, value)) so
+            // Mongoose change-tracking on the array reliably persists.
+            character.inventory = next.map((e) => ({
               item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
               x: e.x,
               y: e.y,
-            })));
+            }));
             character.markModified('inventory');
-            droppedItemSummary = { name: created.name, quality: created.quality ?? 'common' };
+            droppedItemSummary = {
+              name: created.name,
+              quality: created.quality ?? 'common',
+              image: created.image,
+            };
           } else {
             // Inventory full -- drop on floor (delete the item).
             await Item.findByIdAndDelete(created._id);
@@ -167,7 +176,10 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     if (enemyWon) {
       journal.world.battles++;
       journal.world.defeats++;
+      journal.world.damageInflicted = (journal.world.damageInflicted ?? 0) + (battleSummary.result.attackerTotalDamage ?? 0);
+      journal.world.damageReceived = (journal.world.damageReceived ?? 0) + (battleSummary.result.defenderTotalDamage ?? 0);
       journal.expeditions[expeditionName][enemyName].defeats++;
+      journal.markModified('world');
     }
 
     // If it's a draw.
@@ -175,6 +187,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
       journal.world.battles++;
       journal.world.draws++;
       journal.expeditions[expeditionName][enemyName].draws++;
+      journal.markModified('world');
     }
 
     await journal.save();
@@ -187,6 +200,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
       expedition: expeditionName,
       defender: pickedEnemy,
       attacker: character._id,
+      loot: droppedItemSummary ?? undefined,
     });
 
     character.battleReport = savedBattleReport._id;

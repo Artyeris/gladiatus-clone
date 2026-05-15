@@ -45,6 +45,17 @@ const battleReportSchema = new mongoose.Schema({
   honorLost: {
     type: Number,
   },
+  // Loot summary surfaced on the battle report page so the player can
+  // see expedition drops without checking inventory.
+  loot: {
+    name:    { type: String },
+    quality: { type: String },
+    image:   { type: String },
+  },
+  // Arena jackpot transferred when the attacker dethroned the tier's #1.
+  potClaimed: {
+    type: Number,
+  },
 }, {
   timestamps: true
 });

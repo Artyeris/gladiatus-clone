@@ -11,7 +11,7 @@ const itemSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['head', 'chest', 'gloves', 'legs', 'boots', 'mainHand', 'offHand', 'necklace', 'ring']
+    enum: ['head', 'chest', 'gloves', 'cloak', 'legs', 'boots', 'mainHand', 'offHand', 'necklace', 'ring']
   },
   level: {
     type: Number,

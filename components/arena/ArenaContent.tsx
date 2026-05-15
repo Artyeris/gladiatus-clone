@@ -16,6 +16,15 @@ interface ArenaTierInfo {
   maxLevel: number | null;
 }
 
+interface ArenaPotInfo {
+  amount: number;
+  championId: string | null;
+  championName: string | null;
+  growthPerHour: number;
+  salaryPerHour: number;
+  expPerHour: number;
+}
+
 interface ArenaContentProps {
   arenaRivals: {
     name: string;
@@ -29,11 +38,26 @@ interface ArenaContentProps {
   tier: ArenaTierInfo;
   myRank: number;
   character: CharacterInterface;
+  pot?: ArenaPotInfo;
+  salaryAwarded?: { gold: number; exp: number } | null;
 }
 
-const ArenaContent = ({ arenaRivals, character, tier, myRank }: ArenaContentProps) => {
+const ArenaContent = ({ arenaRivals, character, tier, myRank, pot, salaryAwarded }: ArenaContentProps) => {
   const [canCharacterFight, setCanCharacterFight] = useState(canFight({ time: new Date(character.arenaLastBattle).getTime(), fight: 'arena' }));
   const router = useRouter();
+
+  // Pop a toast once per visit if the champion just collected idle
+  // salary on page load.
+  useEffect(() => {
+    if (salaryAwarded && (salaryAwarded.gold > 0 || salaryAwarded.exp > 0)) {
+      toast.success(
+        `Champion salary: +${salaryAwarded.gold} crowns${salaryAwarded.exp > 0 ? `, +${salaryAwarded.exp} XP` : ''}`,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isMyChampion = pot?.championId === String(character._id);
 
   const handleClick = async (rivalId: string) => {
     const response = await battleArena(rivalId);
@@ -68,6 +92,43 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank }: ArenaContentProp
           {levelRange} &middot; Your rank: <span className='font-semibold'>#{myRank}</span>
         </div>
       </div>
+
+      {pot && (
+        <div
+          className={`brown-card rounded-sm px-3 py-2 text-sm text-brown2 flex items-center justify-between gap-3 ${
+            isMyChampion ? 'ring-2 ring-red3' : ''
+          }`}
+        >
+          <div className='flex flex-col'>
+            <div className='font-semibold'>
+              {isMyChampion
+                ? 'You hold the champion seat'
+                : pot.championName
+                  ? `Champion: ${pot.championName}`
+                  : 'Tier vacant -- claim #1 to start the pot'}
+            </div>
+            <div className='text-xs opacity-80'>
+              Pot grows by <strong>{pot.growthPerHour}</strong>/h &middot; champion earns{' '}
+              <strong>{pot.salaryPerHour}</strong> gold + <strong>{pot.expPerHour}</strong> XP/h
+              {isMyChampion && <span className='italic ml-1'>(paid on each visit)</span>}
+            </div>
+          </div>
+          <div className='text-right shrink-0'>
+            <div className='text-xs opacity-80'>Arena pot</div>
+            <div className='text-xl font-bold text-red3 flex items-center gap-1 justify-end'>
+              {pot.amount}
+              <Image
+                src='/images/crowns.png'
+                width={14}
+                height={14}
+                alt='crowns'
+                style={{ width: 'auto', height: 'auto' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className='flex gap-4'>
         <DescriptionCard title='Arena Ranking'>
           <div className='flex flex-col w-full justify-between text-sm'>

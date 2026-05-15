@@ -10,7 +10,10 @@ import Journal from '@/lib/models/journal.model';
 import { fight } from '@/lib/utils/simulateCombat';
 import { populateEquipment } from '@/lib/utils/populateEquipment';
 import BattleReport from '@/lib/models/battleReport.model';
+import ArenaPot from '@/lib/models/arenaPot.model';
 import { calculateHonor } from '@/lib/utils/battleUtils';
+import { getArenaTier } from '@/lib/utils/arena';
+import { growPot, installChampion } from '@/lib/utils/arenaPot';
 import { revalidatePath } from 'next/cache';
 
 export async function battleArena(defenderId: string) {
@@ -134,14 +137,46 @@ export async function battleArena(defenderId: string) {
 
     if (attackerJournal) {
       attackerJournal.arena.battles++;
-      attackerJournal.arena.damageInflicted += result.attackerTotalDamage;
-      attackerJournal.arena.damageReceived += result.defenderTotalDamage;
+      attackerJournal.arena.damageInflicted = (attackerJournal.arena.damageInflicted ?? 0) + result.attackerTotalDamage;
+      attackerJournal.arena.damageReceived = (attackerJournal.arena.damageReceived ?? 0) + result.defenderTotalDamage;
+      attackerJournal.markModified('arena');
     }
 
     if (defenderJournal) {
       defenderJournal.arena.battles++;
-      defenderJournal.arena.damageInflicted += result.defenderTotalDamage;
-      defenderJournal.arena.damageReceived += result.attackerTotalDamage;
+      defenderJournal.arena.damageInflicted = (defenderJournal.arena.damageInflicted ?? 0) + result.defenderTotalDamage;
+      defenderJournal.arena.damageReceived = (defenderJournal.arena.damageReceived ?? 0) + result.attackerTotalDamage;
+      defenderJournal.markModified('arena');
+    }
+
+    // ---- Arena pot / champion takeover ----
+    // If the attacker beat the current tier's champion, hand over the
+    // accumulated pot and install them as the new champion. Otherwise
+    // just keep the pot growing (lazy in getOrCreatePot).
+    let potClaimed = 0;
+    try {
+      const playerWon = String(result.winner) === String(attacker._id);
+      if (playerWon) {
+        const tier = getArenaTier(defender.level ?? 1);
+        const pot = await ArenaPot.findOne({ tierId: tier.id });
+        if (pot && pot.championId && String(pot.championId) === String(defender._id)) {
+          growPot(pot, tier);
+          potClaimed = Math.max(0, pot.potAmount ?? 0);
+          if (potClaimed > 0) {
+            attacker.crowns = (attacker.crowns ?? 0) + potClaimed;
+            (battleReport as any).potClaimed = potClaimed;
+          }
+          installChampion(pot, attacker._id, attacker.name);
+          await pot.save();
+        } else if (pot) {
+          // Defender wasn't the champion, but the attacker might still
+          // be promoted to #1 by this win. The lazy sync in
+          // getOrCreatePot picks that up next visit.
+          await pot.save();
+        }
+      }
+    } catch (err) {
+      console.log(`${new Date()} - arena pot transfer failed - ${err}`);
     }
 
     const savedBattleReport = await BattleReport.create(battleReport);
