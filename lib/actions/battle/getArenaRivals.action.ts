@@ -8,8 +8,7 @@ import { extractUserId } from '@/lib/utils';
 import { getArenaTier, tierLevelRange } from '@/lib/utils/arena';
 import { ensureArenaBots } from '@/lib/actions/arena/seedBots.action';
 import { getOrCreatePot } from '@/lib/actions/arena/arenaPot.action';
-import { claimChampionSalary, potGrowthPerHour, championHourlyGold, championHourlyExp } from '@/lib/utils/arenaPot';
-import { calculateExperience } from '@/lib/utils/characterUtils';
+import { potGrowthPerHour, championHourlyGold, championHourlyExp } from '@/lib/utils/arenaPot';
 import { cookies } from 'next/headers';
 
 export async function getArenaRivals() {
@@ -32,30 +31,10 @@ export async function getArenaRivals() {
     const range = tierLevelRange(tier);
 
     // Refresh the pot record (lazy-grow + sync champion to current
-    // tier leader). Champion can pay themselves the accrued salary on
-    // this visit.
+    // tier leader). Salary itself is claimed silently by the
+    // background tick in getUser -- we don't want a UI toast on the
+    // arena page, just an inbox note.
     const pot = await getOrCreatePot(tier);
-    let salaryAwarded: { gold: number; exp: number } | null = null;
-    if (pot.championId && String(pot.championId) === String(character._id)) {
-      const delta = claimChampionSalary(pot, tier);
-      if (delta.gold > 0 || delta.exp > 0) {
-        character.crowns = (character.crowns ?? 0) + delta.gold;
-        let exp = (character.experience ?? 0) + delta.exp;
-        let level = character.level ?? 1;
-        let bumped = false;
-        // Roll over level-ups in case the champion has been idle for ages.
-        while (exp >= calculateExperience(level)) {
-          exp -= calculateExperience(level);
-          level += 1;
-          bumped = true;
-        }
-        character.experience = exp;
-        if (bumped) character.level = level;
-        await character.save();
-        await pot.save();
-        salaryAwarded = delta;
-      }
-    }
 
     // Pool of contenders sharing the same league bracket.
     const tierFilter: any = {
@@ -123,7 +102,6 @@ export async function getArenaRivals() {
         salaryPerHour: championHourlyGold(tier),
         expPerHour: championHourlyExp(tier),
       },
-      salaryAwarded,
     }));
   } catch (error) {
     console.log(`${new Date()} - Failed to get arena rivals - ${error}`);

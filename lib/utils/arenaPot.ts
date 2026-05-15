@@ -59,16 +59,24 @@ export interface SalaryDelta {
 
 // Computes how much salary (gold + exp) the champion has accrued since
 // their last claim, updates `lastSalaryAt`, and returns the delta.
+// Pays in 1-game-hour chunks so background ticks don't spawn a steady
+// drizzle of single-coin notifications -- the leftover keeps accruing
+// against `lastSalaryAt` until the next full hour rolls in.
 export function claimChampionSalary(pot: any, tier: ArenaTier): SalaryDelta {
   if (!pot.championId) return { gold: 0, exp: 0 };
   const hours = gameHoursSince(pot.lastSalaryAt ?? pot.championBecameAt);
-  if (hours <= 0) {
-    pot.lastSalaryAt = new Date();
+  const wholeHours = Math.floor(hours);
+  if (wholeHours <= 0) {
+    if (!pot.lastSalaryAt) pot.lastSalaryAt = new Date();
     return { gold: 0, exp: 0 };
   }
-  const gold = Math.floor(hours * championHourlyGold(tier));
-  const exp = Math.floor(hours * championHourlyExp(tier));
-  pot.lastSalaryAt = new Date();
+  const gold = wholeHours * championHourlyGold(tier);
+  const exp = wholeHours * championHourlyExp(tier);
+  // Advance the clock by exactly the hours we paid for so partial
+  // accrual carries over to the next claim.
+  const realHoursPaid = wholeHours / SERVER_SPEED;
+  const base = pot.lastSalaryAt ?? pot.championBecameAt ?? new Date();
+  pot.lastSalaryAt = new Date(new Date(base).getTime() + realHoursPaid * 3_600_000);
   return { gold, exp };
 }
 

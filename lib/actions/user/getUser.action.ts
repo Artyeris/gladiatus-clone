@@ -8,6 +8,7 @@ import Journal from '@/lib/models/journal.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import { migrateLegacyInventory } from '@/lib/utils/inventory/grid';
+import { tickChampionSalary } from '@/lib/actions/arena/arenaPot.action';
 import { cookies } from 'next/headers';
 
 const EQUIPMENT_SLOT_NAMES = [
@@ -85,9 +86,25 @@ export async function getUser(getInventory = false) {
       }
     }
 
-    if (dirty && character) {
-      character.markModified('inventory');
-      character.markModified('equipment');
+    // Background champion-salary tick. Runs on every page load so the
+    // gold/exp accrues without the player needing to visit /game/arena.
+    // tickChampionSalary mutates the doc in-place when there's a real
+    // payment to apply; everything else is a cheap no-op.
+    let salaryDirty = false;
+    try {
+      const paid = await tickChampionSalary(character);
+      if (paid && (paid.gold > 0 || paid.exp > 0)) {
+        salaryDirty = true;
+      }
+    } catch (err) {
+      console.log(`${new Date()} - champion salary tick failed - ${err}`);
+    }
+
+    if ((dirty || salaryDirty) && character) {
+      if (dirty) {
+        character.markModified('inventory');
+        character.markModified('equipment');
+      }
       try {
         await character.save();
       } catch (err) {

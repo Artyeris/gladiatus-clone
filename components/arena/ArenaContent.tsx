@@ -39,23 +39,11 @@ interface ArenaContentProps {
   myRank: number;
   character: CharacterInterface;
   pot?: ArenaPotInfo;
-  salaryAwarded?: { gold: number; exp: number } | null;
 }
 
-const ArenaContent = ({ arenaRivals, character, tier, myRank, pot, salaryAwarded }: ArenaContentProps) => {
+const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaContentProps) => {
   const [canCharacterFight, setCanCharacterFight] = useState(canFight({ time: new Date(character.arenaLastBattle).getTime(), fight: 'arena' }));
   const router = useRouter();
-
-  // Pop a toast once per visit if the champion just collected idle
-  // salary on page load.
-  useEffect(() => {
-    if (salaryAwarded && (salaryAwarded.gold > 0 || salaryAwarded.exp > 0)) {
-      toast.success(
-        `Champion salary: +${salaryAwarded.gold} crowns${salaryAwarded.exp > 0 ? `, +${salaryAwarded.exp} XP` : ''}`,
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const isMyChampion = pot?.championId === String(character._id);
 

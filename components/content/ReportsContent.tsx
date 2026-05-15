@@ -2,9 +2,15 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 
-import type { ReportRow, ReportCategory } from '@/lib/actions/battle/listBattleReports.action';
+import type { ReportRow, ReportCategory } from '@/lib/types/battleReport';
+import {
+  deleteAllBattleReports,
+  deleteBattleReport,
+} from '@/lib/actions/battle/listBattleReports.action';
 
 interface Props {
   reports: ReportRow[];
@@ -24,12 +30,33 @@ function timeOf(iso: string) {
 }
 
 const ReportsContent = ({ reports }: Props) => {
+  const router = useRouter();
   const [tab, setTab] = useState<ReportCategory>('expedition');
+  const [busy, setBusy] = useState(false);
 
   const filtered = useMemo(
     () => reports.filter((r) => r.category === tab),
     [reports, tab],
   );
+
+  const onDelete = async (id: string) => {
+    setBusy(true);
+    const res = await deleteBattleReport({ id });
+    setBusy(false);
+    if (res?.error) return toast.error(res.error.message);
+    router.refresh();
+  };
+
+  const onDeleteAll = async () => {
+    if (filtered.length === 0) return;
+    if (!confirm(`Delete all ${filtered.length} ${tab} report${filtered.length === 1 ? '' : 's'}?`)) return;
+    setBusy(true);
+    const res = await deleteAllBattleReports({ category: tab });
+    setBusy(false);
+    if (res?.error) return toast.error(res.error.message);
+    toast.success(`Deleted ${res.deleted ?? 0} reports`);
+    router.refresh();
+  };
 
   const grouped = useMemo(() => {
     const out = new Map<string, ReportRow[]>();
@@ -103,12 +130,34 @@ const ReportsContent = ({ reports }: Props) => {
                   >
                     Details
                   </Link>
+                  <button
+                    type='button'
+                    onClick={() => onDelete(row._id)}
+                    disabled={busy}
+                    className='general-button px-2 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+                    aria-label='Delete report'
+                  >
+                    X
+                  </button>
                 </div>
               ))}
             </div>
           );
         })}
       </div>
+
+      {filtered.length > 0 && (
+        <div className='flex justify-end'>
+          <button
+            type='button'
+            onClick={onDeleteAll}
+            disabled={busy}
+            className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+          >
+            Delete all {tab} ({filtered.length})
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -39,7 +39,6 @@ const Page = async () => {
         tier={data.tier}
         myRank={data.myRank}
         pot={data.pot}
-        salaryAwarded={data.salaryAwarded}
       />
     </div>
   )

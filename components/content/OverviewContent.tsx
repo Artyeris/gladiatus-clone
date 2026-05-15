@@ -34,18 +34,17 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
       <div
         style={{
           display: 'flex',
-          gap: '16px',
+          gap: '24px',
           justifyContent: 'center',
           alignItems: 'flex-start',
-          maxWidth: '600px',
-          margin: '0 auto',
+          padding: '0 16px',
         }}
       >
         <div
           style={{
-            flex: '0 0 250px',
+            flex: '0 0 290px',
             borderRight: '2px solid #5c3a21',
-            paddingRight: '12px',
+            paddingRight: '20px',
           }}
         >
            <CharacterPanel user={character} />

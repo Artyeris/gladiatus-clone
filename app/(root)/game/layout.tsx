@@ -26,10 +26,10 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         <NavigationBanner />
         <div className='flex flex-col items-center h-min-full'>
           <GameHeader user={user} />
-          <div className='h-min-full main-cream-card w-[620px] flex-grow py-4'>
+          <div className='h-min-full main-cream-card w-[720px] flex-grow py-4'>
             <div>{children}</div>
           </div>
-          <div className='footer w-[640px] h-[50px] orange-gradient' />
+          <div className='footer w-[740px] h-[50px] orange-gradient' />
         </div>
       </div>
       <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none'>

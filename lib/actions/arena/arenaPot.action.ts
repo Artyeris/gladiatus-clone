@@ -3,8 +3,10 @@
 import Character from '@/lib/models/character.model';
 import ArenaPot from '@/lib/models/arenaPot.model';
 import { connectToDB } from '@/lib/mongoose';
-import { ArenaTier, tierLevelRange } from '@/lib/utils/arena';
+import { ArenaTier, getArenaTier, tierLevelRange } from '@/lib/utils/arena';
 import { growPot, claimChampionSalary } from '@/lib/utils/arenaPot';
+import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
+import { calculateExperience } from '@/lib/utils/characterUtils';
 
 // Returns the current top character in a tier (highest honor in the
 // tier's level range). Null when nobody is in the bracket yet.
@@ -73,4 +75,60 @@ export async function claimSalaryFor(characterId: any, tier: ArenaTier) {
   const delta = claimChampionSalary(pot, tier);
   await pot.save();
   return delta;
+}
+
+// Background tick: awarded silently to a champion's character on any
+// page load (called from getUser). Mutates the character doc in-place
+// (caller must save it) and drops a single "Champion salary" message
+// per claim into their inbox -- never raises a UI toast. Skipped when
+// the user isn't actually #1, or when less than a full game-hour has
+// accrued since the last claim.
+export async function tickChampionSalary(character: any): Promise<{
+  gold: number;
+  exp: number;
+  leveledUp: boolean;
+} | null> {
+  if (!character?._id) return null;
+  await connectToDB();
+  const tier = getArenaTier(character.level ?? 1);
+  const pot = await ArenaPot.findOne({ tierId: tier.id });
+  if (!pot || !pot.championId || String(pot.championId) !== String(character._id)) {
+    return null;
+  }
+
+  const delta = claimChampionSalary(pot, tier);
+  if (delta.gold === 0 && delta.exp === 0) {
+    // Persist the lastSalaryAt advance so the clock initialises even
+    // before the first hourly payment.
+    if (pot.isModified()) await pot.save();
+    return null;
+  }
+
+  character.crowns = (character.crowns ?? 0) + delta.gold;
+  let exp = (character.experience ?? 0) + delta.exp;
+  let level = character.level ?? 1;
+  let leveledUp = false;
+  while (exp >= calculateExperience(level)) {
+    exp -= calculateExperience(level);
+    level += 1;
+    leveledUp = true;
+  }
+  character.experience = exp;
+  if (leveledUp) character.level = level;
+
+  await pot.save();
+
+  try {
+    await sendMessageToCharacter(
+      String(character._id),
+      'system',
+      `Champion salary -- ${tier.name}`,
+      `You earned ${delta.gold} crowns and ${delta.exp} XP for holding the champion seat in ${tier.name}.` +
+        (leveledUp ? `\n\nYou levelled up to ${character.level}!` : ''),
+    );
+  } catch (err) {
+    console.log(`${new Date()} - champion salary message failed - ${err}`);
+  }
+
+  return { ...delta, leveledUp };
 }
