@@ -58,15 +58,15 @@ export const expeditionRoutes = [
     link: '/wolfcave',
   },
   {
-    name: 'Frostpeak Pass',
-    link: '/frostpeak',
-  },
-  {
-    name: 'Sunken Ruins',
-    link: '/ruins',
-  },
-  {
     name: 'Ancient Temple',
     link: '/ancienttemple',
+  },
+  {
+    name: 'Barbarian Village',
+    link: '/barbarianvillage',
+  },
+  {
+    name: 'Bandit Camp',
+    link: '/banditcamp',
   },
 ]

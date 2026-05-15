@@ -54,16 +54,6 @@ export const expeditions: Expeditions = {
     realLevel: '19',
     additionalInfo: "Typical expedition -- nothing unusual about it. The low entry level doesn't mean you can fight here at 15. The real fighting level is around 20, and at 20 you can already travel to Africa. Africa is really hard at level 20 though, so you might want to stay here a bit longer. What's interesting is that the boss Werewolf awards really good experience -- if you can fight him without losing too much. Otherwise he's not worth it if you lose 50% of the fights.",
   },
-  frostpeak: {
-    name: 'Frostpeak Pass',
-    id: 'frostpeak',
-    description: 'The mountain road north freezes the breath in your chest. Beasts and exiles alike haunt the snowbound switchbacks of Frostpeak, where a wrong step or a wrong word ends the same way.',
-  },
-  ruins: {
-    name: 'Sunken Ruins',
-    id: 'ruins',
-    description: 'Once a proud coastal temple, the Sunken Ruins now lie half-drowned and forgotten. Things that should have stayed buried still walk its flooded halls, jealous of the gold left to rot beside them.',
-  },
   ancienttemple: {
     name: 'Ancient Temple',
     id: 'ancienttemple',
@@ -73,5 +63,25 @@ export const expeditions: Expeditions = {
     enemyLevels: '70-78',
     realLevel: '60',
     additionalInfo: "The first expedition you encounter when you return to Italy from your adventures abroad. A very convenient and interesting dungeon sits in this expedition. Cultist Guard is really good in terms of rewards. 2nd, 3rd and the Boss are not a huge difference in terms of treasure -- but Cultist has a lot of Armour. Rewards from the boss are really good. If you can fight him, go for it.",
+  },
+  barbarianvillage: {
+    name: 'Barbarian Village',
+    id: 'barbarianvillage',
+    intro: 'Barbarian Village is the second expedition you will see since your return to Italy. Fairly strong enemies and really important dungeons.',
+    description: "In the far east there is a barbarian village where barbarians live who have not yet acknowledged the greatness of the Roman Empire. Because they mug travellers and merchants every now and then, you are likely to find many treasures. As long as the Imperial Legion doesn't take any steps against the barbarians, going there is still a daring adventure.",
+    entryLevel: 65,
+    enemyLevels: '75-83',
+    realLevel: '65',
+    additionalInfo: "What's typical for the barbarians is that they all have low armour. If you are doing fine in Ancient Temple you might not rush and start all over discovering a new expedition -- rewards are not a lot greater than Ancient Temple. What's fascinating is the damage of the Berserker. The boss is strong, but the drops there are good.",
+  },
+  banditcamp: {
+    name: 'Bandit Camp',
+    id: 'banditcamp',
+    intro: "Bandit Camp is comprised of deserters, criminals and smugglers from the city. Last expedition in Italy. Once you're done here, you won't return home anymore.",
+    description: "Near the city, hidden in the southern foothills of the Misty Mountains, there is a bandit camp. Bandits, smugglers, thieves and other outlaws bustle around there. Although the imperial legion sent troops there countless times, the camp was reconstructed every time.",
+    entryLevel: 70,
+    enemyLevels: '80-88',
+    realLevel: '70',
+    additionalInfo: "Now this is a proper upgrade of an expedition. The jump from Barbarian Village to Bandit Camp is greater than the jump from Ancient Temple to Barbarian Village. Fight here if you can. The expedition doesn't have a dungeon of its own, but this is where the Advanced Italy dungeons start to be accessible -- so you might want to stay here and fight. Interesting note: Assassinator is really hard and almost as good as the boss, Bandit Chief.",
   },
 }
