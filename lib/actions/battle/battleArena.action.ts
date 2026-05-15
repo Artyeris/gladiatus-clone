@@ -92,6 +92,18 @@ export async function battleArena(defenderId: string) {
 
       attacker.honor += earnedHonor;
       defender.honor += lostHonor;
+
+      // Guarantee the winner ends above the loser by at least 1 honor.
+      // With raw Elo a player can beat the rival directly above them but
+      // still trail in honor, so rank never moves -- this nudges the
+      // remaining gap to ensure an overtake.
+      if (attacker.honor <= defender.honor) {
+        const bridge = Math.ceil((defender.honor - attacker.honor) / 2) + 1;
+        attacker.honor += bridge;
+        defender.honor -= bridge;
+        battleReport.result.honorEarned = earnedHonor + bridge;
+        battleReport.result.honorLost = lostHonor - bridge;
+      }
     }
     // Defender won.
     else if (result.winner == defender._id) {
@@ -108,6 +120,16 @@ export async function battleArena(defenderId: string) {
 
       defender.honor += earnedHonor;
       attacker.honor += lostHonor;
+
+      // Mirror of the attacker-won overtake guarantee: the defender
+      // (winner here) must end above the attacker (loser here).
+      if (defender.honor <= attacker.honor) {
+        const bridge = Math.ceil((attacker.honor - defender.honor) / 2) + 1;
+        defender.honor += bridge;
+        attacker.honor -= bridge;
+        battleReport.result.honorEarned = earnedHonor + bridge;
+        battleReport.result.honorLost = lostHonor - bridge;
+      }
     }
 
     if (attackerJournal) {

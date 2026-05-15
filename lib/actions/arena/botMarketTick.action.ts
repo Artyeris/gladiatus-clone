@@ -12,9 +12,12 @@ import {
   removeItem,
 } from '@/lib/utils/inventory/grid';
 
-const BOTS_PER_TICK = 10;
-const LIST_CHANCE   = 0.22;  // Per ticked bot.
-const BUY_CHANCE    = 0.18;  // Per ticked bot.
+const BOTS_PER_TICK = 18;
+const LIST_CHANCE   = 0.18;  // Per ticked bot.
+const BUY_CHANCE    = 0.55;  // Per ticked bot. Tuned high so player
+                             // listings actually drain.
+const PLAYER_BUY_BIAS = 0.80; // Probability a buy targets a real-player
+                              // seller when both pools have candidates.
 
 function loadEntries(character: any): InventoryEntry[] {
   const inv = character.inventory;
@@ -70,13 +73,33 @@ async function botListsItem(bot: any) {
 }
 
 async function botBuysListing(bot: any) {
-  // Look at listings the bot can afford and isn't its own.
-  const candidates = await MarketListing.find({
+  // Pull two pools: listings posted by real players vs. by other bots.
+  // Picking from the player pool with high bias means a fresh player
+  // listing usually gets snapped up within the next few market ticks.
+  const baseFilter = {
     seller: { $ne: bot._id },
     price: { $lte: bot.crowns ?? 0 },
-  })
-    .limit(20)
-    .lean();
+  };
+
+  const playerSellerIds = await Character.find(
+    { isBot: { $ne: true } },
+    { _id: 1 },
+  ).lean();
+  const playerIds = playerSellerIds.map((c: any) => c._id);
+
+  const [playerListings, anyListings] = await Promise.all([
+    playerIds.length > 0
+      ? MarketListing.find({ ...baseFilter, seller: { $in: playerIds } })
+          .limit(20)
+          .lean()
+      : Promise.resolve([] as any[]),
+    MarketListing.find(baseFilter).limit(20).lean(),
+  ]);
+
+  let candidates: any[] = anyListings as any[];
+  if (playerListings.length > 0 && Math.random() < PLAYER_BUY_BIAS) {
+    candidates = playerListings as any[];
+  }
   if (candidates.length === 0) return false;
 
   const listing = candidates[Math.floor(Math.random() * candidates.length)] as any;

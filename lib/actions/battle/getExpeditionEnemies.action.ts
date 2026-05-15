@@ -46,7 +46,11 @@ export async function getExpeditionEnemies(expeditionName: string) {
       if (expedition.hasOwnProperty(enemyName)) {
         const enemy = expedition[enemyName];
 
-        const enemyKnowledge = character.journal.expeditions[expeditionName][enemyName]?.knowledge || 0;
+        // Optional chain on each level so a missing journal sub-tree
+        // (e.g. a renamed expedition slug the player hasn't visited yet)
+        // returns 0 instead of crashing the whole action.
+        const enemyKnowledge =
+          character.journal?.expeditions?.[expeditionName]?.[enemyName]?.knowledge || 0;
 
         const enemyInfo: EnemyStatsInterface = {
           name: enemy.name,
