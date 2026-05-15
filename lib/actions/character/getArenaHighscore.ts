@@ -6,16 +6,7 @@ import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils';
 import { cookies } from 'next/headers';
-
-export const HIGHSCORE_PAGE_SIZE = 25;
-
-export interface HighscorePage {
-  characters: any[];
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-}
+import { HIGHSCORE_PAGE_SIZE, type HighscorePage } from '@/lib/types/highscore';
 
 export async function getArenaHighscore(page: number = 1): Promise<HighscorePage> {
   const token = cookies().get(COOKIE_NAME);

@@ -121,7 +121,10 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
         ? 'boss'
         : enemyTypeFromIndex(slotIndex);
       const drop = rollExpeditionDrop({
-        playerLevel: character.level ?? 1,
+        // Items scale to the *enemy* (Gladiatus drops the bear's loot,
+        // not the player's). Falls back to the player's level if the
+        // picked enemy somehow shipped without one.
+        enemyLevel: (pickedEnemy as any).level ?? character.level ?? 1,
         enemyType,
       });
       if (drop.dropped && drop.template) {

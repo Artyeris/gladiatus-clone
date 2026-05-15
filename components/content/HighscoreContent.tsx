@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import type { HighscorePage } from '@/lib/actions/character/getArenaHighscore';
+import type { HighscorePage } from '@/lib/types/highscore';
 
 interface Props {
   highscore: HighscorePage;

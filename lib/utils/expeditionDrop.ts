@@ -73,11 +73,15 @@ export function rollQuality(enemyType: ExpeditionEnemyType, qualityBonus = 0): I
   return table[table.length - 1].quality;
 }
 
-export function rollItemLevel(playerLevel: number, enemyType: ExpeditionEnemyType): number {
-  const minOffset = enemyType === 'boss' ? -2 : -4;
-  const maxOffset = enemyType === 'boss' ?  3 :  1;
+// Drops are scaled to the *enemy* the player just killed -- a level-4
+// gladiator who topples the Bear (lvl 8-10) should walk away with
+// level-8-ish loot, not level-4 trash. Mirrors the "Item Level Drop"
+// column on the gamerz-bg enemy sheets (e.g. Bear: 8-11, Wolf: 4-9).
+export function rollItemLevel(enemyLevel: number, enemyType: ExpeditionEnemyType): number {
+  const minOffset = enemyType === 'boss' ? -1 : -2;
+  const maxOffset = enemyType === 'boss' ?  2 :  1;
   const offset = Math.floor(Math.random() * (maxOffset - minOffset + 1)) + minOffset;
-  return Math.max(1, playerLevel + offset);
+  return Math.max(1, enemyLevel + offset);
 }
 
 const CATEGORY_TABLE: { value: string; weight: number }[] = [
@@ -124,7 +128,7 @@ export interface ExpeditionDropResult {
 }
 
 export function rollExpeditionDrop(params: {
-  playerLevel: number;
+  enemyLevel: number;
   enemyType: ExpeditionEnemyType;
   searchMode?: SearchMode;
   eventDropBonus?: number;
@@ -145,7 +149,7 @@ export function rollExpeditionDrop(params: {
   }
 
   const quality = rollQuality(params.enemyType, search.qualityBonus);
-  const itemLevel = rollItemLevel(params.playerLevel, params.enemyType);
+  const itemLevel = rollItemLevel(params.enemyLevel, params.enemyType);
   const category = rollWeighted(CATEGORY_TABLE);
   const template = pickItemTemplate(category, itemLevel);
   if (!template) return { dropped: false, reason: 'No template' };
