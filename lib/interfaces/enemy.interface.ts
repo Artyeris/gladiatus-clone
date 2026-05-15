@@ -10,6 +10,8 @@ export interface EnemyInterface {
   charisma: number;
   experience: number[];
   crowns: number[];
+  armor?: number[];
+  damage?: number[];
   boss?: boolean;
   id: number;
   power?: number;
@@ -27,6 +29,8 @@ export interface EnemyStatsInterface {
   charisma?: number[];
   experience?: number[];
   crowns?: number[];
+  armor?: number[];
+  damage?: number[];
   boss?: boolean;
   items?: string[];
   id: number;

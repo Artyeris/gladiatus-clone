@@ -110,7 +110,21 @@ const EnemyCard = ({ enemy, expedition, canFight }: EnemyCardProps) => {
                   </span>
                 </span>
 
-              </div>  
+                <span className='flex justify-between'>
+                  Armor:
+                  <span>
+                    {enemy.armor ? `${enemy.armor[0]} - ${enemy.armor[enemy.armor.length - 1]}` : '?'}
+                  </span>
+                </span>
+
+                <span className='flex justify-between'>
+                  Damage:
+                  <span>
+                    {enemy.damage ? `${enemy.damage[0]} - ${enemy.damage[enemy.damage.length - 1]}` : '?'}
+                  </span>
+                </span>
+
+              </div>
             </HoverCardContent>
           </HoverCard>
         </div>

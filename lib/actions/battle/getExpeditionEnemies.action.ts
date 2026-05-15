@@ -70,6 +70,8 @@ export async function getExpeditionEnemies(expeditionName: string) {
           enemyInfo.dexterity = enemy.dexterity;
           enemyInfo.intelligence= enemy.intelligence;
           enemyInfo.charisma = enemy.charisma;
+          enemyInfo.armor = enemy.armor;
+          enemyInfo.damage = enemy.damage;
         }
 
         enemiesInfo.push(enemyInfo);

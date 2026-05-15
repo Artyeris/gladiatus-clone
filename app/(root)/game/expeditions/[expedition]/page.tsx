@@ -27,12 +27,32 @@ const Page = async ({ params }: { params: { expedition: string } }) => {
         expeditionName={expeditionName}
         character={user.character}
       />
-      <div>
-        <DescriptionCard
-          title='Expedition description'
-        >
-          {expeditionInfo.description}
+      <div className='flex flex-col gap-2'>
+        <DescriptionCard title='Expedition description'>
+          {expeditionInfo.intro && <p>{expeditionInfo.intro}</p>}
+          <p>{expeditionInfo.description}</p>
+          {(expeditionInfo.entryLevel !== undefined || expeditionInfo.enemyLevels || expeditionInfo.realLevel) && (
+            <div className='grid grid-cols-3 gap-2 border-t border-cream2 pt-2 mt-1 text-xs'>
+              <div>
+                <span className='font-semibold'>Entry level:</span>{' '}
+                {expeditionInfo.entryLevel ?? '-'}
+              </div>
+              <div>
+                <span className='font-semibold'>Enemy levels:</span>{' '}
+                {expeditionInfo.enemyLevels ?? '-'}
+              </div>
+              <div>
+                <span className='font-semibold'>Real level:</span>{' '}
+                {expeditionInfo.realLevel ?? '-'}
+              </div>
+            </div>
+          )}
         </DescriptionCard>
+        {expeditionInfo.additionalInfo && (
+          <DescriptionCard title='Strategy'>
+            <p>{expeditionInfo.additionalInfo}</p>
+          </DescriptionCard>
+        )}
       </div>
     </div>
   )

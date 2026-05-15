@@ -75,6 +75,23 @@ export function calculateCombatStats(character: CharacterInterface): CombatStats
   // the displayed damage too.
   const eff = effectiveStats(character);
 
+  // NPCs carry their own intrinsic armor and damage in the expedition
+  // table (matching the real-game enemy sheets). Apply them when the
+  // combatant has no equipped contributions in that slot.
+  const npc = character as any;
+  let damageIsIntrinsic = false;
+
+  if (armor === 0 && Array.isArray(npc.armor) && npc.armor.length >= 2) {
+    armor = Math.floor((npc.armor[0] + npc.armor[npc.armor.length - 1]) / 2);
+  }
+
+  if (!hasWeapon && Array.isArray(npc.damage) && npc.damage.length >= 2) {
+    weaponMin = npc.damage[0];
+    weaponMax = npc.damage[npc.damage.length - 1];
+    hasWeapon = true;
+    damageIsIntrinsic = true;
+  }
+
   if (!hasWeapon) {
     // Unarmed scales gently with strength so high-level NPCs without
     // weapons aren't reduced to a 0-2 punch.
@@ -82,7 +99,9 @@ export function calculateCombatStats(character: CharacterInterface): CombatStats
     weaponMax = Math.max(2, Math.floor(eff.strength * 0.15));
   }
 
-  const strBonus = Math.floor(eff.strength / 10);
+  // Intrinsic NPC damage is already a final range from the enemy sheet,
+  // so don't stack the strength bonus on top of it.
+  const strBonus = damageIsIntrinsic ? 0 : Math.floor(eff.strength / 10);
 
   return {
     armor,

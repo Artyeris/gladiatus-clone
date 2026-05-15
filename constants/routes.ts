@@ -42,20 +42,20 @@ export const villageRoutes = [
 
 export const expeditionRoutes = [
   {
-    name: 'Grimwood Forest',
+    name: 'Grimwood',
     link: '/grimwood',
   },
   {
-    name: 'Bandit Settlement',
-    link: '/bandit',
+    name: 'Pirate Harbour',
+    link: '/pirateharbour',
   },
   {
-    name: 'Ancient Crypt',
-    link: '/crypt',
+    name: 'Misty Mountains',
+    link: '/mistymountains',
   },
   {
-    name: "Smuggler's Harbour",
-    link: '/harbour',
+    name: 'Wolf Cave',
+    link: '/wolfcave',
   },
   {
     name: 'Frostpeak Pass',
@@ -64,5 +64,9 @@ export const expeditionRoutes = [
   {
     name: 'Sunken Ruins',
     link: '/ruins',
+  },
+  {
+    name: 'Ancient Temple',
+    link: '/ancienttemple',
   },
 ]

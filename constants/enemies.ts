@@ -1,43 +1,7 @@
 import { EnemyStatsInterface } from "@/lib/interfaces/enemy.interface";
 
 interface ExpeditionEnemies {
-  grimwood: {
-    rat: EnemyStatsInterface;
-    lynx: EnemyStatsInterface;
-    wolf: EnemyStatsInterface;
-    bear: EnemyStatsInterface;
-  },
-  bandit: {
-    slave: EnemyStatsInterface;
-    mercenary: EnemyStatsInterface;
-    berserker: EnemyStatsInterface;
-    chief: EnemyStatsInterface;
-  },
-  crypt: {
-    draug: EnemyStatsInterface;
-    drowned: EnemyStatsInterface;
-    ancient: EnemyStatsInterface;
-    soulless: EnemyStatsInterface;
-  },
-  harbour: {
-    dockhand: EnemyStatsInterface;
-    smuggler: EnemyStatsInterface;
-    cutthroat: EnemyStatsInterface;
-    harbourmaster: EnemyStatsInterface;
-  },
-  frostpeak: {
-    wolf_pack: EnemyStatsInterface;
-    exile: EnemyStatsInterface;
-    iceclaw: EnemyStatsInterface;
-    frost_giant: EnemyStatsInterface;
-  },
-  ruins: {
-    drowned_acolyte: EnemyStatsInterface;
-    reef_lurker: EnemyStatsInterface;
-    temple_guardian: EnemyStatsInterface;
-    tideborn_priest: EnemyStatsInterface;
-  },
-  [key: string]: any;
+  [key: string]: Record<string, EnemyStatsInterface>;
 }
 
 export const expeditionEnemies: ExpeditionEnemies = {
@@ -47,13 +11,15 @@ export const expeditionEnemies: ExpeditionEnemies = {
       image: 'rat',
       level: [1, 2],
       strength: [1, 2],
-      endurance: [1, 1],
-      dexterity: [2, 2],
-      agility: [3, 4],
+      endurance: [2, 2],
+      dexterity: [3, 3],
+      agility: [4, 4],
       intelligence: [2, 2],
       charisma: [3, 3],
       experience: [1, 1],
       crowns: [26, 72],
+      armor: [22, 56],
+      damage: [1, 2],
       items: ['short_sword'],
       id: 0,
     },
@@ -69,7 +35,8 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [6, 9, 12, 15],
       experience: [1, 1],
       crowns: [68, 176],
-      // items: ['plate_helmet', 'iron_chest', 'reinforced_boots'],
+      armor: [50, 123],
+      damage: [2, 6],
       id: 1,
     },
     wolf: {
@@ -84,7 +51,8 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [12, 15, 18, 21, 25],
       experience: [1, 3],
       crowns: [116, 261],
-      // items: ['runic_sword'],
+      armor: [116, 234],
+      damage: [3, 9],
       id: 2,
     },
     bear: {
@@ -99,15 +67,16 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [22, 25, 28],
       experience: [3, 3],
       crowns: [293, 383],
-      // items: ['rock_of_aegis', 'vanguard_breastplate'],
+      armor: [401, 591],
+      damage: [12, 18],
       boss: true,
       id: 4,
     },
   },
-  bandit: {
-    slave: {
-      name: 'Slave',
-      image: 'slave',
+  pirateharbour: {
+    fled_slave: {
+      name: 'Fled Slave',
+      image: 'fled_slave',
       level: [8, 9],
       strength: [16, 18],
       endurance: [17, 19],
@@ -117,25 +86,29 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [16, 18],
       experience: [2, 2],
       crowns: [185, 339],
+      armor: [220, 286],
+      damage: [7, 10],
       id: 5,
     },
-    mercenary: {
-      name: 'Mercenary',
-      image: 'mercenary',
+    corrupt_soldier: {
+      name: 'Corrupt Soldier',
+      image: 'corrupt_soldier',
       level: [9, 10, 11, 12],
       strength: [12, 13, 15, 16],
       endurance: [19, 21, 24, 26],
       dexterity: [18, 20, 22, 24],
-      agility: [31, 34, 37, 40, 42],
-      intelligence: [19, 21, 23, 24, 26],
+      agility: [31, 35, 38, 42],
+      intelligence: [19, 21, 23, 26],
       charisma: [28, 31, 34, 37],
       experience: [2, 2],
-      crowns: [283, 390],
+      crowns: [238, 390],
+      armor: [325, 459],
+      damage: [9, 15],
       id: 6,
     },
-    berserker: {
-      name: 'Berserker',
-      image: 'berserker',
+    assassin: {
+      name: 'Assassin',
+      image: 'assassin',
       level: [11, 12, 13, 14, 15],
       strength: [17, 19, 21, 23, 24],
       endurance: [17, 19, 21, 22, 24],
@@ -145,11 +118,13 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [19, 21, 23, 24, 26],
       experience: [2, 2],
       crowns: [293, 599],
+      armor: [339, 457],
+      damage: [11, 19],
       id: 7,
     },
-    chief: {
-      name: 'Chief',
-      image: 'chief',
+    captain: {
+      name: 'Captain',
+      image: 'captain',
       level: [15, 16, 17],
       strength: [27, 28, 30],
       endurance: [36, 38, 40],
@@ -159,14 +134,16 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [47, 50, 53],
       experience: [3, 3],
       crowns: [480, 716],
+      armor: [466, 730],
+      damage: [23, 32],
       boss: true,
       id: 8,
     },
   },
-  crypt: {
-    draug: {
-      name: 'Draug',
-      image: 'draug',
+  mistymountains: {
+    elusive_recruit: {
+      name: 'Elusive Recruit',
+      image: 'elusive_recruit',
       level: [15, 16],
       strength: [42, 44],
       endurance: [42, 44],
@@ -176,11 +153,13 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [26, 28],
       experience: [2, 3],
       crowns: [397, 649],
+      armor: [500, 607],
+      damage: [13, 21],
       id: 9,
     },
-    drowned: {
-      name: 'Drowned',
-      image: 'drowned',
+    harpy: {
+      name: 'Harpy',
+      image: 'harpy',
       level: [15, 16, 17, 18, 19],
       strength: [25, 26, 27, 29, 30],
       endurance: [35, 37, 39, 40, 41],
@@ -188,27 +167,31 @@ export const expeditionEnemies: ExpeditionEnemies = {
       agility: [67, 70, 73, 76, 79],
       intelligence: [28, 30, 31, 33, 34],
       charisma: [56, 59, 62, 64, 66],
-      experience: [2, 3],
+      experience: [2, 2],
       crowns: [409, 772],
+      armor: [607, 753],
+      damage: [19, 27],
       id: 10,
     },
-    ancient: {
-      name: 'Ancient Warrior',
-      image: 'ancient',
+    cerberus: {
+      name: 'Cerberus',
+      image: 'cerberus',
       level: [18, 19, 20, 21, 22],
       strength: [43, 46, 48, 50, 52],
       endurance: [46, 49, 52, 54, 57],
       dexterity: [58, 62, 65, 68, 71],
       agility: [44, 46, 48, 50, 53],
-      intelligence: [14, 15, 16, 16, 18],
+      intelligence: [14, 15, 16, 16, 17],
       charisma: [94, 100, 106, 111, 115],
       experience: [2, 3],
       crowns: [501, 938],
+      armor: [750, 1433],
+      damage: [22, 33],
       id: 11,
     },
-    soulless: {
-      name: 'Soulless Knight',
-      image: 'soulless',
+    medusa: {
+      name: 'Medusa',
+      image: 'medusa',
       level: [22, 23],
       strength: [39, 41],
       endurance: [52, 55],
@@ -218,64 +201,75 @@ export const expeditionEnemies: ExpeditionEnemies = {
       charisma: [115, 120],
       experience: [3, 4],
       crowns: [798, 1185],
+      armor: [1405, 1708],
+      damage: [33, 43],
+      boss: true,
       id: 12,
     },
   },
-  harbour: {
-    dockhand: {
-      name: 'Dockhand',
-      image: 'dockhand',
-      level: [22, 23, 24, 25],
-      strength: [40, 44, 48, 52],
-      endurance: [50, 54, 58, 62],
-      dexterity: [55, 60, 65, 70],
-      agility: [70, 75, 80, 85],
-      intelligence: [30, 33, 36, 39],
-      charisma: [40, 44, 48, 52],
-      experience: [3, 4],
-      crowns: [820, 1250],
+  wolfcave: {
+    wild_boar: {
+      name: 'Wild Boar',
+      image: 'wild_boar',
+      level: [22, 23],
+      strength: [48, 50],
+      endurance: [57, 59],
+      dexterity: [33, 34],
+      agility: [46, 48],
+      intelligence: [13, 13],
+      charisma: [46, 48],
+      experience: [2, 3],
+      crowns: [610, 919],
+      armor: [2018, 2524],
+      damage: [40, 52],
       id: 13,
     },
-    smuggler: {
-      name: 'Smuggler',
-      image: 'smuggler',
-      level: [24, 25, 26, 27, 28],
-      strength: [48, 52, 56, 60, 64],
-      endurance: [58, 62, 66, 70, 74],
-      dexterity: [68, 73, 78, 83, 88],
-      agility: [85, 91, 97, 103, 109],
-      intelligence: [38, 42, 46, 50, 54],
-      charisma: [50, 54, 58, 62, 66],
-      experience: [3, 4],
-      crowns: [950, 1480],
+    wolf_pack: {
+      name: 'Wolf Pack',
+      image: 'wolf_pack',
+      level: [23, 24, 25, 26],
+      strength: [36, 38, 39, 41],
+      endurance: [41, 43, 44, 46],
+      dexterity: [80, 84, 87, 91],
+      agility: [96, 100, 105, 109],
+      intelligence: [41, 43, 44, 46],
+      charisma: [64, 67, 69, 72],
+      experience: [3, 3],
+      crowns: [624, 1145],
+      armor: [764, 1683],
+      damage: [42, 58],
       id: 14,
     },
-    cutthroat: {
-      name: 'Cutthroat',
-      image: 'cutthroat',
-      level: [27, 28, 29, 30, 31],
-      strength: [62, 67, 72, 77, 82],
-      endurance: [70, 75, 80, 85, 90],
-      dexterity: [85, 91, 97, 103, 109],
-      agility: [105, 112, 119, 126, 133],
-      intelligence: [48, 52, 56, 60, 64],
-      charisma: [62, 67, 72, 77, 82],
-      experience: [4, 5],
-      crowns: [1150, 1720],
+    alphawolf: {
+      name: 'Alphawolf',
+      image: 'alphawolf',
+      level: [26, 27, 28, 29],
+      strength: [57, 59, 61, 63],
+      endurance: [52, 54, 56, 58],
+      dexterity: [97, 101, 104, 108],
+      agility: [118, 122, 127, 131],
+      intelligence: [46, 48, 50, 52],
+      charisma: [109, 113, 117, 121],
+      experience: [3, 3],
+      crowns: [784, 1319],
+      armor: [1414, 1650],
+      damage: [52, 71],
       id: 15,
     },
-    harbourmaster: {
-      name: 'Harbourmaster',
-      image: 'harbourmaster',
-      level: [31, 32, 33],
-      strength: [88, 94, 100],
-      endurance: [98, 105, 112],
-      dexterity: [120, 128, 136],
-      agility: [140, 149, 158],
-      intelligence: [70, 75, 80],
-      charisma: [95, 102, 109],
-      experience: [5, 6],
-      crowns: [1900, 2800],
+    werewolf: {
+      name: 'Werewolf',
+      image: 'werewolf',
+      level: [29, 30, 31],
+      strength: [92, 96, 99],
+      endurance: [104, 108, 111],
+      dexterity: [94, 97, 100],
+      agility: [121, 126, 130],
+      intelligence: [58, 60, 62],
+      charisma: [142, 147, 151],
+      experience: [4, 5],
+      crowns: [1100, 1594],
+      armor: [2749, 3077],
+      damage: [66, 87],
       boss: true,
       id: 16,
     },
@@ -396,6 +390,73 @@ export const expeditionEnemies: ExpeditionEnemies = {
       crowns: [9000, 13000],
       boss: true,
       id: 24,
+    },
+  },
+  ancienttemple: {
+    cultist_guard: {
+      name: 'Cultist Guard',
+      image: 'cultist_guard',
+      level: [70, 71],
+      strength: [154, 156],
+      endurance: [140, 142],
+      dexterity: [140, 142],
+      agility: [196, 198],
+      intelligence: [70, 71],
+      charisma: [122, 124],
+      experience: [6, 8],
+      crowns: [2692, 4255],
+      armor: [5987, 7371],
+      damage: [118, 147],
+      id: 25,
+    },
+    wererat: {
+      name: 'Wererat',
+      image: 'wererat',
+      level: [71, 72, 73, 74],
+      strength: [85, 86, 87, 88],
+      endurance: [170, 172, 175, 177],
+      dexterity: [266, 270, 273, 277],
+      agility: [347, 352, 357, 362],
+      intelligence: [127, 129, 131, 133],
+      charisma: [149, 151, 153, 155],
+      experience: [6, 8],
+      crowns: [2728, 4240],
+      armor: [3146, 3768],
+      damage: [131, 167],
+      id: 26,
+    },
+    minotaur: {
+      name: 'Minotaur',
+      image: 'minotaur',
+      level: [73, 74, 75, 76, 77],
+      strength: [262, 266, 270, 273, 277],
+      endurance: [292, 296, 300, 304, 308],
+      dexterity: [146, 148, 150, 152, 154],
+      agility: [127, 129, 131, 132, 134],
+      intelligence: [58, 59, 60, 60, 61],
+      charisma: [332, 337, 341, 346, 350],
+      experience: [6, 7],
+      crowns: [3128, 4718],
+      armor: [3311, 3887],
+      damage: [179, 220],
+      id: 27,
+    },
+    minotaur_chief: {
+      name: 'Minotaur Chief',
+      image: 'minotaur_chief',
+      level: [76, 77, 78],
+      strength: [380, 385, 390],
+      endurance: [304, 308, 312],
+      dexterity: [228, 231, 234],
+      agility: [425, 431, 436],
+      intelligence: [121, 123, 124],
+      charisma: [372, 377, 382],
+      experience: [9, 10],
+      crowns: [3616, 5375],
+      armor: [4980, 8778],
+      damage: [187, 235],
+      boss: true,
+      id: 28,
     },
   },
 };
