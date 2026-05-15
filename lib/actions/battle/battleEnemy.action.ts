@@ -84,9 +84,20 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
 
     journal.expeditions[expeditionName][enemyName].battles++;
 
+    // Normalise the result identifiers up-front. simulateCombat sets
+    // `winner` to either the attacker's _id (ObjectId) or the picked
+    // enemy's numeric id stringified, so compare via String() to avoid
+    // ObjectId-instance pitfalls that would silently drop the loot path.
+    const winnerKey = String(battleSummary.result.winner ?? '');
+    const characterKey = String(character._id);
+    const enemyKey = String(pickedEnemy.id);
+    const playerWon = winnerKey === characterKey;
+    const enemyWon = winnerKey === enemyKey;
+    const isDraw = winnerKey === 'Draw';
+
     // If the character won.
     let droppedItemSummary: { name: string; quality: string } | null = null;
-    if (battleSummary.result.winner === character._id) {
+    if (playerWon) {
       journal.world.battles++;
       journal.world.wins++;
       journal.world.crownsEarned += battleSummary.result.crownsDrop;
@@ -153,14 +164,14 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     }
 
     // If the enemy won.
-    if (battleSummary.result.winner === pickedEnemy.id.toString()) {
+    if (enemyWon) {
       journal.world.battles++;
       journal.world.defeats++;
       journal.expeditions[expeditionName][enemyName].defeats++;
     }
 
     // If it's a draw.
-    if (battleSummary.result.winner === 'Draw') {
+    if (isDraw) {
       journal.world.battles++;
       journal.world.draws++;
       journal.expeditions[expeditionName][enemyName].draws++;

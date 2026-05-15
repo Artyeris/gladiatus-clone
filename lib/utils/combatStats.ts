@@ -1,6 +1,7 @@
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import { EQUIPMENT_SLOTS } from '@/lib/utils/equipment';
+import { statCap } from '@/lib/utils/statUtils';
 
 // Bare-handed minimum so the UI never reads "0 - 0" damage.
 export const UNARMED_DAMAGE_MIN = 0;
@@ -27,21 +28,26 @@ export interface EffectiveStats {
   charisma: number;
 }
 
-// Sum of base stats and stat bonuses contributed by equipped items.
-// NPC enemies (no equipment) just return their base stats unchanged.
+// Sum of base stats and stat bonuses contributed by equipped items,
+// clamped per stat at the character's max (base*2 + (level-1)*4). NPCs
+// have no items and no level-2 cap to hit, so they return unchanged.
 export function effectiveStats(combatant: any): EffectiveStats {
   const items = getEquippedItems(combatant as CharacterInterface);
   const sum = (key: keyof ItemInterface) =>
     items.reduce((s, it) => s + ((it[key] as number | undefined) ?? 0), 0);
 
+  const level = combatant.level ?? 1;
+  const cap = (base: number, raw: number) =>
+    Math.min(base + raw, statCap(base, level));
+
   return {
-    level:        combatant.level ?? 1,
-    strength:     (combatant.strength ?? 5)     + sum('strength'),
-    endurance:    (combatant.endurance ?? 5)    + sum('endurance'),
-    agility:      (combatant.agility ?? 5)      + sum('agility'),
-    dexterity:    (combatant.dexterity ?? 5)    + sum('dexterity'),
-    intelligence: (combatant.intelligence ?? 5) + sum('intelligence'),
-    charisma:     (combatant.charisma ?? 5)     + sum('charisma'),
+    level,
+    strength:     cap(combatant.strength ?? 5,     sum('strength')),
+    endurance:    cap(combatant.endurance ?? 5,    sum('endurance')),
+    agility:      cap(combatant.agility ?? 5,      sum('agility')),
+    dexterity:    cap(combatant.dexterity ?? 5,    sum('dexterity')),
+    intelligence: cap(combatant.intelligence ?? 5, sum('intelligence')),
+    charisma:     cap(combatant.charisma ?? 5,     sum('charisma')),
   };
 }
 

@@ -11,11 +11,12 @@ export type StatId =
   | 'charisma';
 
 export interface StatBreakdown {
-  base: number;        // trained value stored on the character
-  fromItems: number;   // current sum of equipped-item bonuses for this stat
-  maxFromItems: number; // how much items can still add on top of the base
-  total: number;       // base + fromItems (current effective stat)
-  max: number;         // base + maxFromItems (cap if every item slot is filled)
+  base: number;          // trained value stored on the character
+  fromItems: number;     // effective item bonus (capped at maxFromItems)
+  rawFromItems: number;  // raw sum of equipped-item bonuses before the cap
+  maxFromItems: number;  // how much items can add on top of the base
+  total: number;         // base + fromItems (current effective stat)
+  max: number;           // base + maxFromItems (cap if every item slot is filled)
 }
 
 // Default value of an untrained stat.
@@ -40,6 +41,10 @@ function getEquippedItems(character: CharacterInterface): ItemInterface[] {
 //     of headroom that items can fill)
 // Closed form: max = 2 * base + (level - 1) * 4.
 // Examples: base 10 at level 1 -> max 20; base 10 at level 2 -> max 24.
+//
+// Item bonuses are clamped to maxFromItems so the effective total never
+// exceeds the displayed cap (the previous behaviour let +50 on a base-30
+// level-4 character read as 80 vs a max of 72).
 export function calculateStatBreakdown(
   character: CharacterInterface,
   stat: StatId,
@@ -48,7 +53,7 @@ export function calculateStatBreakdown(
   const base = ((character[stat] as number | undefined) ?? BASE_STAT);
   const items = equippedItems.length > 0 ? equippedItems : getEquippedItems(character);
 
-  const fromItems = items.reduce(
+  const rawFromItems = items.reduce(
     (sum, item) => sum + ((item?.[stat] as number | undefined) ?? 0),
     0
   );
@@ -56,13 +61,22 @@ export function calculateStatBreakdown(
   const levelBonus = Math.max(((character.level ?? 1) - 1) * 4, 0);
   const max = base * 2 + levelBonus;
   const maxFromItems = Math.max(max - base, 0);
+  const fromItems = Math.min(rawFromItems, maxFromItems);
   const total = base + fromItems;
 
   return {
     base,
     fromItems,
+    rawFromItems,
     maxFromItems,
     total,
     max,
   };
+}
+
+// Standalone cap used by effectiveStats (which can't import the full
+// breakdown for circular-import reasons).
+export function statCap(base: number, level: number): number {
+  const levelBonus = Math.max((level - 1) * 4, 0);
+  return base * 2 + levelBonus;
 }
