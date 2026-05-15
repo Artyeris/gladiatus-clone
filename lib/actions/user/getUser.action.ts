@@ -4,6 +4,7 @@ import { COOKIE_NAME } from '@/constants';
 import Character from '@/lib/models/character.model';
 import User from '@/lib/models/user.model';
 import Item from '@/lib/models/item.model';
+import Journal from '@/lib/models/journal.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import { migrateLegacyInventory } from '@/lib/utils/inventory/grid';
@@ -29,6 +30,10 @@ export async function getUser(getInventory = false) {
     const user = await User.findById(userId).populate({
       path: 'character',
       model: Character,
+      populate: {
+        path: 'journal',
+        model: Journal,
+      },
     });
 
     if (!user) return null;

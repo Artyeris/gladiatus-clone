@@ -114,6 +114,21 @@ export async function deleteMessage({ id }: { id: string }) {
   }
 }
 
+export async function deleteAllMessages() {
+  const charId = await getMyCharacterId();
+  if (!charId) return { error: { message: 'Not authenticated' } };
+
+  try {
+    await connectToDB();
+    const res = await Message.deleteMany({ recipient: charId });
+    revalidatePath('/game/messages');
+    return { ok: true, deleted: res.deletedCount ?? 0 };
+  } catch (err: any) {
+    console.log(`${new Date()} - deleteAllMessages failed - ${err}`);
+    return { error: { message: err?.message || 'Failed' } };
+  }
+}
+
 export async function getUnreadMessageCount(): Promise<number> {
   const id = await getMyCharacterId();
   if (!id) return 0;

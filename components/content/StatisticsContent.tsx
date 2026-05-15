@@ -48,12 +48,41 @@ function gatherInventory(user: CharacterInterface): ItemInterface[] {
   return out;
 }
 
+function pct(n: number, total: number): string {
+  if (total <= 0) return '0%';
+  return `${Math.round((n / total) * 100)}%`;
+}
+
 const StatisticsContent = ({ character }: Props) => {
   const equipped = gatherEquipped(character);
   const inventory = gatherInventory(character);
 
   const equipmentValue = valueOfItems(equipped);
   const inventoryValue = valueOfItems(inventory);
+
+  // Journal lives on the populated character. Default to zeros so the
+  // page renders even for a fresh character whose journal hasn't been
+  // touched yet.
+  const journal = (character as any).journal ?? {};
+  const arena = journal.arena ?? {};
+  const world = journal.world ?? {};
+
+  const aBattles = arena.battles ?? 0;
+  const aWins = arena.wins ?? 0;
+  const aLosses = arena.defeats ?? 0;
+  const aDraws = arena.draws ?? 0;
+  const aDealt = arena.damageInflicted ?? 0;
+  const aReceived = arena.damageReceived ?? 0;
+  const aHonor = arena.honorEarned ?? 0;
+
+  const wBattles = world.battles ?? 0;
+  const wWins = world.wins ?? 0;
+  const wLosses = world.defeats ?? 0;
+  const wDealt = world.damageInflicted ?? 0;
+  const wReceived = world.damageReceived ?? 0;
+  const wCrowns = world.crownsEarned ?? 0;
+
+  const arenaWLR = aLosses > 0 ? (aWins / aLosses).toFixed(2) : aWins.toFixed(2);
 
   return (
     <div className='px-6 flex flex-col gap-4 text-brown2'>
@@ -64,26 +93,24 @@ const StatisticsContent = ({ character }: Props) => {
       </div>
 
       <Section title='Combat Stats - Arena'>
-        <Row label='Battles' value='0' />
-        <Row label='Wins' value='0 (0%)' />
-        <Row label='Losses' value='0 (0%)' />
-        <Row label='Draws' value='0 (0%)' />
-        <Row label='Win/Loss ratio' value='0.00' />
-        <Row label='Damage dealt' value='0' />
-        <Row label='Damage received' value='0' />
-        <Row label='Difference' value='0' />
-        <Row label='Gold won in battles' value='0' coin />
-        <Row label='Gold lost in battles' value='0' coin />
-        <Row label='Difference' value='0' coin />
-        <Row label='Win streak' value='0' />
+        <Row label='Battles' value={String(aBattles)} />
+        <Row label='Wins' value={`${aWins} (${pct(aWins, aBattles)})`} />
+        <Row label='Losses' value={`${aLosses} (${pct(aLosses, aBattles)})`} />
+        <Row label='Draws' value={`${aDraws} (${pct(aDraws, aBattles)})`} />
+        <Row label='Win/Loss ratio' value={String(arenaWLR)} />
+        <Row label='Damage dealt' value={String(aDealt)} />
+        <Row label='Damage received' value={String(aReceived)} />
+        <Row label='Difference' value={String(aDealt - aReceived)} />
+        <Row label='Honor earned' value={String(aHonor)} />
       </Section>
 
       <Section title='Combat Stats - Expeditions'>
-        <Row label='Battles' value='0' />
-        <Row label='Wins' value='0 (0%)' />
-        <Row label='Losses' value='0 (0%)' />
-        <Row label='Damage dealt' value='0' />
-        <Row label='Damage received' value='0' />
+        <Row label='Battles' value={String(wBattles)} />
+        <Row label='Wins' value={`${wWins} (${pct(wWins, wBattles)})`} />
+        <Row label='Losses' value={`${wLosses} (${pct(wLosses, wBattles)})`} />
+        <Row label='Damage dealt' value={String(wDealt)} />
+        <Row label='Damage received' value={String(wReceived)} />
+        <Row label='Crowns earned' value={String(wCrowns)} coin />
       </Section>
 
       <Section title='Wealth'>

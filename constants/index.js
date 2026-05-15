@@ -1,7 +1,9 @@
 export const COOKIE_NAME = 'AuthToken';
 export const MAX_TOKEN_AGE = 30 * 24 * 60 * 60; // 30 days.
-export const EXPEDITION_COOLDOWN = 60; // Cooldown between expeditions fights in seconds.
-export const ARENA_COOLDOWN = 60; // Cooldown between arena fights in seconds.
+// Cooldowns are tuned for a 5x-speed server: the original 60s gates are
+// brought down to 12s so testing and play feel snappier.
+export const EXPEDITION_COOLDOWN = 12;
+export const ARENA_COOLDOWN = 12;
 export const stats = [
   {
     name: 'Strength',

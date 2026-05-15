@@ -9,6 +9,11 @@ import toast from 'react-hot-toast';
 
 import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
+import ItemTypeFilter, {
+  countByType,
+  matchesType,
+  type ItemTypeFilterValue,
+} from '@/components/shared/ItemTypeFilter';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import {
@@ -77,6 +82,9 @@ function Board({ character, listings }: Props) {
   const [pickedItem, setPickedItem] = useState<ItemInterface | null>(null);
   const [price, setPrice] = useState<string>('');
   const [busy, setBusy] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
+
+  const filteredListings = listings.filter((l) => matchesType(l.item, typeFilter));
 
   useEffect(() => {
     setEntries(entriesFromCharacter(character));
@@ -161,16 +169,23 @@ function Board({ character, listings }: Props) {
       </Section>
 
       <Section title='Listings'>
-        {listings.length === 0 ? (
+        <ItemTypeFilter
+          value={typeFilter}
+          onChange={setTypeFilter}
+          counts={countByType(listings.map((l) => l.item))}
+        />
+        {filteredListings.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
-            Nothing for sale right now.
+            {listings.length === 0
+              ? 'Nothing for sale right now.'
+              : 'No listings match the selected filter.'}
           </div>
         ) : (
-          listings.map((listing, idx) => (
+          filteredListings.map((listing, idx) => (
             <ListingRow
               key={listing._id}
               listing={listing}
-              last={idx === listings.length - 1}
+              last={idx === filteredListings.length - 1}
               busy={busy}
               onCancel={onCancel}
               onBuy={onBuy}

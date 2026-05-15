@@ -33,7 +33,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         </div>
       </div>
       <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none'>
-        v0.11
+        v0.12
       </span>
     </div>
   );

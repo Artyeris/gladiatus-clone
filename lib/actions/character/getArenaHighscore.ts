@@ -7,7 +7,17 @@ import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils';
 import { cookies } from 'next/headers';
 
-export async function getArenaHighscore() {
+export const HIGHSCORE_PAGE_SIZE = 25;
+
+export interface HighscorePage {
+  characters: any[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export async function getArenaHighscore(page: number = 1): Promise<HighscorePage> {
   const token = cookies().get(COOKIE_NAME);
 
   if (!token) throw new Error('Unathorized');
@@ -25,12 +35,25 @@ export async function getArenaHighscore() {
 
     if (!user || !user.character) throw new Error('Unauthorized');
 
-    const highcoreArena = await Character
-      .find({ onboarded: true })
-      .sort({ honor: -1 })
-      .limit(100);
+    const filter = { onboarded: true };
+    const safePage = Math.max(1, Math.floor(page));
+    const total = await Character.countDocuments(filter);
+    const totalPages = Math.max(1, Math.ceil(total / HIGHSCORE_PAGE_SIZE));
+    const clampedPage = Math.min(safePage, totalPages);
 
-      return JSON.parse(JSON.stringify(highcoreArena));
+    const characters = await Character
+      .find(filter)
+      .sort({ honor: -1 })
+      .skip((clampedPage - 1) * HIGHSCORE_PAGE_SIZE)
+      .limit(HIGHSCORE_PAGE_SIZE);
+
+    return JSON.parse(JSON.stringify({
+      characters,
+      page: clampedPage,
+      pageSize: HIGHSCORE_PAGE_SIZE,
+      total,
+      totalPages,
+    }));
 
   } catch (error) {
     console.log(`${new Date} - Failed to get highscore - ${error}`);

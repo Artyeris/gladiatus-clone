@@ -31,13 +31,27 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
         </a>
       </div>
 
-      <div style={{ display: 'flex', gap: '20px' }}>
-
-        <div style={{ flex: '0 0 300px', borderRight: '2px solid #5c3a21', paddingRight: '20px' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '16px',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
+      >
+        <div
+          style={{
+            flex: '0 0 250px',
+            borderRight: '2px solid #5c3a21',
+            paddingRight: '12px',
+          }}
+        >
            <CharacterPanel user={character} />
         </div>
 
-        <div style={{ flex: 2 }}>
+        <div style={{ flexShrink: 0 }}>
            <InventoryEquipment character={character} />
         </div>
       </div>

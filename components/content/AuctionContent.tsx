@@ -7,6 +7,11 @@ import toast from 'react-hot-toast';
 
 import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
+import ItemTypeFilter, {
+  countByType,
+  matchesType,
+  type ItemTypeFilterValue,
+} from '@/components/shared/ItemTypeFilter';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import {
@@ -46,6 +51,9 @@ const PHASE_COLOR: Record<AuctionPhase, string> = {
 const AuctionContent = ({ character, auctions }: Props) => {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
+
+  const filteredAuctions = auctions.filter((a) => matchesType(a.item, typeFilter));
 
   const onBid = async (auctionId: string, amount: number) => {
     setBusy(true);
@@ -95,16 +103,23 @@ const AuctionContent = ({ character, auctions }: Props) => {
       </Section>
 
       <Section title='Active auctions'>
-        {auctions.length === 0 ? (
+        <ItemTypeFilter
+          value={typeFilter}
+          onChange={setTypeFilter}
+          counts={countByType(auctions.map((a) => a.item))}
+        />
+        {filteredAuctions.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
-            The auctioneer is preparing the next rotation...
+            {auctions.length === 0
+              ? 'The auctioneer is preparing the next rotation...'
+              : 'No auctions match the selected filter.'}
           </div>
         ) : (
-          auctions.map((a, idx) => (
+          filteredAuctions.map((a, idx) => (
             <AuctionRow
               key={a._id}
               auction={a}
-              last={idx === auctions.length - 1}
+              last={idx === filteredAuctions.length - 1}
               busy={busy}
               characterCrowns={character.crowns ?? 0}
               onBid={onBid}

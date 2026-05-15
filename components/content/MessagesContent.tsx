@@ -5,6 +5,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
+  deleteAllMessages,
   deleteMessage,
   markMessageRead,
   MessageView,
@@ -42,6 +43,17 @@ const MessagesContent = ({ messages, unread }: Props) => {
     setBusy(false);
     if (res?.error) return toast.error(res.error.message);
     toast.success('Message deleted');
+    router.refresh();
+  };
+
+  const onDeleteAll = async () => {
+    if (messages.length === 0) return;
+    if (!confirm(`Delete all ${messages.length} message${messages.length === 1 ? '' : 's'}?`)) return;
+    setBusy(true);
+    const res = await deleteAllMessages();
+    setBusy(false);
+    if (res?.error) return toast.error(res.error.message);
+    toast.success(`Deleted ${res.deleted ?? 0} messages`);
     router.refresh();
   };
 
@@ -93,6 +105,19 @@ const MessagesContent = ({ messages, unread }: Props) => {
           );
         })}
       </div>
+
+      {messages.length > 0 && (
+        <div className='flex justify-end'>
+          <button
+            type='button'
+            onClick={onDeleteAll}
+            disabled={busy}
+            className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+          >
+            Delete all ({messages.length})
+          </button>
+        </div>
+      )}
     </div>
   );
 };
