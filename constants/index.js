@@ -10,16 +10,16 @@ export const stats = [
     id: 'strength',
   },
   {
-    name: 'Endurance',
-    id: 'endurance',
+    name: 'Dexterity',
+    id: 'dexterity',
   },
   {
     name: 'Agility',
     id: 'agility',
   },
   {
-    name: 'Dexterity',
-    id: 'dexterity',
+    name: 'Endurance',
+    id: 'endurance',
   },
   {
     name: 'Charisma',
