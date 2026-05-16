@@ -99,6 +99,7 @@ export async function placeMarketListing({ itemId, price }: { itemId: string; pr
       item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
       x: e.x,
       y: e.y,
+      bag: e.bag ?? 0,
     })));
     character.markModified('inventory');
     await character.save();
@@ -141,6 +142,7 @@ export async function cancelMarketListing({ listingId }: { listingId: string }) 
       item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
       x: e.x,
       y: e.y,
+      bag: e.bag ?? 0,
     })));
     character.markModified('inventory');
     await character.save();
@@ -206,6 +208,7 @@ export async function buyMarketListing({ listingId }: { listingId: string }) {
       item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
       x: e.x,
       y: e.y,
+      bag: e.bag ?? 0,
     })));
     buyer.markModified('inventory');
     await buyer.save();

@@ -44,6 +44,7 @@ async function dressBot(bot: any, level: number, seed: number) {
     item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
     x: e.x,
     y: e.y,
+    bag: e.bag ?? 0,
   })));
   // Generous starting purse so bots can keep buying for a while.
   bot.crowns = 10000 + level * 200;

@@ -86,6 +86,7 @@ const characterSchema = new mongoose.Schema({
         item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item' },
         x: { type: Number, default: 0 },
         y: { type: Number, default: 0 },
+        bag: { type: Number, default: 0 },
       },
     ],
     default: [],

@@ -50,7 +50,7 @@ function entriesFromCharacter(character: CharacterInterface): InventoryEntry[] {
   if (inv.length > 0 && !Array.isArray(inv[0])) {
     return inv
       .filter((e: any) => e && e.item)
-      .map((e: any) => ({ item: e.item, x: e.x ?? 0, y: e.y ?? 0 }));
+      .map((e: any) => ({ item: e.item, x: e.x ?? 0, y: e.y ?? 0, bag: e.bag ?? 0 }));
   }
   const out: InventoryEntry[] = [];
   for (let x = 0; x < inv.length; x++) {
@@ -59,7 +59,7 @@ function entriesFromCharacter(character: CharacterInterface): InventoryEntry[] {
     for (let y = 0; y < row.length; y++) {
       const cell = row[y];
       if (cell && typeof cell === 'object' && 'name' in cell) {
-        out.push({ item: cell, x, y });
+        out.push({ item: cell, x, y, bag: 0 });
       }
     }
   }

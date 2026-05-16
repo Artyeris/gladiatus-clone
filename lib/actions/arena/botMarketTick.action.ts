@@ -32,6 +32,7 @@ function serializeInventory(entries: InventoryEntry[]) {
     item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
     x: e.x,
     y: e.y,
+    bag: e.bag ?? 0,
   }));
 }
 
