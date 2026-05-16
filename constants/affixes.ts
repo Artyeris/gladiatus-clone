@@ -78,9 +78,13 @@ const PCT_CAPABLE = new Set([
 // Parses the source-table bonus column into an AffixBonus.
 // Example: "Strength +1; Strength +11%; Charisma -6%; Block Value +5"
 //   -> { strength: 1, strengthPct: 11, charismaPct: -6, blockChanceBonus: 5 }
+// Accepts the source's "—" / "–" / "-" cell as "no bonuses".
 function bonus(text: string): AffixBonus {
   const out: AffixBonus = {};
-  for (const raw of text.split(';').map((s) => s.trim()).filter(Boolean)) {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed === '—' || trimmed === '–' || trimmed === '-') return out;
+  for (const raw of trimmed.split(';').map((s) => s.trim()).filter(Boolean)) {
+    if (raw === '—' || raw === '–' || raw === '-') continue;
     const m = raw.match(/^(.+?)\s*([+-]\d+)(%?)$/);
     if (!m) {
       console.warn(`[affixes] could not parse bonus "${raw}"`);
@@ -347,8 +351,124 @@ export const PREFIXES: AffixDef[] = [
 
 // Populated when the user provides the rest of the source tables.
 export const TOP_PREFIXES: AffixDef[] = [];
-export const SUFFIXES: AffixDef[] = [];
 export const TOP_SUFFIXES: AffixDef[] = [];
+
+export const SUFFIXES: AffixDef[] = [
+  // Numeric +N enhancement suffixes -- name is literally "+1" etc., so
+  // fullItemName renders "Short Sword +5".
+  p('+1', 1, ''),
+  p('+2', 2, ''),
+  p('+3', 3, ''),
+  p('+4', 4, 'Intelligence +2'),
+  p('+5', 5, 'Constitution +2'),
+  p('+6', 6, 'Strength +2'),
+  p('+7', 7, 'Dexterity +2'),
+  p('+8', 8, 'Agility +2'),
+  p('+9', 9, 'Charisma +2'),
+  // Named "of <X>" suffixes.
+  p('of Brightness',      10, 'Charisma +10; Charisma +10%'),
+  p('of Fear',            10, 'Agility -2%; Constitution +2'),
+  p('of Glory',           10, 'Damage +1; Strength +2%'),
+  p('of Grace',           10, 'Dexterity +5; Charisma +10%'),
+  p('of Liturgy',         10, 'Healing +16'),
+  p('of Looseness',       10, 'Strength +6%'),
+  p('of Readiness',       10, 'Agility +5%; Health +20'),
+  p('of Regret',          10, 'Strength +1; Agility +1'),
+  p('of Skill',           10, 'Dexterity +2%; Agility +2'),
+  p('of Stars',           10, 'Damage +1; Charisma +2%'),
+  p('of Tears',           10, 'Constitution -10'),
+  p('of Weakness',        10, ''),
+  p('of Downfall',        11, 'Strength +1'),
+  p('of Eradication',     11, 'Agility +7%; Critical Attack Value +3'),
+  p('of Inquisitiveness', 11, 'Healing +20; Critical Healing Value +3'),
+  p('of the Clouds',      11, 'Dexterity +2; Health +5'),
+  p('of Normality',       12, 'Health +15'),
+  p('of Rapidity',        12, 'Agility +10; Agility +10%'),
+  p('of Reprisal',        12, 'Strength +9%'),
+  p('of the Hills',       12, 'Constitution +4; Charisma +2'),
+  p('of the Sea',         12, 'Dexterity +4; Agility +2; Health +10'),
+  p('of Willpower',       12, 'Armour +57; Block Value +4; Threat +8'),
+  p('of Wounds',          12, 'Healing +24; Critical Healing Value +4'),
+  p('of Blood',           13, 'Agility +2; Health +10'),
+  p('of Decapitation',    13, 'Dexterity +1; Charisma +10%; Critical Attack Value +4'),
+  p('of Holiness',        13, 'Intelligence +11%; Critical Healing Value +4'),
+  p('of Invisibility',    13, 'Hardening Value +4; Health +27'),
+  p('of the Rain',        13, 'Agility +2; Health +8'),
+  p('of Triumph',         13, 'Armour +66'),
+  p('of Capriciousness',  14, 'Strength +8%; Charisma +10%'),
+  p('of Concealment',     14, 'Strength +1; Intelligence -1%; Hardening Value +4'),
+  p('of Consecration',    14, 'Intelligence +2; Healing +24; Critical Healing Value +6'),
+  p('of Malediction',     14, 'Constitution +5%; Charisma +2%'),
+  p('of the Creature',    14, 'Agility +2%'),
+  p('of the Mountains',   14, 'Strength +2; Constitution +2'),
+  p('of the Woods',       14, 'Damage +1; Dexterity +3; Agility +2'),
+  p('of Trouble',         14, 'Strength +2%; Charisma -5'),
+  p('of Balance',         15, 'Strength +2; Dexterity +2; Agility +2; Constitution +2; Charisma +2'),
+  p('of Conflict',        15, 'Damage +2; Dexterity +10; Agility +2%'),
+  p('of Confusion',       15, 'Damage -1; Armour +100; Dexterity -2; Constitution -1%'),
+  p('of Difficulty',      15, 'Armour +10; Strength -1%; Dexterity -1%; Agility -1%'),
+  p('of Failure',         15, 'Damage -5; Charisma +10'),
+  p('of Greed',           15, 'Dexterity -5%'),
+  p('of Hesitation',      15, 'Armour +35; Agility -2; Charisma +2'),
+  p('of Hindrance',       15, 'Armour +20; Dexterity -2; Agility -2'),
+  p('of Honour',          15, 'Constitution +1%; Charisma +5; Charisma +15%'),
+  p('of Incompetence',    15, 'Dexterity -2'),
+  p('of Inevitability',   15, 'Armour +93; Strength +11%'),
+  p('of Insult',          15, 'Damage +1; Dexterity +2%; Charisma -2; Health +20'),
+  p('of Learning',        15, 'Damage +1; Armour +40; Constitution +4; Charisma +2'),
+  p('of Madness',         15, 'Dexterity +2; Agility +3; Health +2'),
+  p('of Magic',           15, 'Dexterity +10; Charisma +10%'),
+  p('of Magnitude',       15, 'Strength +3%; Charisma +5%'),
+  p('of Melting',         15, 'Strength +1; Dexterity -2; Agility +1; Charisma +8%'),
+  p('of Mourning',        15, 'Constitution -4; Health +100'),
+  p('of Pride',           15, 'Strength -5%; Constitution +5%; Charisma +5%'),
+  p('of Satisfaction',    15, 'Damage +2; Health +20'),
+  p('of Spirituality',    15, 'Constitution -13%; Healing +32; Critical Healing Value +6'),
+  p('of Success',         15, 'Damage +2; Strength +2'),
+  p('of Suspicion',       15, 'Charisma -4%'),
+  p('of Vigour',          15, 'Strength +10%'),
+  p('of Emasculation',    16, 'Intelligence +15%'),
+  p('of Generosity',      16, 'Strength +5; Constitution +5%; Charisma +5%'),
+  p('of Martial Arts',    16, 'Strength +1; Charisma +2; Charisma +10%; Critical Attack Value +7'),
+  p('of Ordinance',       16, 'Intelligence +11%; Healing +32'),
+  p('of Pain',            16, 'Damage +1; Strength +5; Agility +20%'),
+  p('of Reversion',       16, 'Armour +80; Hardening Value +4'),
+  p('of Warning',         16, 'Damage +1; Armour +25; Dexterity +4'),
+  p('of Demolition',      17, 'Charisma +2; Charisma +11%; Intelligence -1%; Critical Attack Value +5'),
+  p('of Desperation',     17, 'Constitution +4; Charisma +2'),
+  p('of Fairness',        17, 'Constitution +5; Charisma +15%'),
+  p('of Self-Assurance',  17, 'Strength +2; Strength +13%'),
+  p('of the Blessed',     17, 'Damage -1; Intelligence +1; Healing +28; Critical Healing Value +5'),
+  p('of Arrogance',       18, 'Charisma -5%; Health +100'),
+  p('of Attrition',       18, 'Strength +17%; Charisma -2'),
+  p('of Belief',          18, 'Armour +100; Charisma +20%; Health +100'),
+  p('of Ceremony',        18, 'Intelligence +2; Intelligence +11%; Healing +36'),
+  p('of Distraction',     18, 'Dexterity +3; Dexterity +10%; Agility +10%'),
+  p('of Haughtiness',     18, 'Damage -2; Strength -1%; Charisma +15%'),
+  p('of Meat',            18, 'Strength +2; Constitution -2; Charisma +12%; Critical Attack Value +5'),
+  p('of the Moon',        18, 'Strength +4; Agility +2%; Health +10'),
+  p('of Brutality',       19, 'Damage +3; Strength +6'),
+  p('of Chakra',          19, 'Strength +14%; Charisma +13%'),
+  p('of Haste',           19, 'Dexterity +2%; Agility +10%'),
+  p('of Inadequacy',      19, 'Health +46'),
+  p('of Nostalgia',       19, 'Strength +16%; Agility +13%'),
+  p('of Religiousness',   19, 'Intelligence +1; Intelligence +13%; Healing +44; Critical Healing Value +6'),
+  p('of Apprenticeship',  20, 'Damage +3; Strength +2; Dexterity +2'),
+  p('of Assassination',   20, 'Damage +4; Dexterity +4; Dexterity +2%; Agility +4%'),
+  p('of Battle',          20, 'Strength +4; Strength +5%'),
+  p('of Cleverness',      20, 'Intelligence +12%; Healing +36'),
+  p('of Courage',         20, 'Charisma +5; Charisma +20%; Health +50'),
+  p('of Diligence',       20, 'Charisma +20%; Health +20'),
+  p('of Endurance',       20, 'Armour +30; Strength +3%; Constitution +15%'),
+  p('of Favour',          20, 'Armour +100; Constitution +5; Charisma +2%; Health +20'),
+  p('of Harmony',         20, 'Constitution +20%; Charisma +20%'),
+  p('of Health',          20, 'Armour +10; Constitution +2%; Health +30'),
+  p('of Illusion',        20, 'Dexterity +2%; Agility +4; Charisma +4; Health +100'),
+  p('of Independence',    20, 'Armour +100; Dexterity +2; Agility +2; Constitution +3; Health +40'),
+  p('of Magnificence',    20, 'Armour +60; Charisma +4; Charisma +2%; Health +20'),
+  p('of Obsession',       20, 'Dexterity +2%; Charisma -5%'),
+  p('of Peace',           20, 'Constitution +10%'),
+];
 
 // Pick the highest-level affix in `pool` that the item can use (level
 // <= itemLevel). Returns null when the item is below the table's floor.
