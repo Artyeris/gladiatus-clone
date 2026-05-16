@@ -75,6 +75,26 @@ const itemSchema = new mongoose.Schema({
   durabilityMax: { type: Number },
   conditioning: { type: Number },
   conditioningMax: { type: Number },
+
+  // Affix-derived bonuses (rolled at drop time -- see constants/affixes).
+  // Defaults are intentionally omitted so the field is absent on items
+  // that didn't roll the bonus; combat code falls back to 0 with `?? 0`.
+  damageBonus:     { type: Number },
+  health:          { type: Number },
+  strengthPct:     { type: Number },
+  dexterityPct:    { type: Number },
+  agilityPct:      { type: Number },
+  endurancePct:    { type: Number },
+  charismaPct:     { type: Number },
+  intelligencePct: { type: Number },
+  blockChanceBonus: { type: Number },
+  critChanceBonus:  { type: Number },
+
+  // Dungeon-only -- stored but ignored by combat for now.
+  threat:               { type: Number },
+  hardeningValue:       { type: Number },
+  healing:              { type: Number },
+  criticalHealingValue: { type: Number },
 }, {
   timestamps: true
 });

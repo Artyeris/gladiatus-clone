@@ -1,4 +1,13 @@
 import { items as ITEM_CATALOG } from '@/constants/items';
+import {
+  AffixDef,
+  PREFIXES,
+  SUFFIXES,
+  TOP_PREFIXES,
+  TOP_SUFFIXES,
+  mergeAffixes,
+  pickAffix,
+} from '@/constants/affixes';
 import { ItemQuality } from '@/lib/interfaces/item.interface';
 
 export type ExpeditionEnemyType = 'normal_1' | 'normal_2' | 'normal_3' | 'boss';
@@ -125,6 +134,37 @@ export interface ExpeditionDropResult {
   itemLevel?: number;
   quality?: ItemQuality;
   category?: string;
+  prefix?: AffixDef | null;
+  suffix?: AffixDef | null;
+}
+
+// Quality tier ordering used to decide whether a drop is "good enough"
+// to roll a prefix / suffix. Common stays plain; green/green+ may get a
+// suffix; blue+ also gets a prefix; orange+ pulls from the top tables.
+const QUALITY_RANK: Record<ItemQuality, number> = {
+  common: 0, common_plus: 1,
+  green: 2, green_plus: 3,
+  blue: 4, blue_plus: 5,
+  purple: 6, purple_plus: 7,
+  orange: 8, orange_plus: 9,
+  red: 10,
+};
+
+function rollAffixesForQuality(quality: ItemQuality, itemLevel: number) {
+  const rank = QUALITY_RANK[quality] ?? 0;
+  let prefix: AffixDef | null = null;
+  let suffix: AffixDef | null = null;
+  // Suffix at green and above.
+  if (rank >= QUALITY_RANK.green) {
+    const pool = rank >= QUALITY_RANK.orange ? TOP_SUFFIXES : SUFFIXES;
+    suffix = pickAffix(pool, itemLevel) ?? pickAffix(SUFFIXES, itemLevel);
+  }
+  // Prefix at blue and above.
+  if (rank >= QUALITY_RANK.blue) {
+    const pool = rank >= QUALITY_RANK.orange ? TOP_PREFIXES : PREFIXES;
+    prefix = pickAffix(pool, itemLevel) ?? pickAffix(PREFIXES, itemLevel);
+  }
+  return { prefix, suffix };
 }
 
 export function rollExpeditionDrop(params: {
@@ -151,8 +191,11 @@ export function rollExpeditionDrop(params: {
   const quality = rollQuality(params.enemyType, search.qualityBonus);
   const itemLevel = rollItemLevel(params.enemyLevel, params.enemyType);
   const category = rollWeighted(CATEGORY_TABLE);
-  const template = pickItemTemplate(category, itemLevel);
-  if (!template) return { dropped: false, reason: 'No template' };
+  const baseTemplate = pickItemTemplate(category, itemLevel);
+  if (!baseTemplate) return { dropped: false, reason: 'No template' };
 
-  return { dropped: true, template, itemLevel, quality, category };
+  const { prefix, suffix } = rollAffixesForQuality(quality, itemLevel);
+  const template = mergeAffixes(baseTemplate, prefix, suffix);
+
+  return { dropped: true, template, itemLevel, quality, category, prefix, suffix };
 }

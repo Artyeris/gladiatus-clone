@@ -31,23 +31,32 @@ export interface EffectiveStats {
 // Sum of base stats and stat bonuses contributed by equipped items,
 // clamped per stat at the character's max (base*2 + (level-1)*4). NPCs
 // have no items and no level-2 cap to hit, so they return unchanged.
+//
+// Item bonuses can be flat ("strength: 4") or percentage of the base
+// stat ("strengthPct: 11" -> floor(base * 0.11)); both stack, then the
+// cap is applied.
 export function effectiveStats(combatant: any): EffectiveStats {
   const items = getEquippedItems(combatant as CharacterInterface);
-  const sum = (key: keyof ItemInterface) =>
-    items.reduce((s, it) => s + ((it[key] as number | undefined) ?? 0), 0);
+
+  const sumKey = (key: string): number =>
+    items.reduce((s, it) => s + (((it as any)[key] as number | undefined) ?? 0), 0);
 
   const level = combatant.level ?? 1;
-  const cap = (base: number, raw: number) =>
-    Math.min(base + raw, statCap(base, level));
+  const compute = (statKey: string, base: number) => {
+    const flat = sumKey(statKey);
+    const pct = sumKey(statKey + 'Pct');
+    const pctBonus = pct === 0 ? 0 : Math.floor(base * pct / 100);
+    return Math.min(base + flat + pctBonus, statCap(base, level));
+  };
 
   return {
     level,
-    strength:     cap(combatant.strength ?? 5,     sum('strength')),
-    endurance:    cap(combatant.endurance ?? 5,    sum('endurance')),
-    agility:      cap(combatant.agility ?? 5,      sum('agility')),
-    dexterity:    cap(combatant.dexterity ?? 5,    sum('dexterity')),
-    intelligence: cap(combatant.intelligence ?? 5, sum('intelligence')),
-    charisma:     cap(combatant.charisma ?? 5,     sum('charisma')),
+    strength:     compute('strength',     combatant.strength ?? 5),
+    endurance:    compute('endurance',    combatant.endurance ?? 5),
+    agility:      compute('agility',      combatant.agility ?? 5),
+    dexterity:    compute('dexterity',    combatant.dexterity ?? 5),
+    intelligence: compute('intelligence', combatant.intelligence ?? 5),
+    charisma:     compute('charisma',     combatant.charisma ?? 5),
   };
 }
 
@@ -59,6 +68,10 @@ export interface CombatStats {
   strBonus: number;
   damageMin: number;
   damageMax: number;
+  // Aggregated affix bonuses surfaced for combatBreakdown.
+  blockChanceBonus: number;
+  critChanceBonus: number;
+  healthBonus: number;
 }
 
 export function calculateCombatStats(character: CharacterInterface): CombatStats {
@@ -67,6 +80,10 @@ export function calculateCombatStats(character: CharacterInterface): CombatStats
   let weaponMin = 0;
   let weaponMax = 0;
   let hasWeapon = false;
+  let damageBonus = 0;       // flat affix bonus added to weapon damage
+  let blockChanceBonus = 0;  // % added to block chance
+  let critChanceBonus = 0;   // % added to crit chance
+  let healthBonus = 0;       // flat HP bonus from affixes
 
   for (const it of items) {
     armor += it.armor ?? 0;
@@ -75,6 +92,10 @@ export function calculateCombatStats(character: CharacterInterface): CombatStats
       weaponMax += it.damage[1];
       hasWeapon = true;
     }
+    damageBonus      += (it as any).damageBonus       ?? 0;
+    blockChanceBonus += (it as any).blockChanceBonus  ?? 0;
+    critChanceBonus  += (it as any).critChanceBonus   ?? 0;
+    healthBonus      += (it as any).health            ?? 0;
   }
 
   // Use effective strength (base + item bonuses) so a strength ring lifts
@@ -106,16 +127,22 @@ export function calculateCombatStats(character: CharacterInterface): CombatStats
   }
 
   // Intrinsic NPC damage is already a final range from the enemy sheet,
-  // so don't stack the strength bonus on top of it.
+  // so don't stack the strength bonus on top of it. Player weapons get
+  // both the strBonus and any affix damageBonus rolled onto rings /
+  // amulets / weapons themselves.
   const strBonus = damageIsIntrinsic ? 0 : Math.floor(eff.strength / 10);
+  const flatDamageAdd = damageIsIntrinsic ? 0 : damageBonus;
 
   return {
     armor,
-    weaponMin,
-    weaponMax,
+    weaponMin: weaponMin + flatDamageAdd,
+    weaponMax: weaponMax + flatDamageAdd,
     hasWeapon,
     strBonus,
-    damageMin: weaponMin + strBonus,
-    damageMax: weaponMax + strBonus,
+    damageMin: weaponMin + flatDamageAdd + strBonus,
+    damageMax: weaponMax + flatDamageAdd + strBonus,
+    blockChanceBonus,
+    critChanceBonus,
+    healthBonus,
   };
 }

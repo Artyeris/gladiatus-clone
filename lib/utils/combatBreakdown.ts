@@ -67,19 +67,25 @@ export function combatBreakdown(combatant: any): CombatBreakdown {
   const baseDex = combatant.dexterity ?? BASE_STAT;
   const baseAgi = combatant.agility ?? BASE_STAT;
 
-  // Critical hit -- scales with dexterity.
+  // Critical hit -- scales with dexterity, plus a flat affix bonus
+  // (Critical Attack Value on items goes straight onto the chance %).
   const critValue = Math.floor(eff.dexterity / 10);
   const critFromBase = Math.floor(baseDex / 10);
   const critFromItems = Math.max(0, critValue - critFromBase);
-  const critChance = round1(capPercent((critValue * 52 / levelDivisor) / 5));
+  const critChance = round1(capPercent(
+    (critValue * 52 / levelDivisor) / 5 + (cs.critChanceBonus ?? 0),
+  ));
 
-  // Block -- scales with strength.
+  // Block -- scales with strength, plus the affix Block Value flat
+  // bonus to block chance.
   const blockValue = Math.floor(eff.strength / 10);
   const blockFromBase = Math.floor(baseStr / 10);
   const blockFromItems = Math.max(0, blockValue - blockFromBase);
-  const blockChance = round1(capPercent((blockValue * 52 / levelDivisor) / 6));
+  const blockChance = round1(capPercent(
+    (blockValue * 52 / levelDivisor) / 6 + (cs.blockChanceBonus ?? 0),
+  ));
 
-  // Avoid critical -- scales with agility.
+  // Avoid critical -- scales with agility (no affix support yet).
   const avoidCritValue = Math.floor(eff.agility / 10);
   const avoidCritFromBase = Math.floor(baseAgi / 10);
   const avoidCritFromItems = Math.max(0, avoidCritValue - avoidCritFromBase);
@@ -89,7 +95,7 @@ export function combatBreakdown(combatant: any): CombatBreakdown {
 
   return {
     level,
-    maxHP: calculateHP({ level, endurance: eff.endurance }),
+    maxHP: calculateHP({ level, endurance: eff.endurance }) + (cs.healthBonus ?? 0),
 
     damageMin: cs.damageMin,
     damageMax: cs.damageMax,

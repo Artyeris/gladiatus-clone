@@ -53,10 +53,19 @@ export function calculateStatBreakdown(
   const base = ((character[stat] as number | undefined) ?? BASE_STAT);
   const items = equippedItems.length > 0 ? equippedItems : getEquippedItems(character);
 
-  const rawFromItems = items.reduce(
+  const flatFromItems = items.reduce(
     (sum, item) => sum + ((item?.[stat] as number | undefined) ?? 0),
-    0
+    0,
   );
+  // Affix percentage bonuses (e.g. strengthPct: 11) are applied to the
+  // wearer's BASE stat, not the running total, so they don't snowball.
+  const pctKey = `${stat}Pct` as keyof ItemInterface;
+  const totalPct = items.reduce(
+    (sum, item) => sum + (((item as any)?.[pctKey] as number | undefined) ?? 0),
+    0,
+  );
+  const pctFromItems = totalPct === 0 ? 0 : Math.floor(base * totalPct / 100);
+  const rawFromItems = flatFromItems + pctFromItems;
 
   const levelBonus = Math.max(((character.level ?? 1) - 1) * 4, 0);
   const max = base * 2 + levelBonus;

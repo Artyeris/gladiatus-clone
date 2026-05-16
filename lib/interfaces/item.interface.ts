@@ -38,4 +38,21 @@ export interface ItemInterface {
   conditioning?: number,
   conditioningMax?: number,
   sellPrice?: number,
+
+  // Affix-rolled bonuses (see constants/affixes).
+  damageBonus?: number,
+  health?: number,
+  strengthPct?: number,
+  dexterityPct?: number,
+  agilityPct?: number,
+  endurancePct?: number,
+  charismaPct?: number,
+  intelligencePct?: number,
+  blockChanceBonus?: number,
+  critChanceBonus?: number,
+  // Dungeon-only, ignored by current combat.
+  threat?: number,
+  hardeningValue?: number,
+  healing?: number,
+  criticalHealingValue?: number,
 }

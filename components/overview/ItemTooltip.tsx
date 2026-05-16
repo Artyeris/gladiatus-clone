@@ -67,15 +67,49 @@ const ItemTooltip = ({ item, children }: ItemTooltipProps) => {
             <div>Damage <strong>{item.damage[0]} - {item.damage[1]}</strong></div>
           )}
 
-          {item.armor != null && (
-            <div>Armor <strong>{item.armor}</strong></div>
+          {(item as any).damageBonus ? (
+            <div>Damage bonus <strong>+{(item as any).damageBonus}</strong></div>
+          ) : null}
+
+          {item.armor != null && item.armor !== 0 && (
+            <div>Armor <strong>{item.armor > 0 ? '+' : ''}{item.armor}</strong></div>
           )}
 
-          {(['strength', 'endurance', 'agility', 'dexterity', 'intelligence', 'charisma'] as const).map((s) => {
-            const v = item[s];
-            if (!v) return null;
-            return <div key={s}>{STAT_LABELS[s]} <strong>+{v}</strong></div>;
+          {(['strength', 'dexterity', 'agility', 'endurance', 'charisma', 'intelligence'] as const).map((s) => {
+            const flat = item[s];
+            const pct = (item as any)[`${s}Pct`] as number | undefined;
+            if (!flat && !pct) return null;
+            const parts: string[] = [];
+            if (flat) parts.push(`${flat > 0 ? '+' : ''}${flat}`);
+            if (pct) parts.push(`${pct > 0 ? '+' : ''}${pct}%`);
+            return <div key={s}>{STAT_LABELS[s]} <strong>{parts.join(' / ')}</strong></div>;
           })}
+
+          {(item as any).health ? (
+            <div>Health <strong>+{(item as any).health}</strong></div>
+          ) : null}
+
+          {(item as any).blockChanceBonus ? (
+            <div>Block chance <strong>+{(item as any).blockChanceBonus}%</strong></div>
+          ) : null}
+
+          {(item as any).critChanceBonus ? (
+            <div>Critical chance <strong>+{(item as any).critChanceBonus}%</strong></div>
+          ) : null}
+
+          {/* Dungeon-only -- shown for completeness, ignored by current combat. */}
+          {(item as any).threat ? (
+            <div style={{ color: '#a08758' }}>Threat <strong>+{(item as any).threat}</strong></div>
+          ) : null}
+          {(item as any).hardeningValue ? (
+            <div style={{ color: '#a08758' }}>Hardening <strong>+{(item as any).hardeningValue}</strong></div>
+          ) : null}
+          {(item as any).healing ? (
+            <div style={{ color: '#a08758' }}>Healing <strong>+{(item as any).healing}</strong></div>
+          ) : null}
+          {(item as any).criticalHealingValue ? (
+            <div style={{ color: '#a08758' }}>Crit. heal <strong>+{(item as any).criticalHealingValue}</strong></div>
+          ) : null}
 
           <div>Level <strong>{item.level}</strong></div>
 
