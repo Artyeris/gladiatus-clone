@@ -629,6 +629,15 @@ export const SUFFIXES: AffixDef[] = [
   p('of Broken Oaths',         108, 'Agility +31; Healing +300; Critical Healing Value +62; Health +41'),
   p('of Swordplay',            110, 'Armour +210; Strength -10%; Agility -12%; Charisma +12; Charisma +11%; Intelligence +49; Intelligence +29%; Healing +485; Critical Healing Value +89; Health +77'),
   p('of Ramparts',             112, 'Damage +14; Armour +695; Strength +35; Strength +21%; Constitution +18; Charisma -18%; Intelligence -8; Critical Attack Value +19; Hardening Value +18; Threat +110; Health +82'),
+  p('of Absolution',           115, 'Armour +756; Dexterity +12; Agility +24; Constitution -19; Charisma +33; Intelligence +16; Healing +39; Critical Attack Value +19; Health +85'),
+  p('of Exultation',           117, 'Damage +7; Armour +480; Strength +43; Intelligence +22%; Health +75'),
+  p('of Justice',              120, 'Damage +18; Armour +61; Strength +38; Intelligence -20%; Critical Attack Value -9; Blocking Value +40'),
+  p('of Menace',               122, 'Damage +9; Armour +745; Dexterity +21; Dexterity -6%; Agility +22%; Constitution +20%; Charisma -10%; Critical Attack Value +20; Threat +38'),
+  p('of Heroism',              125, 'Armour +90; Dexterity -7%; Agility +33; Charisma +21%; Intelligence +47; Healing +554; Critical Healing Value +70; Blocking Value +81'),
+  p('of Resolve',              127, 'Damage +8; Armour +828; Strength +51; Dexterity +29%; Constitution +39; Constitution +9%; Hardening Value +25; Blocking Value +61'),
+  p('of Ascendency',           130, 'Armour +375; Strength -8%; Dexterity +23; Agility +38; Charisma +19; Charisma +39%; Health +1025'),
+  p('of Hazard',               132, 'Armour +56; Agility +37; Healing +312; Critical Healing Value +65; Threat +80'),
+  p('of Force',                132, 'Damage +12; Armour +812; Strength +19%; Dexterity +19%; Agility +19%; Constitution -18%; Charisma +39; Critical Attack Value +21; Blocking Value +59'),
 ];
 
 // Pick the highest-level affix in `pool` that the item can use (level
