@@ -17,12 +17,6 @@ export function championHourlyGold(tier: ArenaTier): number {
   return 20 * tierLevel(tier) + 100;
 }
 
-// Hourly XP for the champion -- modest so it doesn't shove them out of
-// the bracket too fast.
-export function championHourlyExp(tier: ArenaTier): number {
-  return Math.max(1, Math.floor(tierLevel(tier) / 5));
-}
-
 // How much pot accumulates per real hour. Late-game brackets grow much
 // faster -- 50 + level^2 * 0.8 per the design notes.
 export function potGrowthPerHour(tier: ArenaTier): number {
@@ -54,30 +48,28 @@ export function growPot(pot: any, tier: ArenaTier): number {
 
 export interface SalaryDelta {
   gold: number;
-  exp: number;
 }
 
-// Computes how much salary (gold + exp) the champion has accrued since
+// Computes how much salary (gold) the champion has accrued since
 // their last claim, updates `lastSalaryAt`, and returns the delta.
 // Pays in 1-game-hour chunks so background ticks don't spawn a steady
 // drizzle of single-coin notifications -- the leftover keeps accruing
 // against `lastSalaryAt` until the next full hour rolls in.
 export function claimChampionSalary(pot: any, tier: ArenaTier): SalaryDelta {
-  if (!pot.championId) return { gold: 0, exp: 0 };
+  if (!pot.championId) return { gold: 0 };
   const hours = gameHoursSince(pot.lastSalaryAt ?? pot.championBecameAt);
   const wholeHours = Math.floor(hours);
   if (wholeHours <= 0) {
     if (!pot.lastSalaryAt) pot.lastSalaryAt = new Date();
-    return { gold: 0, exp: 0 };
+    return { gold: 0 };
   }
   const gold = wholeHours * championHourlyGold(tier);
-  const exp = wholeHours * championHourlyExp(tier);
   // Advance the clock by exactly the hours we paid for so partial
   // accrual carries over to the next claim.
   const realHoursPaid = wholeHours / SERVER_SPEED;
   const base = pot.lastSalaryAt ?? pot.championBecameAt ?? new Date();
   pot.lastSalaryAt = new Date(new Date(base).getTime() + realHoursPaid * 3_600_000);
-  return { gold, exp };
+  return { gold };
 }
 
 // Reset the pot record onto a fresh champion. Caller has already

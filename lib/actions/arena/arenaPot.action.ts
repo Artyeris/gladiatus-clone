@@ -6,7 +6,6 @@ import { connectToDB } from '@/lib/mongoose';
 import { ArenaTier, getArenaTier, tierLevelRange } from '@/lib/utils/arena';
 import { growPot, claimChampionSalary } from '@/lib/utils/arenaPot';
 import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
-import { calculateExperience } from '@/lib/utils/characterUtils';
 
 // Returns the current top character in a tier (highest honor in the
 // tier's level range). Null when nobody is in the bracket yet.
@@ -63,14 +62,14 @@ export async function getOrCreatePot(tier: ArenaTier) {
   return pot;
 }
 
-// Champion claims accrued hourly salary. Returns {gold, exp} actually
+// Champion claims accrued hourly salary. Returns the gold actually
 // awarded. Safe to call for anyone; if they're not the champion it
 // no-ops.
 export async function claimSalaryFor(characterId: any, tier: ArenaTier) {
   await connectToDB();
   const pot = await getOrCreatePot(tier);
   if (!pot.championId || String(pot.championId) !== String(characterId)) {
-    return { gold: 0, exp: 0 };
+    return { gold: 0 };
   }
   const delta = claimChampionSalary(pot, tier);
   await pot.save();
@@ -82,11 +81,10 @@ export async function claimSalaryFor(characterId: any, tier: ArenaTier) {
 // (caller must save it) and drops a single "Champion salary" message
 // per claim into their inbox -- never raises a UI toast. Skipped when
 // the user isn't actually #1, or when less than a full game-hour has
-// accrued since the last claim.
+// accrued since the last claim. Pays gold only -- no XP, so a long
+// champion run can't shove the player out of their bracket.
 export async function tickChampionSalary(character: any): Promise<{
   gold: number;
-  exp: number;
-  leveledUp: boolean;
 } | null> {
   if (!character?._id) return null;
   await connectToDB();
@@ -97,7 +95,7 @@ export async function tickChampionSalary(character: any): Promise<{
   }
 
   const delta = claimChampionSalary(pot, tier);
-  if (delta.gold === 0 && delta.exp === 0) {
+  if (delta.gold === 0) {
     // Persist the lastSalaryAt advance so the clock initialises even
     // before the first hourly payment.
     if (pot.isModified()) await pot.save();
@@ -105,17 +103,6 @@ export async function tickChampionSalary(character: any): Promise<{
   }
 
   character.crowns = (character.crowns ?? 0) + delta.gold;
-  let exp = (character.experience ?? 0) + delta.exp;
-  let level = character.level ?? 1;
-  let leveledUp = false;
-  while (exp >= calculateExperience(level)) {
-    exp -= calculateExperience(level);
-    level += 1;
-    leveledUp = true;
-  }
-  character.experience = exp;
-  if (leveledUp) character.level = level;
-
   await pot.save();
 
   try {
@@ -123,12 +110,11 @@ export async function tickChampionSalary(character: any): Promise<{
       String(character._id),
       'system',
       `Champion salary -- ${tier.name}`,
-      `You earned ${delta.gold} crowns and ${delta.exp} XP for holding the champion seat in ${tier.name}.` +
-        (leveledUp ? `\n\nYou levelled up to ${character.level}!` : ''),
+      `You earned ${delta.gold} crowns for holding the champion seat in ${tier.name}.`,
     );
   } catch (err) {
     console.log(`${new Date()} - champion salary message failed - ${err}`);
   }
 
-  return { ...delta, leveledUp };
+  return delta;
 }

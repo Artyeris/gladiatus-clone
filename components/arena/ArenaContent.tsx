@@ -22,7 +22,6 @@ interface ArenaPotInfo {
   championName: string | null;
   growthPerHour: number;
   salaryPerHour: number;
-  expPerHour: number;
 }
 
 interface ArenaContentProps {
@@ -97,7 +96,7 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaConten
             </div>
             <div className='text-xs opacity-80'>
               Pot grows by <strong>{pot.growthPerHour}</strong>/h &middot; champion earns{' '}
-              <strong>{pot.salaryPerHour}</strong> gold + <strong>{pot.expPerHour}</strong> XP/h
+              <strong>{pot.salaryPerHour}</strong> gold/h
               {isMyChampion && <span className='italic ml-1'>(paid on each visit)</span>}
             </div>
           </div>

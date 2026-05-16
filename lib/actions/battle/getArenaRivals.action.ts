@@ -8,7 +8,7 @@ import { extractUserId } from '@/lib/utils';
 import { getArenaTier, tierLevelRange } from '@/lib/utils/arena';
 import { ensureArenaBots } from '@/lib/actions/arena/seedBots.action';
 import { getOrCreatePot } from '@/lib/actions/arena/arenaPot.action';
-import { potGrowthPerHour, championHourlyGold, championHourlyExp } from '@/lib/utils/arenaPot';
+import { potGrowthPerHour, championHourlyGold } from '@/lib/utils/arenaPot';
 import { cookies } from 'next/headers';
 
 export async function getArenaRivals() {
@@ -100,7 +100,6 @@ export async function getArenaRivals() {
         championName: pot.championName ?? null,
         growthPerHour: potGrowthPerHour(tier),
         salaryPerHour: championHourlyGold(tier),
-        expPerHour: championHourlyExp(tier),
       },
     }));
   } catch (error) {
