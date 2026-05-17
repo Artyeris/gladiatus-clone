@@ -21,9 +21,17 @@ const GameNavbar = () => {
   return (
     <>
       <Link
-        className='fixed top-2 left-4 text-lg font-semibold text-cream2 cursor-pointer hidden sm:flex drop-shadow-lg z-[998]'
+        className='fixed top-2 left-5 cursor-pointer hidden sm:flex z-[998]'
         href='/game/overview'
-        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}
+        style={{
+          fontFamily: "var(--font-cinzel), 'Cinzel', 'Trajan Pro', 'Times New Roman', serif",
+          fontSize: '28px',
+          fontWeight: 700,
+          letterSpacing: '0.18em',
+          color: '#e6b749',
+          textShadow:
+            '0 1px 0 #3e2714, 0 2px 0 #5c3a21, 0 4px 10px rgba(0,0,0,0.85), 0 0 18px rgba(167, 100, 56, 0.55)',
+        }}
       >
         Gladiatus
       </Link>

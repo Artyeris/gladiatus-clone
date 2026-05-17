@@ -74,7 +74,7 @@ const CooldownTimer = ({ name, message, cooldown, characterLastBattle, redirect 
             boxShadow: "0px -5px 5px rgba(0, 0, 0, 0.5)"
           }}
         />
-        <span className={`progress-percent text-gold font-semibold ${progressPercentage >= 100 && 'w-full pl-2'}`}>
+        <span className='progress-percent text-gold font-semibold whitespace-nowrap'>
           {progressPercentage >= 100 ? message : formatTime(timeRemaining)}
         </span>
       </div>
