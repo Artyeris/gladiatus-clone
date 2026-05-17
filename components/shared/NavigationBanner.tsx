@@ -6,10 +6,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { expeditionRoutes, generalRoutes, villageRoutes } from '@/constants/routes';
+import { expeditions } from '@/constants/expeditions';
 
 type Tab = 'town' | 'expedition';
 
-const NavigationBanner = () => {
+interface Props {
+  characterLevel?: number;
+}
+
+const NavigationBanner = ({ characterLevel = 1 }: Props) => {
   const pathname = usePathname();
   const isOnboarding = pathname === '/onboarding';
 
@@ -33,7 +38,6 @@ const NavigationBanner = () => {
       }}
     >
       <div className='flex flex-col gap-2 w-[180px] mt-16'>
-        <SectionHeader>General</SectionHeader>
         {generalRoutes.map((route) => (
           <NavLink
             key={route.name}
@@ -69,14 +73,22 @@ const NavigationBanner = () => {
           ))}
 
         {tab === 'expedition' &&
-          expeditionRoutes.map((route) => (
-            <NavLink
-              key={route.name}
-              href={`/game/expeditions${route.link}`}
-              label={route.name}
-              active={isRouteActive(route.link)}
-            />
-          ))}
+          expeditionRoutes.map((route) => {
+            const slug = route.link.replace(/^\//, '');
+            const info = expeditions[slug];
+            const required = info?.entryLevel ?? 1;
+            const locked = characterLevel < required;
+            return (
+              <NavLink
+                key={route.name}
+                href={`/game/expeditions${route.link}`}
+                label={route.name}
+                active={isRouteActive(route.link)}
+                locked={locked}
+                requirement={locked ? `from level ${required}` : undefined}
+              />
+            );
+          })}
       </div>
     </div>
   );
@@ -84,22 +96,34 @@ const NavigationBanner = () => {
 
 export default NavigationBanner;
 
-function SectionHeader({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className='text-center font-semibold text-cream2 text-sm uppercase tracking-wider drop-shadow opacity-90 border-b border-cream2/30 pb-1'>
-      {children}
-    </h2>
-  );
-}
-
 function NavLink({
-  href, label, active,
-}: { href: string; label: string; active: boolean }) {
-  // Both states share the same wrapper height/padding so toggling active
-  // never makes the row jump or change perceived size. Only the
-  // background swaps: red-card pill when inactive, marked banner when
-  // active. The marked.webp is overlaid on a solid red-card base so the
-  // sidebar art behind never bleeds through and skews the look.
+  href, label, active, locked, requirement,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  locked?: boolean;
+  requirement?: string;
+}) {
+  // Locked rows render as a non-clickable stub with a small requirement
+  // subtitle (mirrors the original Gladiatus expedition sidebar which
+  // shows greyed entries and "from level N" below them).
+  if (locked) {
+    return (
+      <div
+        className='relative h-9 w-full flex flex-col items-center justify-center rounded-sm red-card opacity-50 select-none cursor-not-allowed'
+        title={requirement ? `Unlocks ${requirement}` : 'Locked'}
+      >
+        <span className='text-cream2 font-semibold text-sm tracking-wide line-through'>{label}</span>
+        {requirement && (
+          <span className='text-cream2 text-[9px] font-normal opacity-90 -mt-1'>
+            {requirement}
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <Link
       href={href}

@@ -177,9 +177,10 @@ body::-webkit-scrollbar {
 }
 
 .general-button {
-  background-color: #b59964;
-  outline: 2px solid #b59964;
+  background-color: #8d7144;
+  outline: 2px solid #8d7144;
   border: 2px solid #eedfb8;
+  color: #f7eccc;
 }
 
 .brown-card {

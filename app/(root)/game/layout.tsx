@@ -22,8 +22,8 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         }}
       />
       <GameNavbar />
-      <div className='w-full h-min-full flex flex-row justify-center gap-6'>
-        <NavigationBanner />
+      <div className='w-full h-min-full flex flex-row justify-center gap-6 pt-14'>
+        <NavigationBanner characterLevel={user.character?.level ?? 1} />
         <div className='flex flex-col items-center h-min-full'>
           <GameHeader user={user} />
           <div className='h-min-full main-cream-card w-[720px] flex-grow py-4'>
@@ -33,7 +33,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         </div>
       </div>
       <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none'>
-        v0.14
+        v0.15
       </span>
     </div>
   );

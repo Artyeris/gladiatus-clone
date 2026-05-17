@@ -69,7 +69,7 @@ const WorkContent = ({ character }: Props) => {
     const res = await claimWorkAction();
     setBusy(false);
     if (res?.error) return toast.error(res.error.message);
-    toast.success(`Earned ${res.reward} crowns`);
+    toast.success(`Earned ${res.reward} gold`);
     router.refresh();
   };
 

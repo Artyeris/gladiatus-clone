@@ -31,6 +31,8 @@ import {
   migrateLegacyInventory,
   placeItem,
 } from '@/lib/utils/inventory/grid';
+import Package from '@/lib/models/package.model';
+import { SHOP_LABELS } from '@/lib/utils/shopRotation';
 
 async function getMyCharacter() {
   const token = cookies().get(COOKIE_NAME);
@@ -191,31 +193,28 @@ export async function buyFromShop({
 
     const price = buyPriceFor(item);
     if ((character.crowns ?? 0) < price) {
-      return { error: { message: `Need ${price} crowns to buy this` } };
+      return { error: { message: `Need ${price} gold to buy this` } };
     }
 
-    // Find a spot in the player's bags first; bail before deducting
-    // gold if there's no room anywhere.
-    const entries = loadInventoryEntries(character);
-    const spot = findFreePositionAnyBag(entries, item);
-    if (!spot) return { error: { message: 'Inventory full -- no room across any bag' } };
-
     character.crowns = (character.crowns ?? 0) - price;
-    item.owner = character._id;
-    await item.save();
-
-    const next = placeItem(entries, item, spot.x, spot.y, spot.bag);
-    character.inventory = serializeInventory(next);
-    character.markModified('inventory');
     await character.save();
+
+    // Shop purchases ship to the player's Packages mailbox rather than
+    // landing in the bag directly. Player ferries them out from there.
+    await Package.create({
+      owner: character._id,
+      item: item._id,
+      source: 'shop',
+      detail: SHOP_LABELS[shopType as keyof typeof SHOP_LABELS] ?? 'Shop',
+    });
 
     shop.slots[slotIndex] = { item: null };
     shop.markModified('slots');
     await shop.save();
 
     revalidatePath(`/game/shop/${shopType}`);
-    revalidatePath('/game/overview');
-    return { ok: true, price, itemName: item.name, bag: spot.bag };
+    revalidatePath('/game/packages');
+    return { ok: true, price, itemName: item.name };
   } catch (err: any) {
     console.log(`${new Date()} - buyFromShop(${shopType}) failed - ${err}`);
     return { error: { message: err?.message || 'Purchase failed' } };

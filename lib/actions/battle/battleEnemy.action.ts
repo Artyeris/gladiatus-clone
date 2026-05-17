@@ -20,12 +20,7 @@ import {
   enemyTypeFromIndex,
   rollExpeditionDrop,
 } from '@/lib/utils/expeditionDrop';
-import {
-  InventoryEntry,
-  findFreePosition,
-  migrateLegacyInventory,
-  placeItem,
-} from '@/lib/utils/inventory/grid';
+import Package from '@/lib/models/package.model';
 import { revalidatePath } from 'next/cache';
 
 interface BattleEnemyParams {
@@ -141,6 +136,9 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
       });
       if (drop.dropped && drop.template) {
         try {
+          // Expedition drops ship to the player's Packages mailbox rather
+          // than landing in the bag directly. Owner is set to the player
+          // immediately so cleanup can't accidentally reap it.
           const created = await Item.create({
             ...drop.template,
             level: drop.itemLevel ?? drop.template.level,
@@ -151,38 +149,18 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
             created.id = `${drop.template.itemId}-${created._id}`;
             await created.save();
           }
-
-          const migrated = migrateLegacyInventory(character.inventory);
-          const entries: InventoryEntry[] = migrated
-            ? migrated
-            : (Array.isArray(character.inventory)
-              ? (character.inventory as any[]).map((e: any) => ({
-                  item: e?.item, x: e?.x ?? 0, y: e?.y ?? 0,
-                }))
-              : []);
-
-          const free = findFreePosition(entries, created);
-          if (free) {
-            const next = placeItem(entries, created, free.x, free.y);
-            // Direct assignment (instead of doc.set(path, value)) so
-            // Mongoose change-tracking on the array reliably persists.
-            character.inventory = next.map((e) => ({
-              item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
-              x: e.x,
-              y: e.y,
-              bag: e.bag ?? 0,
-            }));
-            character.markModified('inventory');
-            character.itemsFound = (character.itemsFound ?? 0) + 1;
-            droppedItemSummary = {
-              name: created.name,
-              quality: created.quality ?? 'common',
-              image: created.image,
-            };
-          } else {
-            // Inventory full -- drop on floor (delete the item).
-            await Item.findByIdAndDelete(created._id);
-          }
+          await Package.create({
+            owner: character._id,
+            item: created._id,
+            source: 'expedition',
+            detail: `${expeditionName} - ${enemyName}`,
+          });
+          character.itemsFound = (character.itemsFound ?? 0) + 1;
+          droppedItemSummary = {
+            name: created.name,
+            quality: created.quality ?? 'common',
+            image: created.image,
+          };
         } catch (err) {
           console.log(`${new Date()} - Failed to apply expedition drop - ${err}`);
         }
@@ -260,6 +238,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     } catch {}
 
     revalidatePath('/game/expeditions');
+    revalidatePath('/game/packages');
     return JSON.parse(JSON.stringify(savedBattleReport._id));
 
   } catch (error) {

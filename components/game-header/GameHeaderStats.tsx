@@ -10,27 +10,27 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
   return (
     <div className='flex flex-col gap-[2px] brown-card w-full h-[79px] drop-shadow-2xl items-center justify-center rounded-sm'>
       <div className='flex flex-row w-full font-semibold text-sm text-red3 px-1 pl-2'>
-        <div className='flex items-center gap-1 w-28'>
-          <Image 
+        <div className='flex items-center gap-1 w-20' title='Gold'>
+          <Image
             src={'/images/crowns.png'}
             width={13}
             height={13}
-            alt='crowns' style={{ width: 'auto', height: 'auto' }}
+            alt='gold' style={{ width: 'auto', height: 'auto' }}
           />
-          <span>
-            {character.crowns}
-          </span>
+          <span>{character.crowns}</span>
+        </div>
+        <div className='flex items-center gap-1 w-16' title='Diamonds (premium)'>
+          <span className='inline-block w-[12px] h-[12px] rounded-[1px] bg-[#7ad0ff] border border-[#3a8fb7] drop-shadow' />
+          <span>{(character as any).diamonds ?? 0}</span>
         </div>
         <div className='flex items-center gap-1'>
-          <Image 
+          <Image
             src={'/images/power-rank.png'}
             width={13}
             height={13}
             alt='power rank' style={{ width: 'auto', height: 'auto' }}
           />
-          <span>
-            {calculatePower(character)}
-          </span>
+          <span>{calculatePower(character)}</span>
         </div>
       </div>
       <div className='border-b-cream2 border-b-[3px] w-full' />

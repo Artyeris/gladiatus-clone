@@ -12,6 +12,11 @@ import ItemTypeFilter, {
   matchesType,
   type ItemTypeFilterValue,
 } from '@/components/shared/ItemTypeFilter';
+import QualityFilter, {
+  countByQuality,
+  matchesQuality,
+  type QualityFilterValue,
+} from '@/components/shared/QualityFilter';
 import SortStrip, { type SortMode } from '@/components/shared/SortStrip';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
@@ -68,10 +73,11 @@ const AuctionContent = ({ character, auctions }: Props) => {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
+  const [qualityFilter, setQualityFilter] = useState<QualityFilterValue>('all');
   const [sortBy, setSortBy] = useState<SortMode>('default');
 
   const filteredAuctions = auctions
-    .filter((a) => matchesType(a.item, typeFilter))
+    .filter((a) => matchesType(a.item, typeFilter) && matchesQuality(a.item, qualityFilter))
     .slice()
     .sort((a, b) => {
       if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
@@ -131,6 +137,11 @@ const AuctionContent = ({ character, auctions }: Props) => {
           value={typeFilter}
           onChange={setTypeFilter}
           counts={countByType(auctions.map((a) => a.item))}
+        />
+        <QualityFilter
+          value={qualityFilter}
+          onChange={setQualityFilter}
+          counts={countByQuality(auctions.map((a) => a.item))}
         />
         <SortStrip value={sortBy} onChange={setSortBy} />
         {filteredAuctions.length === 0 ? (

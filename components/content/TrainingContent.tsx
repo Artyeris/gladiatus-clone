@@ -71,7 +71,7 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
           title='Training'
         >
           <p>
-            Within the city&apos;s barracks, you can observe robust soldiers training, who are willing to impart their skills in exchange for a generous sum of crowns.
+            Within the city&apos;s barracks, you can observe robust soldiers training, who are willing to impart their skills in exchange for a generous sum of gold.
           </p>
           <div className='flex items-center gap-1'>
             Your balance: {currentCharacter.crowns}

@@ -3,9 +3,9 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { logOutUser } from '@/lib/actions/user/logOut.action';
-import { Github, LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
-import { redirect, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 const GameNavbar = () => {
   const pathname = usePathname();
@@ -23,13 +23,6 @@ const GameNavbar = () => {
         Gladiatus Clone
       </Link>
       <div className='flex items-center gap-4'>
-        <div className='flex gap-4'>
-          <span className='text-cream2 hover:text-gold transition'>
-            <Link href='https://github.com/BautistaTosolini/gladiatus-clone'>
-              <Github />
-            </Link>
-          </span>
-        </div>
         {pathname !== '/onboarding' &&
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

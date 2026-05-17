@@ -15,6 +15,18 @@ const characterSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  diamonds: {
+    type: Number,
+    default: 0,
+  },
+  // Rewards bookkeeping. Stores the last claim date for each cadence so
+  // the next-claim window can be computed without scanning a history.
+  // dailyStreak tracks consecutive day-bonus claims so monthly (28-in-a-
+  // -row) rewards can fire.
+  lastDailyClaim:   { type: Date, default: null },
+  lastWeeklyClaim:  { type: Date, default: null },
+  lastMonthlyClaim: { type: Date, default: null },
+  dailyStreak:      { type: Number, default: 0 },
   level: {
     type: Number,
     default: 1,

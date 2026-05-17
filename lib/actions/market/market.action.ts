@@ -20,6 +20,7 @@ import {
 } from '@/lib/utils/inventory/grid';
 import { tickBotMarket } from '@/lib/actions/arena/botMarketTick.action';
 import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
+import Package from '@/lib/models/package.model';
 
 function loadEntries(character: any): InventoryEntry[] {
   const inv = character.inventory;
@@ -176,46 +177,35 @@ export async function buyMarketListing({ listingId }: { listingId: string }) {
     }
 
     if ((buyer.crowns ?? 0) < listing.price) {
-      return { error: { message: 'Not enough crowns' } };
+      return { error: { message: 'Not enough gold' } };
     }
 
-    let buyerEntries = loadEntries(buyer);
-    const free = findFreePosition(buyerEntries, item);
-    if (!free) return { error: { message: 'No room in your inventory' } };
-
     const seller = await Character.findById(listing.seller);
-    if (!seller) {
-      // Seller gone -- transfer item but no payout possible.
-      buyerEntries = placeItem(buyerEntries, item, free.x, free.y);
-      buyer.crowns = (buyer.crowns ?? 0) - listing.price;
-    } else {
-      buyerEntries = placeItem(buyerEntries, item, free.x, free.y);
-      buyer.crowns = (buyer.crowns ?? 0) - listing.price;
+    buyer.crowns = (buyer.crowns ?? 0) - listing.price;
+    if (seller) {
       seller.crowns = (seller.crowns ?? 0) + listing.price;
       await seller.save();
       await sendMessageToCharacter(
         String(seller._id),
         'market',
         'Your item was sold.',
-        `Your listing for ${item.name} sold for ${listing.price} crowns. The gold has been credited to your purse.`,
+        `Your listing for ${item.name} sold for ${listing.price} gold. The gold has been credited to your purse.`,
       );
     }
 
-    item.owner = buyer._id;
-    await item.save();
-
-    buyer.set('inventory', buyerEntries.map((e) => ({
-      item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
-      x: e.x,
-      y: e.y,
-      bag: e.bag ?? 0,
-    })));
-    buyer.markModified('inventory');
     await buyer.save();
+
+    await Package.create({
+      owner: buyer._id,
+      item: item._id,
+      source: 'market',
+      detail: `Bought for ${listing.price} gold`,
+    });
+
     await listing.deleteOne();
 
     revalidatePath('/game/market');
-    revalidatePath('/game/overview');
+    revalidatePath('/game/packages');
     return { ok: true };
   } catch (error: any) {
     console.log(`${new Date()} - buyMarketListing failed - ${error}`);

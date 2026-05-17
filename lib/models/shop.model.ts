@@ -7,7 +7,7 @@ const shopSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    enum: ['goods', 'armor', 'weapons'],
+    enum: ['goods', 'armor', 'weapons', 'alchemist'],
   },
   slots: [{
     _id: false,

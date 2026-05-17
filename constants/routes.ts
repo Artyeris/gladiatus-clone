@@ -4,24 +4,20 @@ export const generalRoutes = [
     link: '/overview',
   },
   {
-    name: 'Messages',
-    link: '/messages',
-  },
-  {
-    name: 'Reports',
-    link: '/reports',
-  },
-  {
     name: 'Highscore',
     link: '/highscore',
   },
   {
-    name: 'Quests',
-    link: '/quests',
+    name: 'Rewards',
+    link: '/rewards',
   },
 ]
 
 export const villageRoutes = [
+  {
+    name: 'Quests',
+    link: '/quests',
+  },
   {
     name: 'Work',
     link: '/work',
@@ -45,6 +41,10 @@ export const villageRoutes = [
   {
     name: 'General Goods',
     link: '/shop/goods',
+  },
+  {
+    name: 'Alchemist',
+    link: '/shop/alchemist',
   },
   {
     name: 'Auction',

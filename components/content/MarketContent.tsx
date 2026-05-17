@@ -14,6 +14,11 @@ import ItemTypeFilter, {
   matchesType,
   type ItemTypeFilterValue,
 } from '@/components/shared/ItemTypeFilter';
+import QualityFilter, {
+  countByQuality,
+  matchesQuality,
+  type QualityFilterValue,
+} from '@/components/shared/QualityFilter';
 import SortStrip, { type SortMode } from '@/components/shared/SortStrip';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
@@ -86,10 +91,11 @@ function Board({ character, listings }: Props) {
   const [price, setPrice] = useState<string>('');
   const [busy, setBusy] = useState(false);
   const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
+  const [qualityFilter, setQualityFilter] = useState<QualityFilterValue>('all');
   const [sortBy, setSortBy] = useState<SortMode>('default');
 
   const filteredListings = listings
-    .filter((l) => matchesType(l.item, typeFilter))
+    .filter((l) => matchesType(l.item, typeFilter) && matchesQuality(l.item, qualityFilter))
     .slice()
     .sort((a, b) => {
       if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
@@ -184,6 +190,11 @@ function Board({ character, listings }: Props) {
           value={typeFilter}
           onChange={setTypeFilter}
           counts={countByType(listings.map((l) => l.item))}
+        />
+        <QualityFilter
+          value={qualityFilter}
+          onChange={setQualityFilter}
+          counts={countByQuality(listings.map((l) => l.item))}
         />
         <SortStrip value={sortBy} onChange={setSortBy} />
         {filteredListings.length === 0 ? (

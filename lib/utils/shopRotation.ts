@@ -3,26 +3,29 @@
 // SHOP_REFRESH_INTERVAL real milliseconds (lazy: regenerated on the
 // next visit after the timer expires).
 
-export type ShopType = 'goods' | 'armor' | 'weapons';
+export type ShopType = 'goods' | 'armor' | 'weapons' | 'alchemist';
 
-export const SHOP_TYPES: ShopType[] = ['goods', 'armor', 'weapons'];
+export const SHOP_TYPES: ShopType[] = ['goods', 'armor', 'weapons', 'alchemist'];
 
 export const SHOP_LABELS: Record<ShopType, string> = {
-  goods:   'General Goods',
-  armor:   'Armour Smith',
-  weapons: 'Weapon Smith',
+  goods:     'General Goods',
+  armor:     'Armour Smith',
+  weapons:   'Weapon Smith',
+  alchemist: 'Alchemist',
 };
 
 export const SHOP_TAGLINES: Record<ShopType, string> = {
-  goods:   'Gloves, boots, cloaks, rings and amulets, hauled in from every road.',
-  armor:   'Helmets, chestpieces, leggings and shields, hammered fresh today.',
-  weapons: 'Steel for every grip -- daggers, swords, axes, spears.',
+  goods:     'Gloves, boots and cloaks hauled in from every road.',
+  armor:     'Helmets, chestpieces, leggings and shields, hammered fresh today.',
+  weapons:   'Steel for every grip -- daggers, swords, axes, spears.',
+  alchemist: 'Rings and amulets, charged with quiet enchantments.',
 };
 
 export const SHOP_CATEGORIES: Record<ShopType, string[]> = {
-  goods:   ['gloves', 'boots', 'cloak', 'ring', 'necklace'],
-  armor:   ['head', 'chest', 'legs', 'offHand'],
-  weapons: ['mainHand'],
+  goods:     ['gloves', 'boots', 'cloak'],
+  armor:     ['head', 'chest', 'legs', 'offHand'],
+  weapons:   ['mainHand'],
+  alchemist: ['ring', 'necklace'],
 };
 
 // Real Gladiatus restocks every ~5 hours. On a 5x server that's 1

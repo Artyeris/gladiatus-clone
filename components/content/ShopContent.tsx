@@ -49,13 +49,13 @@ const ShopContent = ({ shop, character, title, tagline, refreshCost }: Props) =>
     const res = await buyFromShop({ shopType: shop.shopType, slotIndex });
     setBusy(false);
     if (res?.error) return toast.error(res.error.message);
-    toast.success(`Bought ${res.itemName} for ${res.price} crowns`);
+    toast.success(`Bought ${res.itemName} for ${res.price} gold - delivered to Packages`);
     router.refresh();
   };
 
   const onRefresh = async () => {
-    if ((character.crowns ?? 0) < refreshCost) return toast.error(`Need ${refreshCost} crowns`);
-    if (!confirm(`Restock for ${refreshCost} crowns now?`)) return;
+    if ((character.crowns ?? 0) < refreshCost) return toast.error(`Need ${refreshCost} gold`);
+    if (!confirm(`Restock for ${refreshCost} gold now?`)) return;
     setBusy(true);
     const res = await forceRefreshShop(shop.shopType);
     setBusy(false);
@@ -91,7 +91,7 @@ const ShopContent = ({ shop, character, title, tagline, refreshCost }: Props) =>
             disabled={busy}
             className='general-button px-3 py-1 rounded-sm text-xs font-semibold w-fit hover:brightness-110 disabled:opacity-50 mt-1'
           >
-            Restock now ({refreshCost} crowns)
+            Restock now ({refreshCost} gold)
           </button>
         </div>
       </div>

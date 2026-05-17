@@ -130,7 +130,10 @@ export const items = {
 
   // ----- Cloak (2x2) -----
   travelers_cloak:  armor('travelers_cloak',  'Traveler’s Cloak', 'travelers-cloak', 'cloak', 1,  2,  25, [2, 2]),
+  hooded_cape:      armor('hooded_cape',      'Hooded Cape',      'hooded-cape',      'cloak', 2,  4,  80, [2, 2], 'green'),
   fur_mantle:       armor('fur_mantle',       'Fur Mantle',       'fur-mantle',       'cloak', 4, 10, 280, [2, 2], 'green'),
+  scout_cloak:      armor('scout_cloak',      'Scout Cloak',      'scout-cloak',      'cloak', 5, 12, 360, [2, 2], 'blue', { agility: 2 }),
+  imperial_cloak:   armor('imperial_cloak',   'Imperial Cloak',   'imperial-cloak',   'cloak', 7, 16, 620, [2, 2], 'blue_plus', { charisma: 3, endurance: 2 }),
 
   // ----- Rings (1x1) -----
   ocher_ring:       trinket('ocher_ring',       'Ocher Ring',       'ocher-ring',       'ring', 1, 100, { strength: 2, intelligence: 3 }),

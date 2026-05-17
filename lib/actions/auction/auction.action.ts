@@ -23,6 +23,7 @@ import {
   newAuctionEndsAt,
 } from '@/lib/utils/auction';
 import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
+import Package from '@/lib/models/package.model';
 
 const POOL_SIZE = 12;
 
@@ -103,22 +104,18 @@ async function settleExpiredAuctions() {
       const winner = await Character.findById(auction.highestBidder);
       const item = await Item.findById(auction.item);
       if (winner && item) {
-        const winnerEntries = loadEntries(winner);
-        const free = findFreePosition(winnerEntries, item);
-        if (free) {
-          const next = placeItem(winnerEntries, item, free.x, free.y);
-          winner.set('inventory', serializeInventory(next));
-          winner.markModified('inventory');
-          item.owner = winner._id;
-          await item.save();
-          await winner.save();
-          await sendMessageToCharacter(
-            String(winner._id),
-            'auction',
-            'You won an auction.',
-            `You won the auction for ${item.name} (level ${item.level}) for ${auction.currentBid} crowns. The item has been delivered to your inventory.`,
-          );
-        }
+        await Package.create({
+          owner: winner._id,
+          item: item._id,
+          source: 'auction',
+          detail: `Won for ${auction.currentBid} gold`,
+        });
+        await sendMessageToCharacter(
+          String(winner._id),
+          'auction',
+          'You won an auction.',
+          `You won the auction for ${item.name} (level ${item.level}) for ${auction.currentBid} gold. It is waiting for you in Packages.`,
+        );
       }
     } else {
       // Nobody bid -> item disappears (the auction house keeps it).
@@ -261,10 +258,6 @@ export async function buyoutAuctionAction({ auctionId }: { auctionId: string }) 
       return { error: { message: 'Item no longer exists' } };
     }
 
-    const buyerEntries = loadEntries(buyer);
-    const free = findFreePosition(buyerEntries, item);
-    if (!free) return { error: { message: 'No room in your inventory' } };
-
     // Refund the prior leading bidder if it isn't the buyer themselves.
     if (auction.highestBidder && String(auction.highestBidder) !== String(buyer._id)) {
       const prior = await Character.findById(auction.highestBidder);
@@ -278,13 +271,14 @@ export async function buyoutAuctionAction({ auctionId }: { auctionId: string }) 
     }
 
     buyer.crowns = (buyer.crowns ?? 0) - auction.buyoutPrice;
-    const next = placeItem(buyerEntries, item, free.x, free.y);
-    buyer.set('inventory', serializeInventory(next));
-    buyer.markModified('inventory');
-
-    item.owner = buyer._id;
-    await item.save();
     await buyer.save();
+
+    await Package.create({
+      owner: buyer._id,
+      item: item._id,
+      source: 'auction',
+      detail: `Bought out for ${auction.buyoutPrice} gold`,
+    });
 
     auction.status = 'settled';
     auction.currentBid = auction.buyoutPrice;
@@ -292,7 +286,7 @@ export async function buyoutAuctionAction({ auctionId }: { auctionId: string }) 
     await auction.save();
 
     revalidatePath('/game/auction');
-    revalidatePath('/game/overview');
+    revalidatePath('/game/packages');
     return { ok: true };
   } catch (error: any) {
     console.log(`${new Date()} - buyoutAuctionAction failed - ${error}`);

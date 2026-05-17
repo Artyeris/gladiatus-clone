@@ -8,6 +8,11 @@ export interface CharacterInterface {
   name: string;
   owner: UserInterface | string;
   crowns: number;
+  diamonds?: number;
+  lastDailyClaim?: string | Date | null;
+  lastWeeklyClaim?: string | Date | null;
+  lastMonthlyClaim?: string | Date | null;
+  dailyStreak?: number;
   experience: number;
   level: number;
   dexterity: number;

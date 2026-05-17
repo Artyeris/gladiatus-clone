@@ -1,30 +1,33 @@
 import Link from 'next/link';
-import { Mail, ScrollText, Swords } from 'lucide-react';
+import { Gift, Mail, Package, Swords } from 'lucide-react';
 
 import { getUnreadMessageCount } from '@/lib/actions/message/message.action';
+import { getPackageCount } from '@/lib/actions/package/package.action';
 
 // Small Gladiatus-style shortcut bar that sits in the top-left of
 // every game screen, mirroring the original's icon-row above the
-// gold/honour counters. Messages get a red dot when something
-// unread is waiting in the inbox.
+// gold/honour counters. Each icon shows a red dot when something
+// is waiting (unread messages / pending packages). Quests no longer
+// live here per the latest layout.
 const GameHeaderShortcuts = async () => {
   let unread = 0;
-  try {
-    unread = await getUnreadMessageCount();
-  } catch {
-    unread = 0;
-  }
+  let packages = 0;
+  try { unread = await getUnreadMessageCount(); } catch { unread = 0; }
+  try { packages = await getPackageCount(); } catch { packages = 0; }
 
   return (
     <div className='flex flex-col gap-1 shrink-0'>
-      <Shortcut href='/game/messages' label='Messages' badge={unread}>
-        <Mail className='w-5 h-5' />
+      <Shortcut href='/game/rewards' label='Rewards'>
+        <Gift className='w-5 h-5' />
       </Shortcut>
       <Shortcut href='/game/reports' label='Battle reports'>
         <Swords className='w-5 h-5' />
       </Shortcut>
-      <Shortcut href='/game/quests' label='Quests'>
-        <ScrollText className='w-5 h-5' />
+      <Shortcut href='/game/messages' label='Messages' badge={unread}>
+        <Mail className='w-5 h-5' />
+      </Shortcut>
+      <Shortcut href='/game/packages' label='Packages' badge={packages}>
+        <Package className='w-5 h-5' />
       </Shortcut>
     </div>
   );

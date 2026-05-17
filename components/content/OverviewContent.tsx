@@ -34,24 +34,24 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
       <div
         style={{
           display: 'flex',
-          gap: '24px',
+          gap: '14px',
           justifyContent: 'center',
           alignItems: 'flex-start',
-          padding: '0 16px',
+          padding: '0 12px',
         }}
       >
         <div
-          style={{
-            flex: '0 0 290px',
-            borderRight: '2px solid #5c3a21',
-            paddingRight: '20px',
-          }}
+          className='info-card rounded-sm shadow-md'
+          style={{ flex: '0 0 298px', padding: '4px' }}
         >
-           <CharacterPanel user={character} />
+          <CharacterPanel user={character} />
         </div>
 
-        <div style={{ flexShrink: 0 }}>
-           <InventoryEquipment character={character} />
+        <div
+          className='info-card rounded-sm shadow-md'
+          style={{ flexShrink: 0, padding: '10px' }}
+        >
+          <InventoryEquipment character={character} />
         </div>
       </div>
     </div>

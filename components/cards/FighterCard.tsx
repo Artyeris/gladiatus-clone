@@ -94,27 +94,20 @@ function Row({
 }) {
   return (
     <div className={`px-2 py-[2px] ${!last && 'border-b-[2px] border-cream2'}`}>
-      <div className='flex justify-between items-center gap-2'>
-        <span className='shrink-0'>{label}:</span>
-        {bar ? (
-          <div className='flex items-center gap-2 flex-1 min-w-0 justify-end'>
+      <div className='flex items-center gap-2'>
+        <span className='w-[90px] shrink-0'>{label}:</span>
+        <div className='flex-1 min-w-0 h-2 rounded-sm overflow-hidden' style={{ backgroundColor: bar ? '#3e2714' : 'transparent' }}>
+          {bar && (
             <div
-              className='relative h-2 rounded-sm overflow-hidden flex-1 min-w-0'
-              style={{ backgroundColor: '#3e2714' }}
-            >
-              <div
-                className='absolute top-0 left-0 h-full'
-                style={{
-                  width: `${Math.min(100, (bar.value / Math.max(1, bar.max)) * 100)}%`,
-                  backgroundColor: '#6b8e23',
-                }}
-              />
-            </div>
-            <span className='font-semibold text-red3 w-7 text-right shrink-0'>{value}</span>
-          </div>
-        ) : (
-          <span className='flex items-center font-semibold gap-2 text-red3'>{value}</span>
-        )}
+              className='h-full'
+              style={{
+                width: `${Math.min(100, (bar.value / Math.max(1, bar.max)) * 100)}%`,
+                backgroundColor: '#6b8e23',
+              }}
+            />
+          )}
+        </div>
+        <span className='font-semibold text-red3 w-[78px] text-right shrink-0'>{value}</span>
       </div>
     </div>
   );

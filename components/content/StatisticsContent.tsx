@@ -110,13 +110,13 @@ const StatisticsContent = ({ character }: Props) => {
         <Row label='Losses' value={`${wLosses} (${pct(wLosses, wBattles)})`} />
         <Row label='Damage dealt' value={String(wDealt)} />
         <Row label='Damage received' value={String(wReceived)} />
-        <Row label='Crowns earned' value={String(wCrowns)} coin />
+        <Row label='Gold earned' value={String(wCrowns)} coin />
       </Section>
 
       <Section title='Wealth'>
         <Row label='Equipment value' value={String(equipmentValue)} coin />
         <Row label='Inventory value' value={String(inventoryValue)} coin />
-        <Row label='Crowns on hand' value={String(character.crowns ?? 0)} coin />
+        <Row label='Gold on hand' value={String(character.crowns ?? 0)} coin />
       </Section>
 
       <Section title='Victories'>

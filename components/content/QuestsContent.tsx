@@ -46,7 +46,7 @@ const QuestsContent = ({ quests, max, hasMoreToAccept }: Props) => {
     const res = await claimQuest({ id });
     setBusy(false);
     if (res?.error) return toast.error(res.error.message);
-    toast.success(`Reward: +${res.gold} crowns, +${res.exp} XP`);
+    toast.success(`Reward: +${res.gold} gold, +${res.exp} XP`);
     router.refresh();
   };
 

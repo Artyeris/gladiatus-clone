@@ -19,6 +19,7 @@ import {
   calculateStatBreakdown,
   StatId,
 } from '@/lib/utils/statUtils';
+import CombatRows from '@/components/overview/CombatRows';
 
 interface Props {
   character: CharacterInterface;
@@ -60,6 +61,11 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
   const { armor, damageMin, damageMax } = calculateCombatStats(character);
   const equipment = (character.equipment ?? {}) as Record<string, ItemInterface | null | undefined>;
 
+  // Bars are sized against the strongest stat on the card so the
+  // relative shape of this fighter is visible at a glance.
+  const statTotals = STATS.map((s) => calculateStatBreakdown(character, s.id as StatId).total);
+  const softMax = Math.max(1, ...statTotals);
+
   const onArenaFight = async () => {
     setBusy(true);
     const res = await battleArena(String(character._id));
@@ -90,17 +96,29 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
             className='drop-shadow-xl rounded-sm'
           />
 
-          <div className='brown-card w-[200px] rounded-sm flex flex-col text-sm'>
+          <div className='brown-card w-[230px] rounded-sm flex flex-col text-sm'>
             <Row label='Level' value={String(level)} />
             <Row label='HP'    value={`${maxHp} / ${maxHp}`} />
             <Row label='XP'    value={`${xpPercent.toFixed(1)}%`} />
             {STATS.map((s) => {
               const breakdown = calculateStatBreakdown(character, s.id as StatId);
-              return <Row key={s.id} label={s.name} value={String(breakdown.total)} />;
+              return (
+                <Row
+                  key={s.id}
+                  label={s.name}
+                  value={String(breakdown.total)}
+                  bar={{ value: breakdown.total, max: softMax }}
+                />
+              );
             })}
-            <Row label='Armor'  value={String(armor)} />
-            <Row label='Damage' value={`${damageMin} - ${damageMax}`} />
-            <Row label='Power'  value={String(calculatePower(character))} last />
+          </div>
+
+          <div className='w-[230px]'>
+            <CombatRows user={character} />
+          </div>
+
+          <div className='brown-card w-[230px] rounded-sm flex flex-col text-sm'>
+            <Row label='Power' value={String(calculatePower(character))} last />
           </div>
         </div>
 
@@ -164,11 +182,32 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
 
 export default CharacterProfileContent;
 
-function Row({ label, value, last }: { label: string; value: string; last?: boolean }) {
+function Row({
+  label, value, last, bar,
+}: {
+  label: string;
+  value: string;
+  last?: boolean;
+  bar?: { value: number; max: number };
+}) {
   return (
-    <div className={`flex justify-between items-center px-2 py-1 ${!last && 'border-b-[2px] border-cream2'}`}>
-      <span>{label}</span>
-      <span className='font-semibold text-red3'>{value}</span>
+    <div className={`flex items-center gap-2 px-2 py-[2px] ${!last && 'border-b-[2px] border-cream2'}`}>
+      <span className='w-[78px] shrink-0 text-sm'>{label}</span>
+      <div
+        className='flex-1 min-w-0 h-2 rounded-sm overflow-hidden'
+        style={{ backgroundColor: bar ? '#3e2714' : 'transparent' }}
+      >
+        {bar && (
+          <div
+            className='h-full'
+            style={{
+              width: `${Math.min(100, (bar.value / Math.max(1, bar.max)) * 100)}%`,
+              backgroundColor: '#6b8e23',
+            }}
+          />
+        )}
+      </div>
+      <span className='font-semibold text-red3 w-[60px] text-right shrink-0 text-sm'>{value}</span>
     </div>
   );
 }

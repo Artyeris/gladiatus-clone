@@ -62,7 +62,7 @@ const EnemyCard = ({ enemy, expedition, canFight }: EnemyCardProps) => {
                 </span>
 
                 <span className='flex justify-between'>
-                  Crowns:
+                  Gold:
                   <span>
                     {enemy.crowns ? `${enemy.crowns[0]} - ${enemy.crowns[enemy.crowns.length - 1]}` : '?'}
                   </span>
