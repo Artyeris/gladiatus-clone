@@ -30,7 +30,7 @@ const NavigationBanner = ({ characterLevel = 1, shortcuts }: Props) => {
 
   return (
     <div
-      className={`relative w-[230px] flex flex-col items-center pt-4 pb-10 px-3 ${
+      className={`relative w-[230px] flex flex-col items-center pt-2 pb-10 px-3 ${
         isOnboarding && 'hidden'
       }`}
       style={{
@@ -42,7 +42,7 @@ const NavigationBanner = ({ characterLevel = 1, shortcuts }: Props) => {
         alignSelf: 'stretch',
       }}
     >
-      <div className='flex flex-col gap-2 w-[180px] mt-4'>
+      <div className='flex flex-col gap-2 w-[180px] mt-2'>
         {shortcuts && <div className='mb-1'>{shortcuts}</div>}
         {generalRoutes.map((route) => (
           <NavLink
