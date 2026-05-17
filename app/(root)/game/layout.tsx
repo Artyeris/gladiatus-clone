@@ -23,7 +23,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         }}
       />
       <GameNavbar />
-      <div className='w-full min-h-screen flex flex-row justify-center gap-6 pt-14 items-stretch'>
+      <div className='w-full min-h-screen flex flex-row justify-center gap-6 pt-12 items-stretch'>
         <NavigationBanner
           characterLevel={user.character?.level ?? 1}
           shortcuts={user.character ? (
@@ -31,15 +31,15 @@ export default async function GameLayout({ children }: { children: React.ReactNo
             <GameHeaderShortcuts />
           ) : null}
         />
-        <div className='flex flex-col items-center h-min-full'>
+        <div className='flex flex-col items-center h-min-full w-[820px]'>
           <GameHeader user={user} />
-          <div className='h-min-full main-cream-card w-[720px] flex-grow py-4'>
+          <div className='h-min-full main-cream-card w-[820px] flex-grow py-4'>
             <div>{children}</div>
           </div>
-          <div className='footer w-[740px] h-[50px] orange-gradient' />
+          <div className='footer w-[840px] h-[50px] orange-gradient' />
         </div>
       </div>
-      <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none'>
+      <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none z-[999]'>
         v0.16
       </span>
     </div>

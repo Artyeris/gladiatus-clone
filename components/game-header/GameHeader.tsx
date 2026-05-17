@@ -9,7 +9,7 @@ const GameHeader = ({ user }: { user: UserInterface }) => {
   if (!user.character) return null;
 
   return (
-    <div className='w-full h-[145px] orange-card drop-shadow-2xl px-4 flex flex-row gap-4 items-center'>
+    <div className='w-full h-[95px] orange-card drop-shadow-2xl px-2 flex flex-row gap-2 items-center'>
       <GameHeaderStats character={character} />
       <GameHeaderExpeditionTimer character={character} />
       <GameHeaderArenaTimer character={character} />

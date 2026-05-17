@@ -8,7 +8,7 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
   const levelProgress = calculateProgressPercent(character.experience, calculateNextLevelExperience(character.level));
 
   return (
-    <div className='flex flex-col gap-[2px] brown-card w-full h-[79px] drop-shadow-2xl items-center justify-center rounded-sm'>
+    <div className='flex flex-col gap-[2px] brown-card w-full h-[75px] drop-shadow-2xl items-center justify-center rounded-sm'>
       <div className='flex flex-row w-full font-semibold text-sm text-red3 px-1 pl-2'>
         <div className='flex items-center gap-1 w-20' title='Gold'>
           <Image

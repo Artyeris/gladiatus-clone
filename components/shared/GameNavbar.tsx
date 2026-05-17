@@ -7,6 +7,10 @@ import { LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+// The dark navbar bar has been removed; the two surviving elements
+// (Gladiatus title on the left, My Account button on the right) are
+// rendered as fixed, free-floating widgets that sit on top of the
+// background image without a chrome strip behind them.
 const GameNavbar = () => {
   const pathname = usePathname();
 
@@ -15,18 +19,19 @@ const GameNavbar = () => {
   }
 
   return (
-    <nav className='bg-red fixed w-full h-12 flex flex-row items-center px-14 justify-between drop-shadow-2xl border-b-[3px] border-cream2 red-nav z-[998]'>
+    <>
       <Link
-        className='text-lg font-semibold text-cream2 cursor-pointer hidden sm:flex'
+        className='fixed top-2 left-4 text-lg font-semibold text-cream2 cursor-pointer hidden sm:flex drop-shadow-lg z-[998]'
         href='/game/overview'
+        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}
       >
         Gladiatus
       </Link>
-      <div className='flex items-center gap-4'>
-        {pathname !== '/onboarding' &&
+      {pathname !== '/onboarding' && (
+        <div className='fixed top-2 right-4 z-[998]'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className='red-card text-cream2 text-center font-semibold text-md cursor-pointer hover:text-gold hover:border-gold transition rounded-sm hover:bg-red h-8 w-40'>
+              <Button className='red-card text-cream2 text-center font-semibold text-md cursor-pointer hover:text-gold hover:border-gold transition rounded-sm hover:bg-red h-8 w-40 drop-shadow-lg'>
                 My Account
               </Button>
             </DropdownMenuTrigger>
@@ -50,7 +55,7 @@ const GameNavbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator className='bg-cream2' />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className='hover:bg-red2 cursor-pointer'
                 onClick={logOut}
               >
@@ -61,9 +66,9 @@ const GameNavbar = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        }
-      </div>
-    </nav>
+        </div>
+      )}
+    </>
   )
 }
 

@@ -6,7 +6,7 @@ import { EXPEDITION_COOLDOWN } from '@/constants';
 
 const GameHeaderExpeditionTimer = ({ character }: { character: CharacterInterface }) => {
   return (
-    <div className='flex flex-col w-full brown-card h-[79px] drop-shadow-2xl items-center justify-center gap-2 text-xs rounded-sm'>
+    <div className='flex flex-col w-full brown-card h-[75px] drop-shadow-2xl items-center justify-center gap-2 text-xs rounded-sm'>
       <CooldownTimer 
         name='expedition'
         message='Go to expedition'
