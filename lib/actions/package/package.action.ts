@@ -72,17 +72,6 @@ export async function listPackages(): Promise<{ packages?: PackageView[]; error?
   if (!character) return { error: { message: 'Not authenticated' } };
 
   try {
-    // Drop anything past its expiry first so the list doesn't show
-    // stale rows. The item docs themselves are owned by nobody and
-    // can be cleaned up too.
-    const now = new Date();
-    const expired = await Package.find({ owner: character._id, expiresAt: { $lte: now } });
-    if (expired.length > 0) {
-      const expiredItemIds = expired.map((p: any) => p.item).filter(Boolean);
-      await Item.deleteMany({ _id: { $in: expiredItemIds }, owner: null });
-      await Package.deleteMany({ _id: { $in: expired.map((p: any) => p._id) } });
-    }
-
     const docs = await Package.find({ owner: character._id })
       .populate({ path: 'item', model: Item })
       .sort({ createdAt: -1 })
@@ -92,7 +81,6 @@ export async function listPackages(): Promise<{ packages?: PackageView[]; error?
       _id: String(p._id),
       source: p.source,
       detail: p.detail ?? '',
-      expiresAt: new Date(p.expiresAt).toISOString(),
       item: p.item ? (JSON.parse(JSON.stringify(p.item)) as ItemInterface) : null,
     }));
 
@@ -164,7 +152,7 @@ export async function getPackageCount(): Promise<number> {
   if (!character) return 0;
   try {
     await connectToDB();
-    return await Package.countDocuments({ owner: character._id, expiresAt: { $gt: new Date() } });
+    return await Package.countDocuments({ owner: character._id });
   } catch {
     return 0;
   }

@@ -23,9 +23,11 @@ interface Props {
 function formatCountdown(ms: number): string {
   if (ms <= 0) return 'ready';
   const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
+  if (d > 0) return `${d}d ${h}h ${m}m`;
   return `${h}h ${m}m ${sec}s`;
 }
 
@@ -33,7 +35,7 @@ const RewardsContent = ({ initialStatus }: Props) => {
   const router = useRouter();
   const [status, setStatus] = useState<RewardsStatus>(initialStatus);
   const [busy, setBusy] = useState(false);
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
@@ -47,13 +49,14 @@ const RewardsContent = ({ initialStatus }: Props) => {
     const res = await claimDailyReward();
     setBusy(false);
     if (res?.error) return toast.error(res.error.message);
-    toast.success(`+${res.awarded} diamonds (streak: ${res.streak})`);
+    toast.success(`+${res.awarded} diamonds`);
     setStatus({
       ...status,
       diamonds: status.diamonds + res.awarded,
-      dailyStreak: res.streak,
-      daily: { ready: false, nextAt: new Date().toISOString() },
-      monthly: { ...status.monthly, progress: Math.min(res.streak, 28) },
+      daily: {
+        ready: false,
+        nextAt: new Date(new Date().setHours(24, 0, 0, 0)).toISOString(),
+      },
     });
     refresh();
   };
@@ -81,8 +84,7 @@ const RewardsContent = ({ initialStatus }: Props) => {
     setStatus({
       ...status,
       diamonds: status.diamonds + res.awarded,
-      dailyStreak: 0,
-      monthly: { ready: false, nextAt: null, progress: 0 },
+      monthly: { ready: false, nextAt: new Date(Date.now() + 28 * 24 * 3600 * 1000).toISOString() },
     });
     refresh();
   };
@@ -90,30 +92,25 @@ const RewardsContent = ({ initialStatus }: Props) => {
   const now = Date.now();
   const dailyMs = status.daily.nextAt ? new Date(status.daily.nextAt).getTime() - now : 0;
   const weeklyMs = status.weekly.nextAt ? new Date(status.weekly.nextAt).getTime() - now : 0;
-
-  // touch tick so countdown text re-renders each second
-  void tick;
+  const monthlyMs = status.monthly.nextAt ? new Date(status.monthly.nextAt).getTime() - now : 0;
 
   return (
     <div className='px-6 flex flex-col gap-4 text-brown2'>
       <Section title='Rewards'>
         <div className='flex flex-col gap-2 px-3 py-2 text-sm'>
           <p>
-            Special events and claimables. Log in daily to keep your streak
-            going - hit 28 days in a row to unlock the monthly chest.
+            Special events and claimables. Each reward is on its own
+            cooldown -- claim them whenever they are ready.
           </p>
           <div className='flex items-center gap-2 font-semibold'>
             Diamonds:
             <span className='text-red3'>{status.diamonds}</span>
           </div>
-          <div className='flex items-center gap-2 text-xs opacity-80'>
-            Current login streak: <span className='font-semibold'>{status.dailyStreak} day(s)</span>
-          </div>
         </div>
       </Section>
 
       <RewardRow
-        title='Daily login'
+        title='Daily reward'
         amount={DAILY_REWARD_DIAMONDS}
         ready={status.daily.ready}
         wait={status.daily.ready ? '' : formatCountdown(dailyMs)}
@@ -122,7 +119,7 @@ const RewardsContent = ({ initialStatus }: Props) => {
       />
 
       <RewardRow
-        title='Weekly login'
+        title='Weekly reward'
         amount={WEEKLY_REWARD_DIAMONDS}
         ready={status.weekly.ready}
         wait={status.weekly.ready ? '' : formatCountdown(weeklyMs)}
@@ -131,10 +128,10 @@ const RewardsContent = ({ initialStatus }: Props) => {
       />
 
       <RewardRow
-        title='Monthly login (28-day streak)'
+        title='Monthly reward'
         amount={MONTHLY_REWARD_DIAMONDS}
         ready={status.monthly.ready}
-        wait={status.monthly.ready ? '' : `${status.monthly.progress} / 28 days`}
+        wait={status.monthly.ready ? '' : formatCountdown(monthlyMs)}
         onClaim={onMonthly}
         disabled={busy || !status.monthly.ready}
       />

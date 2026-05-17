@@ -8,6 +8,5 @@ export interface PackageView {
   _id: string;
   source: PackageSource;
   detail: string;
-  expiresAt: string;
   item: ItemInterface | null;
 }

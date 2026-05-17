@@ -12,9 +12,13 @@ type Tab = 'town' | 'expedition';
 
 interface Props {
   characterLevel?: number;
+  // Server-rendered horizontal shortcut row (Messages / Reports /
+  // Packages) injected by the layout. Kept as a generic ReactNode so
+  // this banner stays a pure client component.
+  shortcuts?: React.ReactNode;
 }
 
-const NavigationBanner = ({ characterLevel = 1 }: Props) => {
+const NavigationBanner = ({ characterLevel = 1, shortcuts }: Props) => {
   const pathname = usePathname();
   const isOnboarding = pathname === '/onboarding';
 
@@ -38,6 +42,7 @@ const NavigationBanner = ({ characterLevel = 1 }: Props) => {
       }}
     >
       <div className='flex flex-col gap-2 w-[180px] mt-16'>
+        {shortcuts && <div className='mb-1'>{shortcuts}</div>}
         {generalRoutes.map((route) => (
           <NavLink
             key={route.name}

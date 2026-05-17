@@ -115,19 +115,22 @@ export async function battleArena(defenderId: string) {
       }
       attacker.weeklyWins = (attacker.weeklyWins ?? 0) + 1;
 
-      attacker.honor += earnedHonor;
-      defender.honor += lostHonor;
+      // Rank takeover: if the attacker ranked below the defender on the
+      // honor leaderboard, they swap honor values. That promotes the
+      // winner straight into the loser's rank (e.g. 5th beats 1st ->
+      // attacker becomes 1st, defender drops to 5th). When the attacker
+      // was already ranked above the defender, fall back to plain Elo.
+      const attackerHonorBefore = attacker.honor ?? 0;
+      const defenderHonorBefore = defender.honor ?? 0;
 
-      // Guarantee the winner ends above the loser by at least 1 honor.
-      // With raw Elo a player can beat the rival directly above them but
-      // still trail in honor, so rank never moves -- this nudges the
-      // remaining gap to ensure an overtake.
-      if (attacker.honor <= defender.honor) {
-        const bridge = Math.ceil((defender.honor - attacker.honor) / 2) + 1;
-        attacker.honor += bridge;
-        defender.honor -= bridge;
-        battleReport.result.honorEarned = earnedHonor + bridge;
-        battleReport.result.honorLost = lostHonor - bridge;
+      if (attackerHonorBefore < defenderHonorBefore) {
+        attacker.honor = defenderHonorBefore;
+        defender.honor = attackerHonorBefore;
+        battleReport.result.honorEarned = defenderHonorBefore - attackerHonorBefore;
+        battleReport.result.honorLost = -(defenderHonorBefore - attackerHonorBefore);
+      } else {
+        attacker.honor += earnedHonor;
+        defender.honor += lostHonor;
       }
     }
     // Defender won.
@@ -149,17 +152,21 @@ export async function battleArena(defenderId: string) {
         attackerJournal.arena.honorEarned = (attackerJournal.arena.honorEarned ?? 0) + lostHonor;
       }
 
-      defender.honor += earnedHonor;
-      attacker.honor += lostHonor;
+      // Mirror of the attacker-won rank-takeover: if the defender was
+      // ranked below the attacker on the honor leaderboard, the two
+      // swap honor values so the defender (winner) inherits the
+      // attacker's rank.
+      const attackerHonorBefore = attacker.honor ?? 0;
+      const defenderHonorBefore = defender.honor ?? 0;
 
-      // Mirror of the attacker-won overtake guarantee: the defender
-      // (winner here) must end above the attacker (loser here).
-      if (defender.honor <= attacker.honor) {
-        const bridge = Math.ceil((attacker.honor - defender.honor) / 2) + 1;
-        defender.honor += bridge;
-        attacker.honor -= bridge;
-        battleReport.result.honorEarned = earnedHonor + bridge;
-        battleReport.result.honorLost = lostHonor - bridge;
+      if (defenderHonorBefore < attackerHonorBefore) {
+        defender.honor = attackerHonorBefore;
+        attacker.honor = defenderHonorBefore;
+        battleReport.result.honorEarned = attackerHonorBefore - defenderHonorBefore;
+        battleReport.result.honorLost = -(attackerHonorBefore - defenderHonorBefore);
+      } else {
+        defender.honor += earnedHonor;
+        attacker.honor += lostHonor;
       }
     }
 

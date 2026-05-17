@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import GameNavbar from '@/components/shared/GameNavbar';
 import NavigationBanner from '@/components/shared/NavigationBanner';
 import GameHeader from '@/components/game-header/GameHeader';
+import GameHeaderShortcuts from '@/components/game-header/GameHeaderShortcuts';
 import { getUser } from '@/lib/actions/user/getUser.action';
 import { redirect } from 'next/navigation';
 
@@ -23,7 +24,13 @@ export default async function GameLayout({ children }: { children: React.ReactNo
       />
       <GameNavbar />
       <div className='w-full h-min-full flex flex-row justify-center gap-6 pt-14'>
-        <NavigationBanner characterLevel={user.character?.level ?? 1} />
+        <NavigationBanner
+          characterLevel={user.character?.level ?? 1}
+          shortcuts={user.character ? (
+            // @ts-expect-error -- async server component
+            <GameHeaderShortcuts />
+          ) : null}
+        />
         <div className='flex flex-col items-center h-min-full'>
           <GameHeader user={user} />
           <div className='h-min-full main-cream-card w-[720px] flex-grow py-4'>

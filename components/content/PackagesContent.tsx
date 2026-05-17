@@ -39,14 +39,6 @@ const SOURCE_COLOR: Record<NonNullable<PackageView['source']>, string> = {
   other: '#888',
 };
 
-function formatRemaining(iso: string): string {
-  const ms = new Date(iso).getTime() - Date.now();
-  if (ms <= 0) return 'expired';
-  const days = Math.floor(ms / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-  return `${days}d ${hours}h`;
-}
-
 const PackagesContent = ({ initialPackages }: Props) => {
   const router = useRouter();
   const [packages, setPackages] = useState(initialPackages);
@@ -79,8 +71,7 @@ const PackagesContent = ({ initialPackages }: Props) => {
         <div className='px-3 py-2 text-sm'>
           <p>
             Items you have won, bought or looted land here first. Press
-            <em> Claim</em> to move a package into your inventory. Packages
-            expire after 7 days if untouched.
+            <em> Claim</em> to move a package into your inventory.
           </p>
           <p className='text-xs opacity-80 mt-1'>
             Active packages: <span className='font-semibold'>{packages.length}</span>
@@ -95,9 +86,9 @@ const PackagesContent = ({ initialPackages }: Props) => {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-              gap: '6px',
-              padding: '8px',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
+              gap: '10px',
+              padding: '10px',
             }}
           >
             {packages.map((p) => (
@@ -140,11 +131,11 @@ function PackageTile({
 
   return (
     <div
-      className='flex flex-col items-center gap-1 p-2 rounded-sm'
-      style={{ background: '#cdb88a', border: '1px solid #5c3a21', position: 'relative' }}
+      className='flex flex-col items-center gap-2 p-3 rounded-sm'
+      style={{ background: '#cdb88a', border: '1px solid #5c3a21' }}
     >
       <span
-        className='text-[9px] font-semibold uppercase tracking-wider absolute top-1 left-1 px-1 rounded-sm text-cream2'
+        className='text-[10px] font-semibold uppercase tracking-wider px-2 py-[1px] rounded-sm text-cream2 self-start'
         style={{ background: SOURCE_COLOR[pkg.source] }}
       >
         {SOURCE_LABEL[pkg.source]}
@@ -154,8 +145,8 @@ function PackageTile({
           <div
             className='relative'
             style={{
-              width: '64px',
-              height: '64px',
+              width: '72px',
+              height: '72px',
               background: '#a89f91',
               border: '1px solid #5c3a21',
               borderRadius: '2px',
@@ -166,34 +157,37 @@ function PackageTile({
               imageId={item.image}
               alt={item.name}
               fill
-              sizes='64px'
+              sizes='72px'
               style={{ objectFit: 'contain', padding: '4px' }}
             />
           </div>
         </ItemTooltip>
       ) : (
-        <div className='w-16 h-16 bg-brown2/30 rounded-sm' />
+        <div className='w-[72px] h-[72px] bg-brown2/30 rounded-sm' />
       )}
       <span
-        className='text-xs font-semibold text-center truncate w-full'
+        className='text-xs font-semibold text-center w-full leading-tight'
         style={{ color: nameColor }}
       >
         {item ? fullItemName(item) : 'Unknown item'}
       </span>
-      {pkg.detail && <span className='text-[10px] opacity-80 truncate w-full text-center'>{pkg.detail}</span>}
-      <span className='text-[10px] opacity-70'>Expires in {formatRemaining(pkg.expiresAt)}</span>
-      <div className='flex gap-1 w-full'>
+      {pkg.detail && (
+        <span className='text-[10px] opacity-80 text-center w-full leading-tight'>
+          {pkg.detail}
+        </span>
+      )}
+      <div className='flex gap-1 w-full mt-1'>
         <button
           onClick={onClaim}
           disabled={busy}
-          className='general-button flex-1 px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+          className='general-button flex-1 px-2 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
         >
           Claim
         </button>
         <button
           onClick={onDiscard}
           disabled={busy}
-          className='px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+          className='px-2 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
           style={{ background: '#974342', color: '#f7eccc', border: '1px solid #5c3a21' }}
         >
           Drop

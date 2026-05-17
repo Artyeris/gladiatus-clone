@@ -11,13 +11,13 @@ export const generalRoutes = [
     name: 'Rewards',
     link: '/rewards',
   },
-]
-
-export const villageRoutes = [
   {
     name: 'Quests',
     link: '/quests',
   },
+]
+
+export const villageRoutes = [
   {
     name: 'Work',
     link: '/work',

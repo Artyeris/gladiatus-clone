@@ -12,7 +12,6 @@ export interface CharacterInterface {
   lastDailyClaim?: string | Date | null;
   lastWeeklyClaim?: string | Date | null;
   lastMonthlyClaim?: string | Date | null;
-  dailyStreak?: number;
   experience: number;
   level: number;
   dexterity: number;
