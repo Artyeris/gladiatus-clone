@@ -30,18 +30,19 @@ const NavigationBanner = ({ characterLevel = 1, shortcuts }: Props) => {
 
   return (
     <div
-      className={`relative w-[230px] flex flex-col items-center pt-6 pb-10 px-3 self-start ${
+      className={`relative w-[230px] flex flex-col items-center pt-4 pb-10 px-3 ${
         isOnboarding && 'hidden'
       }`}
       style={{
         backgroundImage: 'url("/images/sidebar.webp")',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: '100% 100%',
+        backgroundRepeat: 'repeat-y',
+        backgroundSize: '100% auto',
         backgroundPosition: 'top center',
-        minHeight: '900px',
+        minHeight: '100%',
+        alignSelf: 'stretch',
       }}
     >
-      <div className='flex flex-col gap-2 w-[180px] mt-16'>
+      <div className='flex flex-col gap-2 w-[180px] mt-4'>
         {shortcuts && <div className='mb-1'>{shortcuts}</div>}
         {generalRoutes.map((route) => (
           <NavLink

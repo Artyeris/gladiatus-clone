@@ -16,11 +16,11 @@ const GameNavbar = () => {
 
   return (
     <nav className='bg-red fixed w-full h-12 flex flex-row items-center px-14 justify-between drop-shadow-2xl border-b-[3px] border-cream2 red-nav z-[998]'>
-      <Link 
+      <Link
         className='text-lg font-semibold text-cream2 cursor-pointer hidden sm:flex'
         href='/game/overview'
       >
-        Gladiatus Clone
+        Gladiatus
       </Link>
       <div className='flex items-center gap-4'>
         {pathname !== '/onboarding' &&

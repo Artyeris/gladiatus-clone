@@ -23,7 +23,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         }}
       />
       <GameNavbar />
-      <div className='w-full h-min-full flex flex-row justify-center gap-6 pt-14'>
+      <div className='w-full min-h-screen flex flex-row justify-center gap-6 pt-14 items-stretch'>
         <NavigationBanner
           characterLevel={user.character?.level ?? 1}
           shortcuts={user.character ? (
@@ -40,7 +40,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         </div>
       </div>
       <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none'>
-        v0.15
+        v0.16
       </span>
     </div>
   );

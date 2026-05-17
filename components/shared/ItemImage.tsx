@@ -22,6 +22,9 @@ const ItemImage = ({ imageId, alt, size, fill, sizes, style, className }: Props)
   const [errored, setErrored] = useState(false);
 
   if (errored) {
+    // Empty stylised box with the alt only on the native tooltip --
+    // the surrounding ItemTooltip already shows the item name on hover,
+    // so an inline label here would duplicate it.
     return (
       <div
         className={className}
@@ -30,21 +33,11 @@ const ItemImage = ({ imageId, alt, size, fill, sizes, style, className }: Props)
           width: fill ? '100%' : size,
           height: fill ? '100%' : size,
           background: 'linear-gradient(135deg, #5c3a21, #8b5a2b)',
-          color: '#f4eac8',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          padding: '2px',
-          fontSize: '9px',
-          fontWeight: 600,
-          lineHeight: 1.05,
           overflow: 'hidden',
         }}
         title={alt}
-      >
-        {alt}
-      </div>
+        aria-label={alt}
+      />
     );
   }
 

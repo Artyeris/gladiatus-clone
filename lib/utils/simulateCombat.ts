@@ -45,8 +45,12 @@ export function fight({ attacker, defender }: FightParams): { rounds: Round[], r
   const attackerMaxHP = calculateHP({ level: A.level, endurance: A.endurance });
   const defenderMaxHP = calculateHP({ level: D.level, endurance: D.endurance });
 
-  let attackerHP = attackerMaxHP;
-  let defenderHP = defenderMaxHP;
+  // Dev cheat: god-mode fighters fight at a massive HP pool so they
+  // effectively cannot die during the simulation.
+  const attackerGod = !!(attacker as any).godMode;
+  const defenderGod = !!(defender as any).godMode;
+  let attackerHP = attackerGod ? Number.MAX_SAFE_INTEGER : attackerMaxHP;
+  let defenderHP = defenderGod ? Number.MAX_SAFE_INTEGER : defenderMaxHP;
 
   const attackerHitChance = calculateHitChance({
     attackerDexterity: A.dexterity,

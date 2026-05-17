@@ -85,6 +85,12 @@ const characterSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  // Developer cheat flag. When true the character never dies and
+  // never loses gold/items. Intended for testing only.
+  godMode: {
+    type: Boolean,
+    default: false,
+  },
   arenaTier: {
     type: String,
     default: null,
@@ -98,6 +104,15 @@ const characterSchema = new mongoose.Schema({
   // Lifetime activity counters used by the Victories tab.
   workCount:  { type: Number, default: 0 },
   itemsFound: { type: Number, default: 0 },
+  // Per-stat train counters powering the Victories "Train X" tiers.
+  trainCount: {
+    strength:     { type: Number, default: 0 },
+    dexterity:    { type: Number, default: 0 },
+    agility:      { type: Number, default: 0 },
+    endurance:    { type: Number, default: 0 },
+    charisma:     { type: Number, default: 0 },
+    intelligence: { type: Number, default: 0 },
+  },
   inventory: {
     type: [
       {

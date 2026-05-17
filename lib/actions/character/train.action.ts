@@ -46,6 +46,14 @@ export async function trainCharacter(stat: string) {
 
     (character as any)[stat] = currentStatValue + 1;
     character.crowns -= cost;
+
+    // Bump the per-stat train counter so the Victories tab can show
+    // "Train mobility / strength / ..." progress.
+    if (!character.trainCount) character.trainCount = {} as any;
+    const tc: any = character.trainCount;
+    tc[stat] = (tc[stat] ?? 0) + 1;
+    character.markModified('trainCount');
+
     await character.save();
 
     revalidatePath('/game/training');

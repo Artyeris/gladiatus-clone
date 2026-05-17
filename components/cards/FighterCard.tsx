@@ -34,7 +34,7 @@ const FighterCard = ({ name, image, expedition, power, profile, isEnemy = false 
   const softMax = Math.max(1, ...Object.values(statValue));
 
   return (
-    <div className='flex flex-col w-[200px] gap-2 items-center'>
+    <div className='flex flex-col w-[250px] gap-2 items-center'>
       <h2 className='font-semibold text-md red-card flex justify-center items-center text-cream2 h-10 px-4 w-full drop-shadow-xl truncate'>
         {name}
       </h2>
@@ -92,11 +92,17 @@ function Row({
   last?: boolean;
   bar?: { value: number; max: number };
 }) {
+  // Stat rows (with bar) use a tighter value column so the bar has
+  // visible room. Non-stat rows (e.g. "245 - 349") get a wider one.
+  const valueWidth = bar ? 40 : 78;
   return (
-    <div className={`px-2 py-[2px] ${!last && 'border-b-[2px] border-cream2'}`}>
+    <div className={`px-2 py-[3px] ${!last && 'border-b-[2px] border-cream2'}`}>
       <div className='flex items-center gap-2'>
-        <span className='w-[90px] shrink-0'>{label}:</span>
-        <div className='flex-1 min-w-0 h-2 rounded-sm overflow-hidden' style={{ backgroundColor: bar ? '#3e2714' : 'transparent' }}>
+        <span className='w-[88px] shrink-0'>{label}:</span>
+        <div
+          className='flex-1 min-w-[40px] h-3 rounded-sm overflow-hidden'
+          style={{ backgroundColor: bar ? '#3e2714' : 'transparent' }}
+        >
           {bar && (
             <div
               className='h-full'
@@ -107,7 +113,12 @@ function Row({
             />
           )}
         </div>
-        <span className='font-semibold text-red3 w-[78px] text-right shrink-0'>{value}</span>
+        <span
+          className='font-semibold text-red3 text-right shrink-0'
+          style={{ width: `${valueWidth}px` }}
+        >
+          {value}
+        </span>
       </div>
     </div>
   );

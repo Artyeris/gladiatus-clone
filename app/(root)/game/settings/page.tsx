@@ -9,7 +9,12 @@ const Page = async () => {
   if (!user.character) redirect('/onboarding');
 
   const currentLanguage = (user.language === 'lt' ? 'lt' : 'en') as 'en' | 'lt';
-  return <SettingsContent currentLanguage={currentLanguage} />;
+  return (
+    <SettingsContent
+      currentLanguage={currentLanguage}
+      godMode={!!(user.character as any).godMode}
+    />
+  );
 };
 
 export default Page;
