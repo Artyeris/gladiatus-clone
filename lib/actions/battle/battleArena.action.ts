@@ -14,6 +14,7 @@ import ArenaPot from '@/lib/models/arenaPot.model';
 import { calculateHonor } from '@/lib/utils/battleUtils';
 import { getArenaTier } from '@/lib/utils/arena';
 import { growPot, installChampion } from '@/lib/utils/arenaPot';
+import { trackQuestProgress } from '@/lib/actions/quest/quest.action';
 import { revalidatePath } from 'next/cache';
 
 export async function battleArena(defenderId: string) {
@@ -192,6 +193,15 @@ export async function battleArena(defenderId: string) {
     }
 
     const savedBattleReport = await BattleReport.create(battleReport);
+
+    // Quest hooks: every initiated arena fight counts toward
+    // "arena_attack"; a win additionally feeds "arena_win".
+    try {
+      await trackQuestProgress({ characterId: attacker._id, verb: 'arena_attack', amount: 1 });
+      if (String(result.winner) === String(attacker._id)) {
+        await trackQuestProgress({ characterId: attacker._id, verb: 'arena_win', amount: 1 });
+      }
+    } catch {}
 
     attacker.arenaLastBattle = new Date();
 

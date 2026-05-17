@@ -16,6 +16,10 @@ export const generalRoutes = [
     link: '/highscore',
   },
   {
+    name: 'Quests',
+    link: '/quests',
+  },
+  {
     name: 'Settings',
     link: '/settings',
   },

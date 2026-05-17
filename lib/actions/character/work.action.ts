@@ -11,6 +11,7 @@ import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import { jobGoldReward } from '@/lib/utils/work';
 import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
+import { trackQuestProgress } from '@/lib/actions/quest/quest.action';
 
 async function getMyCharacter() {
   const token = cookies().get(COOKIE_NAME);
@@ -96,6 +97,16 @@ export async function claimWorkAction() {
       `Shift complete: ${job.name}`,
       `You finished your ${work.hours}h shift as a ${job.name} and earned ${reward} crowns.`,
     );
+
+    // Quest hook: each finished shift feeds the "work N hours" quests
+    // by the shift length.
+    try {
+      await trackQuestProgress({
+        characterId: character._id,
+        verb: 'work_hours',
+        amount: work.hours,
+      });
+    } catch {}
 
     revalidatePath('/game/work');
     revalidatePath('/game/overview');

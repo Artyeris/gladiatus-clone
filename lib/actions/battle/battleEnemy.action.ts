@@ -9,6 +9,7 @@ import { cookies } from 'next/headers';
 import Journal from '@/lib/models/journal.model';
 import { battleCreature } from '@/lib/utils/simulateCombat';
 import { populateEquipment } from '@/lib/utils/populateEquipment';
+import { trackQuestProgress } from '@/lib/actions/quest/quest.action';
 import { randomBoolean } from '@/lib/utils/randomUtils';
 import BattleReport from '@/lib/models/battleReport.model';
 import { calculateExperience } from '@/lib/utils/characterUtils';
@@ -224,6 +225,21 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     character.expeditionLastBattle = new Date();
 
     await character.save();
+
+    // Quest hooks: only count expedition kills (not losses); bosses
+    // feed the boss-specific quest as well; an actual placed drop
+    // (droppedItemSummary set) bumps the loot quest.
+    try {
+      if (playerWon) {
+        await trackQuestProgress({ characterId: character._id, verb: 'expedition_kill', amount: 1 });
+        if ((pickedEnemy as any).boss) {
+          await trackQuestProgress({ characterId: character._id, verb: 'expedition_boss', amount: 1 });
+        }
+        if (droppedItemSummary) {
+          await trackQuestProgress({ characterId: character._id, verb: 'find_items', amount: 1 });
+        }
+      }
+    } catch {}
 
     revalidatePath('/game/expeditions');
     return JSON.parse(JSON.stringify(savedBattleReport._id));
