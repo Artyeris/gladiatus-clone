@@ -87,6 +87,7 @@ export async function claimWorkAction() {
   try {
     const reward = jobGoldReward(character.level ?? 1, job, work.hours);
     character.crowns = (character.crowns ?? 0) + reward;
+    character.workCount = (character.workCount ?? 0) + 1;
     character.currentWork = null;
     character.markModified('currentWork');
     await character.save();

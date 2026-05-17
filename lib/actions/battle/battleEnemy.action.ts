@@ -98,6 +98,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
 
     // If the character won.
     let droppedItemSummary: { name: string; quality: string; image: string } | null = null;
+    let expeditionHonorDelta = 0;
     if (playerWon) {
       journal.world.battles++;
       journal.world.wins++;
@@ -105,6 +106,16 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
       journal.world.damageInflicted = (journal.world.damageInflicted ?? 0) + (battleSummary.result.attackerTotalDamage ?? 0);
       journal.world.damageReceived = (journal.world.damageReceived ?? 0) + (battleSummary.result.defenderTotalDamage ?? 0);
       journal.expeditions[expeditionName][enemyName].wins++;
+
+      // Expedition honor: small per-kill bonus scaled by enemy level,
+      // bosses pay double. Source-table values look like Rat ~3-5,
+      // Bear ~21-36, Captain (boss) ~39-74 -- this matches the lower
+      // end and keeps arena honor as the dominant ladder.
+      const enemyLevel = Math.max(1, (pickedEnemy as any).level ?? 1);
+      const isBossKill = !!(pickedEnemy as any).boss;
+      expeditionHonorDelta = Math.max(1, Math.floor(enemyLevel * (isBossKill ? 1 : 0.5)));
+      character.honor = (character.honor ?? 0) + expeditionHonorDelta;
+      journal.world.honorEarned = (journal.world.honorEarned ?? 0) + expeditionHonorDelta;
       journal.markModified('world');
 
       // Calculate probability of obtaining knowledge only if knowledge is not greater than 3.
@@ -162,6 +173,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
               bag: e.bag ?? 0,
             }));
             character.markModified('inventory');
+            character.itemsFound = (character.itemsFound ?? 0) + 1;
             droppedItemSummary = {
               name: created.name,
               quality: created.quality ?? 'common',
@@ -196,6 +208,12 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     }
 
     await journal.save();
+
+    // Stamp the honor delta onto the result so the battle report page
+    // can display it -- expeditions now feed honor too, not just gold.
+    if (expeditionHonorDelta > 0) {
+      battleSummary.result.honorEarned = expeditionHonorDelta;
+    }
 
      // Create the battle report. Old reports are kept so the player can
      // browse their history under /game/reports.

@@ -14,6 +14,18 @@ const battleReportSchema = new mongoose.Schema({
       honorLost: Number,
       experienceDrop: Number,
       crownsDrop: Number,
+      // Detailed combat counters surfaced on the battle report page;
+      // omitting these from the schema makes Mongoose's strict mode
+      // drop them on save (hence the all-zero rows that used to render).
+      attackerHitsLanded: Number,
+      attackerHitsAttempted: Number,
+      attackerCritsLanded: Number,
+      attackerArmorAbsorbed: Number,
+      defenderHitsLanded: Number,
+      defenderHitsAttempted: Number,
+      defenderCritsLanded: Number,
+      defenderArmorAbsorbed: Number,
+      totalRounds: Number,
     }
   },
   rounds: {

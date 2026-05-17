@@ -21,7 +21,10 @@ const Page = async ({ searchParams }: Props) => {
 
   return (
     <div className='px-8 flex flex-col gap-4'>
-      <HighscoreContent highscore={highscore} />
+      <HighscoreContent
+        highscore={highscore}
+        currentCharacterId={String(user.character._id)}
+      />
     </div>
   )
 }

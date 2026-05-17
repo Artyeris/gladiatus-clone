@@ -14,6 +14,7 @@ import ItemTypeFilter, {
   matchesType,
   type ItemTypeFilterValue,
 } from '@/components/shared/ItemTypeFilter';
+import SortStrip, { type SortMode } from '@/components/shared/SortStrip';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import {
@@ -83,8 +84,16 @@ function Board({ character, listings }: Props) {
   const [price, setPrice] = useState<string>('');
   const [busy, setBusy] = useState(false);
   const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
+  const [sortBy, setSortBy] = useState<SortMode>('default');
 
-  const filteredListings = listings.filter((l) => matchesType(l.item, typeFilter));
+  const filteredListings = listings
+    .filter((l) => matchesType(l.item, typeFilter))
+    .slice()
+    .sort((a, b) => {
+      if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
+      if (sortBy === 'levelDesc') return (b.item?.level ?? 0) - (a.item?.level ?? 0);
+      return 0;
+    });
 
   useEffect(() => {
     setEntries(entriesFromCharacter(character));
@@ -174,6 +183,7 @@ function Board({ character, listings }: Props) {
           onChange={setTypeFilter}
           counts={countByType(listings.map((l) => l.item))}
         />
+        <SortStrip value={sortBy} onChange={setSortBy} />
         {filteredListings.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
             {listings.length === 0

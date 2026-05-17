@@ -94,6 +94,15 @@ export async function battleArena(defenderId: string) {
       if (attackerJournal) attackerJournal.arena.wins++;
       if (defenderJournal) defenderJournal.arena.defeats++;
 
+      // Lifetime honor accounting on the journal so the Statistics
+      // page can show "Honor earned" / "Honor lost" instead of zeros.
+      if (attackerJournal) {
+        attackerJournal.arena.honorEarned = (attackerJournal.arena.honorEarned ?? 0) + earnedHonor;
+      }
+      if (defenderJournal) {
+        defenderJournal.arena.honorEarned = (defenderJournal.arena.honorEarned ?? 0) + lostHonor;
+      }
+
       // Roll the weekly-wins window if the previous week is over,
       // then bump the counter for the 7-day highscore.
       const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -133,6 +142,12 @@ export async function battleArena(defenderId: string) {
 
       if (attackerJournal) attackerJournal.arena.defeats++;
       if (defenderJournal) defenderJournal.arena.wins++;
+      if (defenderJournal) {
+        defenderJournal.arena.honorEarned = (defenderJournal.arena.honorEarned ?? 0) + earnedHonor;
+      }
+      if (attackerJournal) {
+        attackerJournal.arena.honorEarned = (attackerJournal.arena.honorEarned ?? 0) + lostHonor;
+      }
 
       defender.honor += earnedHonor;
       attacker.honor += lostHonor;

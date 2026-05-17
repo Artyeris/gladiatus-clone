@@ -19,10 +19,6 @@ export const generalRoutes = [
     name: 'Quests',
     link: '/quests',
   },
-  {
-    name: 'Settings',
-    link: '/settings',
-  },
 ]
 
 export const villageRoutes = [

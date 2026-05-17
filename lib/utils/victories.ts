@@ -126,9 +126,27 @@ export const VICTORIES: VictoryDef[] = [
   { id: 'dispater_hard',       category: 'underworld', name: 'Long live the King',    description: 'Defeat Dis Pater on Hard.',                    statKey: 'disPaterHard',        tiers: milestone },
 ];
 
+// Many statKeys in this table refer to fields we don't track on the
+// character document directly (yet). Map the ones we *do* feed into
+// gameplay actions onto the actual storage path (often
+// character.journal.<bucket>.<field>) so the Victories page reads
+// real numbers instead of permanent zeros. Anything not in this map
+// still works for direct character paths like `honor` or
+// `trainCount.strength` via the fallback walk.
+const STAT_ALIAS: Record<string, string> = {
+  goldEarned:        'crowns',
+  honor:             'honor',
+  itemsFound:        'itemsFound',
+  workCount:         'workCount',
+  arenaWins:         'journal.arena.wins',
+  arenaDamageDealt:  'journal.arena.damageInflicted',
+  arenaDamageTaken:  'journal.arena.damageReceived',
+};
+
 // Read a possibly nested key from the character object.
 function readStat(character: CharacterInterface, statKey: string): number {
-  const parts = statKey.split('.');
+  const resolved = STAT_ALIAS[statKey] ?? statKey;
+  const parts = resolved.split('.');
   let cur: any = character;
   for (const p of parts) {
     if (cur == null) return 0;

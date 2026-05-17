@@ -12,6 +12,7 @@ import ItemTypeFilter, {
   matchesType,
   type ItemTypeFilterValue,
 } from '@/components/shared/ItemTypeFilter';
+import SortStrip, { type SortMode } from '@/components/shared/SortStrip';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import {
@@ -52,8 +53,16 @@ const AuctionContent = ({ character, auctions }: Props) => {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
+  const [sortBy, setSortBy] = useState<SortMode>('default');
 
-  const filteredAuctions = auctions.filter((a) => matchesType(a.item, typeFilter));
+  const filteredAuctions = auctions
+    .filter((a) => matchesType(a.item, typeFilter))
+    .slice()
+    .sort((a, b) => {
+      if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
+      if (sortBy === 'levelDesc') return (b.item?.level ?? 0) - (a.item?.level ?? 0);
+      return 0;
+    });
 
   const onBid = async (auctionId: string, amount: number) => {
     setBusy(true);
@@ -108,6 +117,7 @@ const AuctionContent = ({ character, auctions }: Props) => {
           onChange={setTypeFilter}
           counts={countByType(auctions.map((a) => a.item))}
         />
+        <SortStrip value={sortBy} onChange={setSortBy} />
         {filteredAuctions.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
             {auctions.length === 0

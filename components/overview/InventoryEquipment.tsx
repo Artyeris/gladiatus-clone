@@ -240,16 +240,6 @@ function EquipmentBoard({
         borderRadius: '5px',
       }}
     >
-      <h3
-        style={{
-          textAlign: 'center',
-          margin: '0 0 15px',
-          fontFamily: "'Cinzel', serif",
-          color: '#3e2714',
-        }}
-      >
-        Equipment
-      </h3>
       <div
         style={{
           display: 'grid',

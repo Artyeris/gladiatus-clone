@@ -29,7 +29,7 @@ const ExpeditionContent = ({ enemies, expeditionName, character }: ExpeditionCon
   }, [character.expeditionLastBattle]);
 
   return (
-    <div className='flex flex-row gap-4'>
+    <div className='flex flex-row gap-4 justify-center flex-wrap'>
       {enemies.map((enemy) => (
         <EnemyCard
           key={enemy.id}

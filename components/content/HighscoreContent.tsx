@@ -8,6 +8,7 @@ import type { HighscorePage, HighscorePeriod } from '@/lib/types/highscore';
 
 interface Props {
   highscore: HighscorePage;
+  currentCharacterId?: string;
 }
 
 const TABS: { id: HighscorePeriod; label: string }[] = [
@@ -15,10 +16,11 @@ const TABS: { id: HighscorePeriod; label: string }[] = [
   { id: 'week', label: '7 days' },
 ];
 
-const HighscoreContent = ({ highscore }: Props) => {
+const HighscoreContent = ({ highscore, currentCharacterId }: Props) => {
   const { characters, page, pageSize, total, totalPages, period } = highscore;
   const startRank = (page - 1) * pageSize;
   const showWeeklyColumn = period === 'week';
+  const myId = currentCharacterId ? String(currentCharacterId) : '';
 
   return (
     <>
@@ -55,10 +57,12 @@ const HighscoreContent = ({ highscore }: Props) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {(characters as CharacterInterface[]).map((character, index) => (
+          {(characters as CharacterInterface[]).map((character, index) => {
+            const isMe = myId !== '' && String(character._id) === myId;
+            return (
             <TableRow
               key={character._id}
-              className='border-none'
+              className={`border-none ${isMe ? 'bg-cream2/60' : ''}`}
             >
               <TableCell className='py-2 text-brown2 font-medium'>{startRank + index + 1}</TableCell>
               <TableCell className='py-2 font-medium'>
@@ -80,7 +84,8 @@ const HighscoreContent = ({ highscore }: Props) => {
                 </TableCell>
               )}
             </TableRow>
-          ))}
+            );
+          })}
           {characters.length === 0 && (
             <TableRow className='border-none'>
               <TableCell colSpan={showWeeklyColumn ? 5 : 4} className='py-3 text-brown2 italic text-center opacity-80'>

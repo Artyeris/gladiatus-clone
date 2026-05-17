@@ -37,58 +37,49 @@ export async function getArenaRivals() {
     const pot = await getOrCreatePot(tier);
 
     // Pool of contenders sharing the same league bracket.
-    const tierFilter: any = {
+    const tierBaseFilter: any = {
       onboarded: true,
       level: { $gte: range.min, $lte: range.max },
-      _id: { $ne: character._id },
     };
 
     const myRank = (await Character.countDocuments({
-      ...tierFilter,
+      ...tierBaseFilter,
+      _id: { $ne: character._id },
       honor: { $gt: character.honor },
     })) + 1;
 
-    const above = await Character.find(
-      { ...tierFilter, honor: { $gt: character.honor } },
-      { name: 1, _id: 1, honor: 1, level: 1, isBot: 1 },
-    )
-      .sort({ honor: 1 })
-      .limit(4);
-
-    const below = await Character.find(
-      { ...tierFilter, honor: { $lte: character.honor } },
+    // Always show the tier's top 5 -- the actual leaderboard. If the
+    // player isn't already in the top 5, append their own row at the
+    // bottom so they can see where they stand.
+    const topFive = await Character.find(
+      tierBaseFilter,
       { name: 1, _id: 1, honor: 1, level: 1, isBot: 1 },
     )
       .sort({ honor: -1 })
-      .limit(2);
+      .limit(5);
 
-    const rivals = [
-      ...above.reverse().map((rival, index) => ({
-        name: rival.name,
-        _id: rival._id,
-        honor: rival.honor,
-        level: rival.level,
-        isBot: !!(rival as any).isBot,
-        rank: myRank - (above.length - index),
-      })),
-      {
-        name: character.name,
-        _id: character._id,
+    const rivals = topFive.map((rival, index) => ({
+      name:  rival.name,
+      _id:   rival._id,
+      honor: rival.honor,
+      level: rival.level,
+      isBot: !!(rival as any).isBot,
+      rank:  index + 1,
+      isMe:  String(rival._id) === String(character._id),
+    }));
+
+    const playerInTop = rivals.some((r) => r.isMe);
+    if (!playerInTop) {
+      rivals.push({
+        name:  character.name,
+        _id:   character._id,
         honor: character.honor,
         level: character.level,
         isBot: false,
-        rank: myRank,
-        isMe: true,
-      },
-      ...below.map((rival, index) => ({
-        name: rival.name,
-        _id: rival._id,
-        honor: rival.honor,
-        level: rival.level,
-        isBot: !!(rival as any).isBot,
-        rank: myRank + 1 + index,
-      })),
-    ];
+        rank:  myRank,
+        isMe:  true,
+      });
+    }
 
     return JSON.parse(JSON.stringify({
       tier: { id: tier.id, name: tier.name, minLevel: tier.minLevel, maxLevel: tier.maxLevel },

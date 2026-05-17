@@ -84,6 +84,10 @@ const characterSchema = new mongoose.Schema({
   // the first win after `weekStartedAt + 7 days` lands.
   weeklyWins: { type: Number, default: 0 },
   weekStartedAt: { type: Date, default: () => new Date() },
+
+  // Lifetime activity counters used by the Victories tab.
+  workCount:  { type: Number, default: 0 },
+  itemsFound: { type: Number, default: 0 },
   inventory: {
     type: [
       {

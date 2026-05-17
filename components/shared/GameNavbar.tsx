@@ -43,17 +43,17 @@ const GameNavbar = () => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator className='bg-cream2' />
               <DropdownMenuGroup>
-                <DropdownMenuItem className='hover:bg-red2 cursor-pointer'>
-                  <User className='mr-2 h-4 w-4 text-cream2' />
-                  <span className='text-cream2'>
-                    Profile
-                  </span>
+                <DropdownMenuItem asChild className='hover:bg-red2 cursor-pointer'>
+                  <Link href='/game/overview'>
+                    <User className='mr-2 h-4 w-4 text-cream2' />
+                    <span className='text-cream2'>Profile</span>
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className='hover:bg-red2 cursor-pointer'>
-                  <Settings className='mr-2 h-4 w-4 text-cream2' />
-                  <span className='text-cream2'>
-                    Settings
-                  </span>
+                <DropdownMenuItem asChild className='hover:bg-red2 cursor-pointer'>
+                  <Link href='/game/settings'>
+                    <Settings className='mr-2 h-4 w-4 text-cream2' />
+                    <span className='text-cream2'>Settings</span>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator className='bg-cream2' />
