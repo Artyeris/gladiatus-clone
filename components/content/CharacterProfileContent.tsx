@@ -19,6 +19,7 @@ import {
   StatId,
 } from '@/lib/utils/statUtils';
 import CombatRows from '@/components/overview/CombatRows';
+import StatBar from '@/components/shared/StatBar';
 
 interface Props {
   character: CharacterInterface;
@@ -59,11 +60,6 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
 
   const equipment = (character.equipment ?? {}) as Record<string, ItemInterface | null | undefined>;
 
-  // Bars are sized against the strongest stat on the card so the
-  // relative shape of this fighter is visible at a glance.
-  const statTotals = STATS.map((s) => calculateStatBreakdown(character, s.id as StatId).total);
-  const softMax = Math.max(1, ...statTotals);
-
   const onArenaFight = async () => {
     setBusy(true);
     const res = await battleArena(String(character._id));
@@ -85,37 +81,70 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
       </div>
 
       <div className='flex gap-4'>
-        <div className='flex flex-col items-center gap-2'>
+        <div className='flex flex-col items-center gap-2 w-[240px]'>
           <Image
             src={avatarUrl}
             alt={`${character.name} avatar`}
-            width={168}
-            height={194}
+            width={200}
+            height={232}
             className='drop-shadow-xl rounded-sm'
           />
 
-          <div className='brown-card w-[230px] rounded-sm flex flex-col text-sm'>
-            <Row label='Level' value={String(level)} />
-            <Row label='HP'    value={`${maxHp} / ${maxHp}`} />
-            <Row label='XP'    value={`${xpPercent.toFixed(1)}%`} />
-            {STATS.map((s) => {
+          <div className='w-full flex justify-between text-sm font-semibold'>
+            <span>Level</span>
+            <span className='text-red3'>{level}</span>
+          </div>
+
+          <div className='w-full'>
+            <div className='flex justify-between text-xs font-semibold mb-1'>
+              <span>Health</span>
+              <span>{maxHp} / {maxHp}</span>
+            </div>
+            <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
+              <div className='absolute top-0 left-0 h-full w-full' style={{ backgroundColor: '#a32626' }} />
+            </div>
+          </div>
+
+          <div className='w-full'>
+            <div className='flex justify-between text-xs font-semibold mb-1'>
+              <span>Experience</span>
+              <span>{character.experience ?? 0} / {xpForNext} ({xpPercent.toFixed(1)}%)</span>
+            </div>
+            <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
+              <div
+                className='absolute top-0 left-0 h-full'
+                style={{ width: `${xpPercent}%`, backgroundColor: '#d4af37' }}
+              />
+            </div>
+          </div>
+
+          <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
+            {STATS.map((s, index) => {
               const breakdown = calculateStatBreakdown(character, s.id as StatId);
               return (
-                <Row
+                <div
                   key={s.id}
-                  label={s.name}
-                  value={String(breakdown.total)}
-                  bar={{ value: breakdown.total, max: softMax }}
-                />
+                  className={`flex items-center gap-2 px-2 py-1 ${
+                    index < STATS.length - 1 && 'border-b-[3px] border-cream2'
+                  }`}
+                >
+                  <span className='w-[72px] shrink-0'>{s.name}</span>
+                  <div className='flex-1 min-w-0'>
+                    <StatBar statName={s.name} breakdown={breakdown} />
+                  </div>
+                  <span className='font-semibold text-red3 w-7 text-right shrink-0'>
+                    {breakdown.total}
+                  </span>
+                </div>
               );
             })}
           </div>
 
-          <div className='w-[230px]'>
+          <div className='w-full'>
             <CombatRows user={character} />
           </div>
 
-          <div className='brown-card w-[230px] rounded-sm flex flex-col text-sm'>
+          <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
             <Row label='Power' value={String(calculatePower(character))} last />
           </div>
         </div>
@@ -180,32 +209,11 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
 
 export default CharacterProfileContent;
 
-function Row({
-  label, value, last, bar,
-}: {
-  label: string;
-  value: string;
-  last?: boolean;
-  bar?: { value: number; max: number };
-}) {
+function Row({ label, value, last }: { label: string; value: string; last?: boolean }) {
   return (
-    <div className={`flex items-center gap-2 px-2 py-[2px] ${!last && 'border-b-[2px] border-cream2'}`}>
-      <span className='w-[78px] shrink-0 text-sm'>{label}</span>
-      <div
-        className='flex-1 min-w-0 h-2 rounded-sm overflow-hidden'
-        style={{ backgroundColor: bar ? '#3e2714' : 'transparent' }}
-      >
-        {bar && (
-          <div
-            className='h-full'
-            style={{
-              width: `${Math.min(100, (bar.value / Math.max(1, bar.max)) * 100)}%`,
-              backgroundColor: '#6b8e23',
-            }}
-          />
-        )}
-      </div>
-      <span className='font-semibold text-red3 w-[60px] text-right shrink-0 text-sm'>{value}</span>
+    <div className={`flex justify-between items-center px-2 py-1 ${!last && 'border-b-[2px] border-cream2'}`}>
+      <span className='text-sm'>{label}</span>
+      <span className='font-semibold text-red3 text-sm'>{value}</span>
     </div>
   );
 }
