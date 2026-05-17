@@ -12,12 +12,6 @@ import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import {
-  InventoryEntry,
-  findFreePosition,
-  migrateLegacyInventory,
-  placeItem,
-} from '@/lib/utils/inventory/grid';
-import {
   auctionPhase,
   minNextBid,
   newAuctionEndsAt,
@@ -26,23 +20,6 @@ import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
 import Package from '@/lib/models/package.model';
 
 const POOL_SIZE = 12;
-
-function loadEntries(character: any): InventoryEntry[] {
-  const inv = character.inventory;
-  const migrated = migrateLegacyInventory(inv);
-  if (migrated) return migrated;
-  if (!Array.isArray(inv)) return [];
-  return inv.map((e: any) => ({ item: e?.item, x: e?.x ?? 0, y: e?.y ?? 0 }));
-}
-
-function serializeInventory(entries: InventoryEntry[]) {
-  return entries.map((e) => ({
-    item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
-    x: e.x,
-    y: e.y,
-    bag: e.bag ?? 0,
-  }));
-}
 
 async function getMyCharacter() {
   const token = cookies().get(COOKIE_NAME);

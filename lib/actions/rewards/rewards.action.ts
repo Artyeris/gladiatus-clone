@@ -8,10 +8,13 @@ import Character from '@/lib/models/character.model';
 import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
+import {
+  DAILY_REWARD_DIAMONDS,
+  MONTHLY_REWARD_DIAMONDS,
+  RewardsStatus,
+  WEEKLY_REWARD_DIAMONDS,
+} from './rewards.types';
 
-export const DAILY_REWARD_DIAMONDS = 1;
-export const WEEKLY_REWARD_DIAMONDS = 7;
-export const MONTHLY_REWARD_DIAMONDS = 28;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 const MONTHLY_STREAK_DAYS = 28;
@@ -30,14 +33,6 @@ function daysBetween(a: Date, b: Date): number {
   const aMid = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
   const bMid = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
   return Math.round((bMid - aMid) / DAY_MS);
-}
-
-export interface RewardsStatus {
-  diamonds: number;
-  dailyStreak: number;
-  daily: { ready: boolean; nextAt: string | null };
-  weekly: { ready: boolean; nextAt: string | null };
-  monthly: { ready: boolean; nextAt: string | null; progress: number };
 }
 
 async function getMyCharacter() {

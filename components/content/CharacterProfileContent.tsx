@@ -14,7 +14,6 @@ import { calculateNextLevelExperience } from '@/lib/utils';
 import { calculatePower } from '@/lib/utils/characterUtils';
 import { stats as STATS } from '@/constants';
 import { EquipmentSlot, SLOT_LABELS } from '@/lib/utils/equipment';
-import { calculateCombatStats } from '@/lib/utils/combatStats';
 import {
   calculateStatBreakdown,
   StatId,
@@ -58,7 +57,6 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
     ? Math.min(((character.experience ?? 0) / xpForNext) * 100, 100)
     : 0;
 
-  const { armor, damageMin, damageMax } = calculateCombatStats(character);
   const equipment = (character.equipment ?? {}) as Record<string, ItemInterface | null | undefined>;
 
   // Bars are sized against the strongest stat on the card so the

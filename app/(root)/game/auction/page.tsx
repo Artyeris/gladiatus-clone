@@ -10,7 +10,7 @@ const Page = async () => {
   if (!user.character) redirect('/onboarding');
 
   const result = await listAuctionsAction();
-  const auctions = 'auctions' in result ? result.auctions : [];
+  const auctions = ('auctions' in result ? result.auctions : []) ?? [];
 
   return <AuctionContent character={user.character} auctions={auctions} />;
 };

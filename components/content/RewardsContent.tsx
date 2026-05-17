@@ -5,14 +5,16 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import {
-  RewardsStatus,
   claimDailyReward,
   claimMonthlyReward,
   claimWeeklyReward,
-  DAILY_REWARD_DIAMONDS,
-  WEEKLY_REWARD_DIAMONDS,
-  MONTHLY_REWARD_DIAMONDS,
 } from '@/lib/actions/rewards/rewards.action';
+import {
+  DAILY_REWARD_DIAMONDS,
+  MONTHLY_REWARD_DIAMONDS,
+  RewardsStatus,
+  WEEKLY_REWARD_DIAMONDS,
+} from '@/lib/actions/rewards/rewards.types';
 
 interface Props {
   initialStatus: RewardsStatus;

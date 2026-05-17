@@ -9,11 +9,9 @@ import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 
-const LANGUAGES = ['en', 'lt'] as const;
+import { RENAME_COST_GOLD } from './updateSettings.constants';
 
-// Gold cost to rename a gladiator. Cheap enough to be flavour but
-// non-trivial so the unique-name slot doesn't churn freely.
-export const RENAME_COST_GOLD = 200;
+const LANGUAGES = ['en', 'lt'] as const;
 
 export async function updateLanguage({ language }: { language: string }) {
   const token = cookies().get(COOKIE_NAME);

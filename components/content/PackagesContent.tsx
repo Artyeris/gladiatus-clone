@@ -7,17 +7,17 @@ import toast from 'react-hot-toast';
 import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
 import {
-  PackageView,
   claimPackage,
   discardPackage,
 } from '@/lib/actions/package/package.action';
+import { PackageView } from '@/lib/actions/package/package.types';
 import { fullItemName, QUALITY_COLOR } from '@/lib/utils/itemUtils';
 
 interface Props {
   initialPackages: PackageView[];
 }
 
-const SOURCE_LABEL: Record<PackageView['source'], string> = {
+const SOURCE_LABEL: Record<NonNullable<PackageView['source']>, string> = {
   shop: 'Shop',
   auction: 'Auction',
   market: 'Market',
@@ -28,7 +28,7 @@ const SOURCE_LABEL: Record<PackageView['source'], string> = {
   other: 'Other',
 };
 
-const SOURCE_COLOR: Record<PackageView['source'], string> = {
+const SOURCE_COLOR: Record<NonNullable<PackageView['source']>, string> = {
   shop: '#7c7060',
   auction: '#d4af37',
   market: '#3ca33c',

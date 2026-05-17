@@ -25,12 +25,6 @@ import {
   msUntilNextRefresh,
 } from '@/lib/utils/shopRotation';
 import { scaleItemTemplate } from '@/lib/utils/itemUtils';
-import {
-  InventoryEntry,
-  findFreePositionAnyBag,
-  migrateLegacyInventory,
-  placeItem,
-} from '@/lib/utils/inventory/grid';
 import Package from '@/lib/models/package.model';
 import { SHOP_LABELS } from '@/lib/utils/shopRotation';
 
@@ -46,22 +40,6 @@ async function getMyCharacter() {
   } catch {
     return null;
   }
-}
-
-function loadInventoryEntries(character: any): InventoryEntry[] {
-  const migrated = migrateLegacyInventory(character.inventory);
-  if (migrated) return migrated;
-  if (!Array.isArray(character.inventory)) return [];
-  return character.inventory.map((e: any) => ({
-    item: e?.item, x: e?.x ?? 0, y: e?.y ?? 0, bag: e?.bag ?? 0,
-  }));
-}
-
-function serializeInventory(entries: InventoryEntry[]) {
-  return entries.map((e) => ({
-    item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
-    x: e.x, y: e.y, bag: e.bag ?? 0,
-  }));
 }
 
 async function regenerateSlots(shop: any, characterLevel: number) {

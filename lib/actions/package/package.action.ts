@@ -17,16 +17,7 @@ import {
   placeItem,
 } from '@/lib/utils/inventory/grid';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
-
-type PackageSource = 'shop' | 'auction' | 'market' | 'expedition' | 'arena' | 'quest' | 'dungeon' | 'other';
-
-export interface PackageView {
-  _id: string;
-  source: PackageSource;
-  detail: string;
-  expiresAt: string;
-  item: ItemInterface | null;
-}
+import { PackageSource, PackageView } from './package.types';
 
 async function getMyCharacter() {
   const token = cookies().get(COOKIE_NAME);
