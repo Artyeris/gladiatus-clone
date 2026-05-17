@@ -110,7 +110,7 @@ export async function tickChampionSalary(character: any): Promise<{
       String(character._id),
       'system',
       `Champion salary -- ${tier.name}`,
-      `You earned ${delta.gold} crowns for holding the champion seat in ${tier.name}.`,
+      `You earned ${delta.gold} gold for holding the champion seat in ${tier.name}.`,
     );
   } catch (err) {
     console.log(`${new Date()} - champion salary message failed - ${err}`);

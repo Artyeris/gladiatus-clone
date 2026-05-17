@@ -5,6 +5,7 @@ import { combatProfile } from '@/lib/utils/combatProfile';
 import { BattleReport } from '@/lib/interfaces/battleReport.interface';
 import DescriptionCard from '@/components/cards/DescriptionCard';
 import FighterCard from '@/components/cards/FighterCard';
+import ItemImage from '@/components/shared/ItemImage';
 import { getBattleReport } from '@/lib/actions/battle/getBattleReport.action';
 import { getUser } from '@/lib/actions/user/getUser.action';
 import { redirect } from 'next/navigation';
@@ -80,10 +81,31 @@ const Page = async ({ params }: { params: { id: string } }) => {
             <span className='font-semibold'>{attacker.name}</span> has received {battleReport.result.experienceDrop} experience.
           </p>
           {battleReport.loot && (
-            <p className='text-sm px-2 py-1 font-semibold text-red3'>
-              Loot:&nbsp;{battleReport.loot.name}
+            <p className='text-sm px-2 py-1 font-semibold text-red3 flex items-center gap-2'>
+              <span>Loot:</span>
+              {battleReport.loot.image && (
+                <span
+                  className='relative inline-block shrink-0'
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    background: '#a89f91',
+                    border: '1px solid #5c3a21',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <ItemImage
+                    imageId={battleReport.loot.image}
+                    alt={battleReport.loot.name}
+                    fill
+                    sizes='24px'
+                    style={{ objectFit: 'contain', padding: '2px' }}
+                  />
+                </span>
+              )}
+              <span>{battleReport.loot.name}</span>
               {battleReport.loot.quality && battleReport.loot.quality !== 'common' && (
-                <span className='opacity-80 font-normal'> ({battleReport.loot.quality.replace('_plus', '+')})</span>
+                <span className='opacity-80 font-normal'>({battleReport.loot.quality.replace('_plus', '+')})</span>
               )}
             </p>
           )}

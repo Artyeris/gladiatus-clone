@@ -45,8 +45,8 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
       <Image
         src={avatarUrl}
         alt='Character avatar'
-        width={168}
-        height={194}
+        width={200}
+        height={232}
         className='drop-shadow-xl'
       />
 

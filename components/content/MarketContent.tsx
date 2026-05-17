@@ -23,9 +23,11 @@ import {
   placeMarketListing,
 } from '@/lib/actions/market/market.action';
 import {
+  BAG_COUNT,
   INVENTORY_COLS,
   INVENTORY_ROWS,
   InventoryEntry,
+  bagFillCounts,
   buildGrid,
 } from '@/lib/utils/inventory/grid';
 import { fullItemName, QUALITY_COLOR } from '@/lib/utils/itemUtils';
@@ -313,6 +315,8 @@ function SellPanel({
   );
 }
 
+const TAB_LABELS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
 function InventoryView({
   entries,
   pickedItemId,
@@ -322,6 +326,8 @@ function InventoryView({
   pickedItemId: string | undefined;
   onPick: (item: ItemInterface) => void;
 }) {
+  const [activeBag, setActiveBag] = useState(0);
+
   // Hide the item that's currently parked in the sell slot.
   const visibleEntries = pickedItemId
     ? entries.filter((e) => {
@@ -330,7 +336,8 @@ function InventoryView({
         return String(id) !== String(pickedItemId);
       })
     : entries;
-  const grid = buildGrid(visibleEntries);
+  const grid = buildGrid(visibleEntries, activeBag);
+  const counts = bagFillCounts(visibleEntries);
 
   return (
     <div
@@ -340,6 +347,24 @@ function InventoryView({
         borderRadius: '5px',
       }}
     >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${BAG_COUNT}, 1fr)`,
+          gap: '4px',
+          marginBottom: '6px',
+        }}
+      >
+        {Array.from({ length: BAG_COUNT }).map((_, i) => (
+          <BagTabButton
+            key={i}
+            label={TAB_LABELS[i] ?? String(i + 1)}
+            active={i === activeBag}
+            count={counts[i]}
+            onSelect={() => setActiveBag(i)}
+          />
+        ))}
+      </div>
       <div
         style={{
           display: 'grid',
@@ -371,6 +396,48 @@ function InventoryView({
         )}
       </div>
     </div>
+  );
+}
+
+function BagTabButton({
+  label,
+  active,
+  count,
+  onSelect,
+}: {
+  label: string;
+  active: boolean;
+  count: number;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      onClick={onSelect}
+      type='button'
+      style={{
+        position: 'relative',
+        height: '24px',
+        background: active ? '#dcd0b8' : '#3e2714',
+        color: active ? '#3e2714' : '#f4eac8',
+        border: '1px solid #8b5a2b',
+        borderRadius: '2px',
+        fontFamily: "'Cinzel', serif",
+        fontSize: '11px',
+        fontWeight: 600,
+        cursor: 'pointer',
+      }}
+      title={`Bag ${label}${count > 0 ? ` (${count} item${count === 1 ? '' : 's'})` : ''}`}
+    >
+      {label}
+      {count > 0 && !active && (
+        <span style={{
+          position: 'absolute',
+          right: 2, top: 1,
+          fontSize: '8px',
+          opacity: 0.85,
+        }}>•</span>
+      )}
+    </button>
   );
 }
 

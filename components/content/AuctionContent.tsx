@@ -40,6 +40,21 @@ interface Props {
   auctions: AuctionView[];
 }
 
+// Colour the "% of base value" badge so a wildly inflated starting
+// price is visible at a glance:
+//   <=120%  grey
+//   121-140 green
+//   141-160 yellow
+//   161-180 orange
+//   180+    red
+function percentColor(pct: number): string {
+  if (pct <= 120) return '#7c7060';
+  if (pct <= 140) return '#3ca33c';
+  if (pct <= 160) return '#d4af37';
+  if (pct <= 180) return '#e08a30';
+  return '#d63a3a';
+}
+
 const PHASE_COLOR: Record<AuctionPhase, string> = {
   'Very Long': '#3a7bd6',
   Long: '#3ca33c',
@@ -211,7 +226,11 @@ function AuctionRow({
         <span className='text-xs opacity-80'>
           Min bid:{' '}
           <span className='font-semibold'>{auction.startingPrice}</span>
-          {percentOfValue != null && <span> ({percentOfValue}%)</span>}
+          {percentOfValue != null && (
+            <span style={{ color: percentColor(percentOfValue), fontWeight: 600 }}>
+              {' '}({percentOfValue}%)
+            </span>
+          )}
           {' '}&middot; Current:{' '}
           <span className='font-semibold'>{auction.currentBid}</span>
           {auction.highestBidder && <> &middot; leading: {auction.highestBidder.name}</>}

@@ -135,14 +135,22 @@ export async function listAuctionsAction() {
     await settleExpiredAuctions();
     await refillAuctionPool();
 
-    const auctions = await Auction.find({ status: 'open' })
+    const me = await getMyCharacter();
+    const myId = 'character' in me ? String(me.character._id) : null;
+    const myLevel = ('character' in me ? (me.character as any).level : 1) ?? 1;
+    // Mirrors the real-game cap: the auction list only ever shows items
+    // at or below the player's level + 3 so it doesn't get cluttered
+    // with gear they couldn't equip yet.
+    const maxItemLevel = myLevel + 3;
+
+    const allAuctions = await Auction.find({ status: 'open' })
       .populate({ path: 'item', model: Item })
       .populate({ path: 'highestBidder', model: Character, select: 'name' })
       .sort({ endsAt: 1 })
       .lean();
-
-    const me = await getMyCharacter();
-    const myId = 'character' in me ? String(me.character._id) : null;
+    const auctions = (allAuctions as any[]).filter(
+      (a) => (a.item?.level ?? 0) <= maxItemLevel,
+    );
 
     return {
       auctions: auctions.map((a: any) => ({
