@@ -15,6 +15,10 @@ export const generalRoutes = [
     name: 'Highscore',
     link: '/highscore',
   },
+  {
+    name: 'Settings',
+    link: '/settings',
+  },
 ]
 
 export const villageRoutes = [
@@ -29,6 +33,18 @@ export const villageRoutes = [
   {
     name: 'Training',
     link: '/training',
+  },
+  {
+    name: 'Weapon Smith',
+    link: '/shop/weapons',
+  },
+  {
+    name: 'Armour Smith',
+    link: '/shop/armor',
+  },
+  {
+    name: 'General Goods',
+    link: '/shop/goods',
   },
   {
     name: 'Auction',

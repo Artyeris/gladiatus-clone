@@ -1,0 +1,49 @@
+// NPC merchant shops -- one per shop type, each holding a small
+// rotation of items the player can buy directly. Refreshes every
+// SHOP_REFRESH_INTERVAL real milliseconds (lazy: regenerated on the
+// next visit after the timer expires).
+
+export type ShopType = 'goods' | 'armor' | 'weapons';
+
+export const SHOP_TYPES: ShopType[] = ['goods', 'armor', 'weapons'];
+
+export const SHOP_LABELS: Record<ShopType, string> = {
+  goods:   'General Goods',
+  armor:   'Armour Smith',
+  weapons: 'Weapon Smith',
+};
+
+export const SHOP_TAGLINES: Record<ShopType, string> = {
+  goods:   'Gloves, boots, cloaks, rings and amulets, hauled in from every road.',
+  armor:   'Helmets, chestpieces, leggings and shields, hammered fresh today.',
+  weapons: 'Steel for every grip -- daggers, swords, axes, spears.',
+};
+
+export const SHOP_CATEGORIES: Record<ShopType, string[]> = {
+  goods:   ['gloves', 'boots', 'cloak', 'ring', 'necklace'],
+  armor:   ['head', 'chest', 'legs', 'offHand'],
+  weapons: ['mainHand'],
+};
+
+// Real Gladiatus restocks every ~5 hours. On a 5x server that's 1
+// real hour, which keeps the rotation fresh without spamming items.
+export const SHOP_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+export const SHOP_SLOTS = 12;
+// Buy price is sellPrice * 3 (Gladiatus markup roughly matches).
+export const BUY_PRICE_MULTIPLIER = 3;
+// Re-stock NOW button costs this many crowns each time.
+export const SHOP_FORCE_REFRESH_COST = 100;
+
+export function isShopType(value: unknown): value is ShopType {
+  return typeof value === 'string' && (SHOP_TYPES as string[]).includes(value);
+}
+
+export function buyPriceFor(item: { sellPrice?: number | null }): number {
+  return Math.max(1, Math.floor((item?.sellPrice ?? 1) * BUY_PRICE_MULTIPLIER));
+}
+
+export function msUntilNextRefresh(lastRefreshAt: Date | null | undefined): number {
+  if (!lastRefreshAt) return 0;
+  const elapsed = Date.now() - new Date(lastRefreshAt).getTime();
+  return Math.max(0, SHOP_REFRESH_INTERVAL_MS - elapsed);
+}

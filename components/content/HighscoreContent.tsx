@@ -4,21 +4,44 @@ import Link from 'next/link';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import type { HighscorePage } from '@/lib/types/highscore';
+import type { HighscorePage, HighscorePeriod } from '@/lib/types/highscore';
 
 interface Props {
   highscore: HighscorePage;
 }
 
+const TABS: { id: HighscorePeriod; label: string }[] = [
+  { id: 'all',  label: 'All-time' },
+  { id: 'week', label: '7 days' },
+];
+
 const HighscoreContent = ({ highscore }: Props) => {
-  const { characters, page, pageSize, total, totalPages } = highscore;
+  const { characters, page, pageSize, total, totalPages, period } = highscore;
   const startRank = (page - 1) * pageSize;
+  const showWeeklyColumn = period === 'week';
 
   return (
     <>
       <h1 className='text-xl font-bold border-b-[3px] border-brown2 text-center text-brown2'>
         Player Highscore
       </h1>
+
+      <div className='flex gap-2 px-2 text-sm font-semibold text-brown2'>
+        {TABS.map((t) => (
+          <Link
+            key={t.id}
+            href={`/game/highscore?period=${t.id}`}
+            className={`px-4 py-1 border-b-[3px] ${
+              period === t.id
+                ? 'border-red3 text-red3'
+                : 'border-transparent hover:text-red3'
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
+
       <Table className='info-card'>
         <TableHeader className='border-[2px] border-brown bg-cream2'>
           <TableRow>
@@ -26,6 +49,9 @@ const HighscoreContent = ({ highscore }: Props) => {
             <TableHead className='text-brown2 font-semibold'>Name</TableHead>
             <TableHead className='text-brown2 font-semibold'>Level</TableHead>
             <TableHead className='text-brown2 font-semibold'>Honor</TableHead>
+            {showWeeklyColumn && (
+              <TableHead className='text-brown2 font-semibold'>Wins (7d)</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,19 +74,33 @@ const HighscoreContent = ({ highscore }: Props) => {
               </TableCell>
               <TableCell className='py-2 text-brown2 font-medium'>{character.level}</TableCell>
               <TableCell className='py-2 text-brown2 font-medium'>{character.honor}</TableCell>
+              {showWeeklyColumn && (
+                <TableCell className='py-2 text-brown2 font-medium'>
+                  {(character as any).weeklyWins ?? 0}
+                </TableCell>
+              )}
             </TableRow>
           ))}
+          {characters.length === 0 && (
+            <TableRow className='border-none'>
+              <TableCell colSpan={showWeeklyColumn ? 5 : 4} className='py-3 text-brown2 italic text-center opacity-80'>
+                Nobody has won an arena fight in the last 7 days.
+              </TableCell>
+            </TableRow>
+          )}
       </TableBody>
       </Table>
 
-      <Pagination page={page} totalPages={totalPages} total={total} />
+      <Pagination page={page} totalPages={totalPages} total={total} period={period} />
     </>
   )
 }
 
 export default HighscoreContent;
 
-function Pagination({ page, totalPages, total }: { page: number; totalPages: number; total: number }) {
+function Pagination({ page, totalPages, total, period }: {
+  page: number; totalPages: number; total: number; period: HighscorePeriod;
+}) {
   if (totalPages <= 1) {
     return (
       <div className='text-xs opacity-70 text-center text-brown2'>
@@ -78,25 +118,25 @@ function Pagination({ page, totalPages, total }: { page: number; totalPages: num
 
   return (
     <div className='flex items-center justify-center gap-1 text-sm text-brown2'>
-      <PageLink page={page - 1} disabled={page <= 1} label='Prev' />
+      <PageLink period={period} page={page - 1} disabled={page <= 1} label='Prev' />
       {pages.map((p, i) => {
         const prev = pages[i - 1];
         const gap = prev !== undefined && p - prev > 1;
         return (
           <span key={p} className='flex items-center gap-1'>
             {gap && <span className='px-1 opacity-60'>...</span>}
-            <PageLink page={p} active={p === page} label={String(p)} />
+            <PageLink period={period} page={p} active={p === page} label={String(p)} />
           </span>
         );
       })}
-      <PageLink page={page + 1} disabled={page >= totalPages} label='Next' />
+      <PageLink period={period} page={page + 1} disabled={page >= totalPages} label='Next' />
     </div>
   );
 }
 
 function PageLink({
-  page, active = false, disabled = false, label,
-}: { page: number; active?: boolean; disabled?: boolean; label: string }) {
+  page, period, active = false, disabled = false, label,
+}: { page: number; period: HighscorePeriod; active?: boolean; disabled?: boolean; label: string }) {
   if (disabled) {
     return (
       <span className='px-2 py-1 rounded-sm text-xs opacity-40 cursor-not-allowed'>{label}</span>
@@ -104,7 +144,7 @@ function PageLink({
   }
   return (
     <Link
-      href={`/game/highscore?page=${page}`}
+      href={`/game/highscore?period=${period}&page=${page}`}
       className={`px-2 py-1 rounded-sm text-xs font-semibold border-[2px] ${
         active
           ? 'border-red3 text-red3 bg-cream2/50'

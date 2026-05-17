@@ -93,6 +93,18 @@ export async function battleArena(defenderId: string) {
       if (attackerJournal) attackerJournal.arena.wins++;
       if (defenderJournal) defenderJournal.arena.defeats++;
 
+      // Roll the weekly-wins window if the previous week is over,
+      // then bump the counter for the 7-day highscore.
+      const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+      const since = attacker.weekStartedAt
+        ? Date.now() - new Date(attacker.weekStartedAt).getTime()
+        : Infinity;
+      if (since >= WEEK_MS) {
+        attacker.weekStartedAt = new Date();
+        attacker.weeklyWins = 0;
+      }
+      attacker.weeklyWins = (attacker.weeklyWins ?? 0) + 1;
+
       attacker.honor += earnedHonor;
       defender.honor += lostHonor;
 

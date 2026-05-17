@@ -15,6 +15,7 @@ export interface IUser extends Document {
   charisma?: number;
   experience?: number;
   crowns?: number;
+  language?: 'en' | 'lt';
 }
 
 const userSchema = new Schema<IUser>({
@@ -57,6 +58,7 @@ const userSchema = new Schema<IUser>({
   charisma: { type: Number, default: 5 },
   experience: { type: Number, default: 0 },
   crowns: { type: Number, default: 100 },
+  language: { type: String, enum: ['en', 'lt'], default: 'en' },
 }, {
   timestamps: true,
 });

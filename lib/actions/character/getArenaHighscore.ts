@@ -6,9 +6,18 @@ import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils';
 import { cookies } from 'next/headers';
-import { HIGHSCORE_PAGE_SIZE, type HighscorePage } from '@/lib/types/highscore';
+import {
+  HIGHSCORE_PAGE_SIZE,
+  type HighscorePage,
+  type HighscorePeriod,
+} from '@/lib/types/highscore';
 
-export async function getArenaHighscore(page: number = 1): Promise<HighscorePage> {
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+export async function getArenaHighscore(
+  page: number = 1,
+  period: HighscorePeriod = 'all',
+): Promise<HighscorePage> {
   const token = cookies().get(COOKIE_NAME);
 
   if (!token) throw new Error('Unathorized');
@@ -26,7 +35,16 @@ export async function getArenaHighscore(page: number = 1): Promise<HighscorePage
 
     if (!user || !user.character) throw new Error('Unauthorized');
 
-    const filter = { onboarded: true };
+    // "Weekly" tab is everyone who has actually won at least one
+    // arena fight in the last 7 game days; pure honor sort otherwise.
+    const filter: Record<string, any> = { onboarded: true };
+    let sort: Record<string, 1 | -1> = { honor: -1 };
+    if (period === 'week') {
+      filter.weeklyWins = { $gt: 0 };
+      filter.weekStartedAt = { $gte: new Date(Date.now() - WEEK_MS) };
+      sort = { weeklyWins: -1, honor: -1 };
+    }
+
     const safePage = Math.max(1, Math.floor(page));
     const total = await Character.countDocuments(filter);
     const totalPages = Math.max(1, Math.ceil(total / HIGHSCORE_PAGE_SIZE));
@@ -34,7 +52,7 @@ export async function getArenaHighscore(page: number = 1): Promise<HighscorePage
 
     const characters = await Character
       .find(filter)
-      .sort({ honor: -1 })
+      .sort(sort)
       .skip((clampedPage - 1) * HIGHSCORE_PAGE_SIZE)
       .limit(HIGHSCORE_PAGE_SIZE);
 
@@ -44,6 +62,7 @@ export async function getArenaHighscore(page: number = 1): Promise<HighscorePage
       pageSize: HIGHSCORE_PAGE_SIZE,
       total,
       totalPages,
+      period,
     }));
 
   } catch (error) {

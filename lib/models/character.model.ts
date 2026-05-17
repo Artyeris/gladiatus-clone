@@ -79,6 +79,11 @@ const characterSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  // Weekly arena counters powering the "7-day best" highscore tab.
+  // weeklyWins is bumped on every arena win; the window resets when
+  // the first win after `weekStartedAt + 7 days` lands.
+  weeklyWins: { type: Number, default: 0 },
+  weekStartedAt: { type: Date, default: () => new Date() },
   inventory: {
     type: [
       {
