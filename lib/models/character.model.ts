@@ -120,15 +120,11 @@ const characterSchema = new mongoose.Schema({
     intelligence: { type: Number, default: 0 },
   },
   inventory: {
-    type: [
-      {
-        _id: false,
-        item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item' },
-        x: { type: Number, default: 0 },
-        y: { type: Number, default: 0 },
-        bag: { type: Number, default: 0 },
-      },
-    ],
+    // Mixed type so the schema doesn't strip any per-entry field --
+    // most importantly `bag`, which a previously cached typed schema
+    // would silently drop on read/write. Each entry is still the
+    // same shape ({ item, x, y, bag }), just persisted as-is.
+    type: [mongoose.Schema.Types.Mixed],
     default: [],
   },
   currentWork: {

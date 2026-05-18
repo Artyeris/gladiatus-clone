@@ -29,19 +29,25 @@ const HighscoreContent = ({ highscore, currentCharacterId }: Props) => {
       </h1>
 
       <div className='flex gap-2 px-2 text-sm font-semibold text-brown2'>
-        {TABS.map((t) => (
-          <Link
-            key={t.id}
-            href={`/game/highscore?period=${t.id}`}
-            className={`px-4 py-1 border-b-[3px] ${
-              period === t.id
-                ? 'border-red3 text-red3'
-                : 'border-transparent hover:text-red3'
-            }`}
-          >
-            {t.label}
-          </Link>
-        ))}
+        {TABS.map((t) => {
+          const active = period === t.id;
+          return (
+            <Link
+              key={t.id}
+              href={`/game/highscore?period=${t.id}`}
+              className={`px-8 py-1 rounded-sm transition ${
+                active ? 'text-cream2 cursor-default' : 'text-brown2 hover:text-red3'
+              }`}
+              style={{
+                background: active ? '#974342' : '#b59964',
+                border: '2px solid #eed7a1',
+                outline: `2px solid ${active ? '#974342' : '#b59964'}`,
+              }}
+            >
+              {t.label}
+            </Link>
+          );
+        })}
       </div>
 
       <Table className='info-card'>

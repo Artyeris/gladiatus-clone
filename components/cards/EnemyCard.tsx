@@ -42,7 +42,12 @@ const EnemyCard = ({ enemy, expedition, canFight }: EnemyCardProps) => {
                 style={{ aspectRatio: '135/156', objectFit: 'cover' }}
               />
             </HoverCardTrigger>
-            <HoverCardContent>
+            <HoverCardContent
+              side='right'
+              align='start'
+              sideOffset={6}
+              className='z-[9999] w-auto p-0 border-none shadow-md'
+            >
               <div className='red-card flex flex-col min-w-[210px] px-3 py-2 text-cream2 text-xs gap-[3px]'>
 
                 <span className='font-semibold text-sm border-b border-cream2 pb-1 mb-1'>

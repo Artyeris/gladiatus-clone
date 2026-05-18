@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/hover-card';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { combatBreakdown } from '@/lib/utils/combatBreakdown';
+import { calculatePower } from '@/lib/utils/characterUtils';
+import PowerTooltip from '@/components/shared/PowerTooltip';
 
 interface CombatRowsProps {
   user: CharacterInterface;
@@ -44,7 +46,7 @@ const CombatRows = ({ user }: CombatRowsProps) => {
         </TooltipCard>
       </CombatRow>
 
-      <CombatRow label='Damage' value={`${b.damageMin} - ${b.damageMax}`} last>
+      <CombatRow label='Damage' value={`${b.damageMin} - ${b.damageMax}`}>
         <TooltipCard title='Damage' headline={`${b.damageMin} - ${b.damageMax}`}>
           <TipRow
             label={b.hasWeapon ? 'From weapon' : 'Bare hands'}
@@ -61,6 +63,15 @@ const CombatRows = ({ user }: CombatRowsProps) => {
           </TipSection>
         </TooltipCard>
       </CombatRow>
+
+      <PowerTooltip character={user}>
+        <div
+          className='flex items-center justify-between gap-2 px-2 py-1 cursor-help'
+        >
+          <span className='w-[90px] shrink-0'>Power</span>
+          <span className='font-semibold text-red3'>{calculatePower(user)}</span>
+        </div>
+      </PowerTooltip>
     </div>
   );
 };
