@@ -48,17 +48,17 @@ export async function getArenaRivals() {
       honor: { $gt: character.honor },
     })) + 1;
 
-    // Always show the tier's top 5 -- the actual leaderboard. If the
-    // player isn't already in the top 5, append their own row at the
-    // bottom so they can see where they stand.
-    const topFive = await Character.find(
+    // Always show the tier's top 10 -- the actual leaderboard. If
+    // the player isn't already in the top 10, append their own row
+    // at the bottom so they can see where they stand.
+    const topRivals = await Character.find(
       tierBaseFilter,
       { name: 1, _id: 1, honor: 1, level: 1, isBot: 1 },
     )
       .sort({ honor: -1 })
-      .limit(5);
+      .limit(10);
 
-    const rivals = topFive.map((rival, index) => ({
+    const rivals = topRivals.map((rival, index) => ({
       name:  rival.name,
       _id:   rival._id,
       honor: rival.honor,

@@ -26,18 +26,20 @@ const EnemyCard = ({ enemy, expedition, canFight }: EnemyCardProps) => {
   }
 
   return (
-      <div className='w-38 flex flex-col items-center gap-2 drop-shadow-lg z-[998]'>
-        <h2 className='red-card text-center font-semibold text-cream2 w-full'>
+      <div className='w-full flex flex-col items-center gap-2 drop-shadow-lg z-[998]'>
+        <h2 className='red-card text-center font-semibold text-cream2 w-full px-2 py-1'>
           {enemy.name}
         </h2>
-        <div>
+        <div className='w-full'>
           <HoverCard closeDelay={0}>
             <HoverCardTrigger asChild>
-              <Image 
+              <Image
                 src={`/enemies/${expedition}/${enemy.image}.jpg`}
-                width={135}
-                height={156}
+                width={160}
+                height={185}
                 alt={enemy.image}
+                className='rounded-sm w-full h-auto'
+                style={{ aspectRatio: '135/156', objectFit: 'cover' }}
               />
             </HoverCardTrigger>
             <HoverCardContent>

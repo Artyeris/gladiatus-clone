@@ -26,6 +26,7 @@ const WorkContent = ({ character }: Props) => {
   const [busy, setBusy] = useState(false);
   const [selectedId, setSelectedId] = useState<string>('stable_boy');
   const [hours, setHours] = useState<number>(1);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const selected = useMemo(() => findJob(selectedId), [selectedId]);
   const level = character.level ?? 1;
@@ -138,10 +139,12 @@ const WorkContent = ({ character }: Props) => {
               job={job}
               level={level}
               selected={selectedId === job.id}
+              hovered={hoveredId === job.id}
               onSelect={() => {
                 setSelectedId(job.id);
                 setHours(job.minHours);
               }}
+              onHover={(over) => setHoveredId(over ? job.id : null)}
             />
           ))}
         </div>
@@ -186,34 +189,53 @@ function HeaderCell({
 }
 
 function JobRow({
-  job, level, selected, onSelect,
+  job, level, selected, hovered, onSelect, onHover,
 }: {
   job: WorkJob;
   level: number;
   selected: boolean;
+  hovered: boolean;
   onSelect: () => void;
+  onHover: (over: boolean) => void;
 }) {
   const wage = jobGoldPerHour(level, job);
+  // Row-wide highlight: a single hover/selection state is shared by
+  // every cell in the row so moving the cursor between columns no
+  // longer makes individual cells flash on their own.
+  const bg = selected
+    ? 'rgba(151, 67, 66, 0.30)'
+    : hovered
+      ? 'rgba(176, 138, 89, 0.35)'
+      : 'transparent';
   const cellClasses = `px-2 py-2 text-sm border-b-[2px] border-cream2 cursor-pointer ${
-    selected ? 'bg-red-card/30 font-semibold' : 'hover:bg-brown2/10'
+    selected ? 'font-semibold' : ''
   }`;
+  const rowProps = {
+    style: { background: bg },
+    onMouseEnter: () => onHover(true),
+    onMouseLeave: () => onHover(false),
+    onClick: onSelect,
+  };
 
   return (
     <>
-      <div className={cellClasses} onClick={onSelect}>{job.name}</div>
-      <div className={cellClasses} style={{ textAlign: 'right' }} onClick={onSelect}>
+      <div className={cellClasses} {...rowProps}>{job.name}</div>
+      <div className={cellClasses} style={{ ...rowProps.style, textAlign: 'right' }}
+        onMouseEnter={rowProps.onMouseEnter} onMouseLeave={rowProps.onMouseLeave} onClick={rowProps.onClick}>
         <span className='inline-flex items-center gap-1'>
           {wage}
           <Image src='/images/crowns.png' width={12} height={12} alt='' />
         </span>
       </div>
-      <div className={cellClasses} style={{ textAlign: 'center' }} onClick={onSelect}>
+      <div className={cellClasses} style={{ ...rowProps.style, textAlign: 'center' }}
+        onMouseEnter={rowProps.onMouseEnter} onMouseLeave={rowProps.onMouseLeave} onClick={rowProps.onClick}>
         {job.minHours} - {job.maxHours}
       </div>
-      <div className={cellClasses} onClick={onSelect}>
+      <div className={cellClasses} {...rowProps}>
         {job.possibleRewards?.length ? job.possibleRewards.join(', ') : '-'}
       </div>
-      <div className={cellClasses} style={{ textAlign: 'right' }} onClick={onSelect}>
+      <div className={cellClasses} style={{ ...rowProps.style, textAlign: 'right' }}
+        onMouseEnter={rowProps.onMouseEnter} onMouseLeave={rowProps.onMouseLeave} onClick={rowProps.onClick}>
         {job.premiumCost ? (
           <span className='inline-flex items-center gap-1 text-red3 font-semibold'>
             {job.premiumCost} <span title='Ruby'>💎</span>

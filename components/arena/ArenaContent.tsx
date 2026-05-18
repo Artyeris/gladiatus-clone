@@ -118,43 +118,46 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaConten
 
       <div className='flex gap-4'>
         <DescriptionCard title='Arena Ranking'>
-          <div className='flex flex-col w-full justify-between text-sm'>
-            <div className='flex w-full gap-2 font-semibold border-b border-brown2 pb-1'>
-              <div className='min-w-[50px]'>Rank</div>
-              <div className='min-w-[50px]'>Honor</div>
-              <div className='min-w-[40px]'>Lvl</div>
-              <div className='w-[160px]'>Name</div>
+          <div className='flex flex-col w-full text-base'>
+            <div className='flex w-full gap-3 font-semibold border-b-[2px] border-brown2 pb-2 px-2'>
+              <div className='w-[60px]'>Rank</div>
+              <div className='w-[80px]'>Honor</div>
+              <div className='w-[50px]'>Lvl</div>
+              <div className='flex-1'>Name</div>
+              <div className='w-[70px] text-center'>Action</div>
             </div>
             {arenaRivals.map((rival) => {
               const isMe = rival.isMe || rival._id === character._id;
               return (
                 <div
-                  className={`flex flex-col w-full justify-between ${isMe && 'bg-cream2/30 rounded-sm'}`}
                   key={rival._id}
+                  className={`flex w-full gap-3 items-center px-2 py-2 border-b border-cream2/60 ${
+                    isMe ? 'bg-cream2/40' : 'hover:bg-cream2/20'
+                  } transition`}
                 >
-                  <div className='flex w-full gap-2 items-center'>
-                    <div className='min-w-[50px] font-semibold'>{rival.rank}</div>
-                    <div className='min-w-[50px] font-semibold'>{rival.honor}</div>
-                    <div className='min-w-[40px]'>{rival.level ?? '-'}</div>
-                    <div
-                      className={`w-[160px] ${!isMe && 'font-semibold underline cursor-pointer hover:text-red3'}`}
-                      onClick={!isMe ? () => router.push(`/game/character/${rival._id}`) : () => {}}
-                    >
-                      {rival.name}
-                      {rival.isBot && <span className='ml-1 text-[10px] opacity-70 italic'>NPC</span>}
-                    </div>
-                    {!isMe && (
-                      <div className='cursor-pointer'>
-                        <Image
-                          src={`/images/fight.png`}
-                          width={55}
-                          height={22}
-                          alt='fight'
-                          style={{ width: 'auto', height: 'auto' }}
-                          onClick={canCharacterFight ? () => handleClick(rival._id) : () => {}}
-                          className={canCharacterFight ? '' : 'cursor-not-allowed grayscale'}
-                        />
-                      </div>
+                  <div className='w-[60px] font-semibold text-lg text-red3'>#{rival.rank}</div>
+                  <div className='w-[80px] font-semibold'>{rival.honor}</div>
+                  <div className='w-[50px]'>{rival.level ?? '-'}</div>
+                  <div
+                    className={`flex-1 truncate ${!isMe && 'font-semibold underline cursor-pointer hover:text-red3'}`}
+                    onClick={!isMe ? () => router.push(`/game/character/${rival._id}`) : () => {}}
+                  >
+                    {rival.name}
+                    {rival.isBot && <span className='ml-1 text-[10px] opacity-70 italic'>NPC</span>}
+                  </div>
+                  <div className='w-[70px] flex justify-center'>
+                    {!isMe ? (
+                      <Image
+                        src={`/images/fight.png`}
+                        width={62}
+                        height={26}
+                        alt='fight'
+                        style={{ width: 'auto', height: 'auto', cursor: canCharacterFight ? 'pointer' : 'not-allowed' }}
+                        onClick={canCharacterFight ? () => handleClick(rival._id) : () => {}}
+                        className={canCharacterFight ? 'hover:brightness-110' : 'grayscale'}
+                      />
+                    ) : (
+                      <span className='text-xs opacity-60 italic'>you</span>
                     )}
                   </div>
                 </div>

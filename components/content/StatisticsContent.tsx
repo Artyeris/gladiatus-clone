@@ -135,7 +135,7 @@ function Tab({ href, label, active = false }: { href: string; label: string; act
   return (
     <a
       href={href}
-      className={`px-4 py-1 rounded-sm font-semibold text-sm transition ${
+      className={`px-8 py-2 rounded-sm font-semibold text-base transition ${
         active ? 'text-cream2 cursor-default' : 'text-brown2 hover:text-red3'
       }`}
       style={{

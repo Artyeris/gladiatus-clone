@@ -172,7 +172,11 @@ function Board({ character, listings }: Props) {
       </Section>
 
       <Section title='Sell'>
-        <div className='flex gap-3 px-3 py-3 text-sm'>
+        {/* SellPanel is vertically aligned to the bottom of the row so
+            the price input and Confirm button sit lower (closer to the
+            inventory's last row), and the inventory is nudged right with
+            a wider left gap. */}
+        <div className='flex gap-6 px-4 py-3 text-sm items-end justify-between'>
           <SellPanel
             picked={pickedItem}
             price={price}
@@ -181,7 +185,9 @@ function Board({ character, listings }: Props) {
             onClear={() => setPickedItem(null)}
             busy={busy}
           />
-          <InventoryView entries={entries} pickedItemId={pickedItem?._id} onPick={onItemDropped} />
+          <div className='ml-6'>
+            <InventoryView entries={entries} pickedItemId={pickedItem?._id} onPick={onItemDropped} />
+          </div>
         </div>
       </Section>
 

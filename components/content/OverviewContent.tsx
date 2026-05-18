@@ -10,18 +10,18 @@ const OverviewContent = ({ character }: OverviewContentProps) => {
   return (
     <div className='game-container'>
       {/* Top tabs - separated chips with their own bordered backgrounds */}
-      <div className='flex gap-2 px-4 mb-3 text-sm font-semibold text-brown2'>
+      <div className='flex gap-2 px-4 mb-3 font-semibold text-brown2'>
         <Tab href='/game/overview'   label='Overview'   active />
         <Tab href='/game/statistics' label='Statistics' />
         <Tab href='/game/victories'  label='Victories'  />
       </div>
 
       <div className='flex gap-3 justify-center items-stretch px-3'>
-        <div className='info-card rounded-sm shadow-md flex' style={{ flex: '0 0 300px', padding: '4px' }}>
+        <div className='info-card rounded-sm shadow-md flex' style={{ flex: '0 0 330px', padding: '4px' }}>
           <CharacterPanel user={character} />
         </div>
 
-        <div className='info-card rounded-sm shadow-md flex flex-col flex-1' style={{ padding: '10px' }}>
+        <div className='info-card rounded-sm shadow-md flex flex-col flex-1' style={{ padding: '12px' }}>
           <InventoryEquipment character={character} />
         </div>
       </div>
@@ -38,7 +38,7 @@ function Tab({ href, label, active }: { href: string; label: string; active?: bo
     return (
       <a
         href={href}
-        className='px-4 py-1 rounded-sm font-semibold text-cream2 cursor-default'
+        className='px-8 py-2 rounded-sm font-semibold text-cream2 cursor-default text-base'
         style={{
           background: '#974342',
           border: '2px solid #eed7a1',
@@ -52,7 +52,7 @@ function Tab({ href, label, active }: { href: string; label: string; active?: bo
   return (
     <a
       href={href}
-      className='px-4 py-1 rounded-sm font-semibold text-brown2 hover:text-red3 transition'
+      className='px-8 py-2 rounded-sm font-semibold text-brown2 hover:text-red3 transition text-base'
       style={{
         background: '#b59964',
         border: '2px solid #eed7a1',

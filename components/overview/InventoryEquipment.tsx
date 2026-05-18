@@ -243,7 +243,7 @@ function EquipmentBoard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 60px)',
+          gridTemplateColumns: 'repeat(4, 70px)',
           gap: '10px',
           justifyContent: 'center',
         }}
@@ -297,8 +297,8 @@ function EquipmentDropSlot({
         drop(node);
       }}
       style={{
-        width: '60px',
-        height: '60px',
+        width: '70px',
+        height: '70px',
         background: bg,
         border: '2px solid #5c3a21',
         borderRadius: '4px',
@@ -314,7 +314,7 @@ function EquipmentDropSlot({
         <DraggableItem
           item={item}
           source={{ kind: 'equipment', slot }}
-          size={56}
+          size={66}
         />
       ) : (
         <div
@@ -329,8 +329,8 @@ function EquipmentDropSlot({
             filter: 'grayscale(1) contrast(0.85)',
           }}
         >
-          <span style={{ fontSize: '24px', lineHeight: 1 }}>{SLOT_ICON[slot]}</span>
-          <span style={{ fontSize: '9px', color: '#3e2714', fontWeight: 600 }}>
+          <span style={{ fontSize: '28px', lineHeight: 1 }}>{SLOT_ICON[slot]}</span>
+          <span style={{ fontSize: '10px', color: '#3e2714', fontWeight: 600 }}>
             {SLOT_LABELS[slot]}
           </span>
         </div>
@@ -388,8 +388,8 @@ function InventoryBoard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 40px)`,
-          gap: '5px',
+          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 48px)`,
+          gap: '6px',
           justifyContent: 'center',
         }}
       >
@@ -509,8 +509,8 @@ function InventoryDropCell({
       }}
       style={{
         position: 'relative',
-        width: '40px',
-        height: '40px',
+        width: '48px',
+        height: '48px',
         background: bg,
         border: '1px solid #8b5a2b',
         borderRadius: '2px',
@@ -520,7 +520,7 @@ function InventoryDropCell({
         <DraggableItem
           item={cell.item}
           source={{ kind: 'inventory', x, y, bag }}
-          size={36}
+          size={44}
         />
       )}
     </div>
