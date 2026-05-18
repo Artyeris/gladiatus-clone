@@ -18,12 +18,12 @@ const Page = async () => {
     <div className='px-8 gap-4 flex flex-col'>
       <div className='flex gap-4'>
         <Image
-          width={140}
-          height={140}
+          width={170}
+          height={170}
           src={`/images/arena.webp`}
           alt='arena'
           className='rounded-sm shrink-0 object-cover'
-          style={{ width: '140px', height: '140px' }}
+          style={{ width: '170px', height: '170px' }}
         />
         <DescriptionCard title='Arena'>
           <p>

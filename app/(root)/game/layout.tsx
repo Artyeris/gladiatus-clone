@@ -1,4 +1,5 @@
 import { Toaster } from 'react-hot-toast';
+import Link from 'next/link';
 
 import GameNavbar from '@/components/shared/GameNavbar';
 import NavigationBanner from '@/components/shared/NavigationBanner';
@@ -26,10 +27,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
       <div className='w-full min-h-screen flex flex-row justify-center gap-6 pt-0 items-stretch'>
         <NavigationBanner
           characterLevel={user.character?.level ?? 1}
-          shortcuts={user.character ? (
-            // @ts-expect-error -- async server component
-            <GameHeaderShortcuts />
-          ) : null}
+          shortcuts={user.character ? ((await GameHeaderShortcuts()) as any) : null}
         />
         <div className='flex flex-col items-center h-min-full w-[820px]'>
           <GameHeader user={user} />
@@ -39,9 +37,13 @@ export default async function GameLayout({ children }: { children: React.ReactNo
           <div className='footer w-[840px] h-[50px] orange-gradient' />
         </div>
       </div>
-      <span className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 drop-shadow-md select-none pointer-events-none z-[999]'>
-        v0.19.2
-      </span>
+      <Link
+        href='/game/changelog'
+        className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 hover:text-gold drop-shadow-md z-[999]'
+        title='Open change log'
+      >
+        v0.19.3
+      </Link>
     </div>
   );
 }

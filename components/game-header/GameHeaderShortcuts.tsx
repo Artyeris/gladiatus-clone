@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import { Mail, Package, Swords } from 'lucide-react';
+import { Mail, Newspaper, Package, Swords } from 'lucide-react';
 
 import { getUnreadMessageCount } from '@/lib/actions/message/message.action';
 import { getPackageCount } from '@/lib/actions/package/package.action';
 
 // Horizontal row of small Gladiatus-style shortcuts (Messages,
-// Battle reports, Packages). Rendered at the top of the side
-// banner, just above the Overview link. Messages / Packages get
-// a red unread-count dot when something is waiting.
+// Battle reports, Packages, News). Rendered at the top of the side
+// banner, just above the Overview link. Messages / Packages get a
+// red unread-count dot when something is waiting.
 const GameHeaderShortcuts = async () => {
   let unread = 0;
   let packages = 0;
@@ -24,6 +24,9 @@ const GameHeaderShortcuts = async () => {
       </Shortcut>
       <Shortcut href='/game/packages' label='Packages' badge={packages}>
         <Package className='w-5 h-5' />
+      </Shortcut>
+      <Shortcut href='/game/news' label='News'>
+        <Newspaper className='w-5 h-5' />
       </Shortcut>
     </div>
   );
