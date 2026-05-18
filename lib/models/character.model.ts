@@ -104,6 +104,12 @@ const characterSchema = new mongoose.Schema({
   // Lifetime activity counters used by the Victories tab.
   workCount:  { type: Number, default: 0 },
   itemsFound: { type: Number, default: 0 },
+  // Trade counters for the Trade victories tier.
+  merchantSells: { type: Number, default: 0 },
+  merchantBuys:  { type: Number, default: 0 },
+  marketSells:   { type: Number, default: 0 },
+  marketBuys:    { type: Number, default: 0 },
+  auctionsWon:   { type: Number, default: 0 },
   // Per-stat train counters powering the Victories "Train X" tiers.
   trainCount: {
     strength:     { type: Number, default: 0 },

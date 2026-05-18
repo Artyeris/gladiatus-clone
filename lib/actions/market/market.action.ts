@@ -103,6 +103,7 @@ export async function placeMarketListing({ itemId, price }: { itemId: string; pr
       bag: e.bag ?? 0,
     })));
     character.markModified('inventory');
+    character.marketSells = (character.marketSells ?? 0) + 1;
     await character.save();
 
     revalidatePath('/game/market');
@@ -193,6 +194,7 @@ export async function buyMarketListing({ listingId }: { listingId: string }) {
       );
     }
 
+    buyer.marketBuys = (buyer.marketBuys ?? 0) + 1;
     await buyer.save();
 
     await Package.create({

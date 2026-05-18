@@ -19,7 +19,7 @@ import {
 import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
 import Package from '@/lib/models/package.model';
 
-const POOL_SIZE = 12;
+const POOL_SIZE = 40;
 
 async function getMyCharacter() {
   const token = cookies().get(COOKIE_NAME);
@@ -87,6 +87,8 @@ async function settleExpiredAuctions() {
           source: 'auction',
           detail: `Won for ${auction.currentBid} gold`,
         });
+        winner.auctionsWon = (winner.auctionsWon ?? 0) + 1;
+        await winner.save();
         await sendMessageToCharacter(
           String(winner._id),
           'auction',
@@ -248,6 +250,7 @@ export async function buyoutAuctionAction({ auctionId }: { auctionId: string }) 
     }
 
     buyer.crowns = (buyer.crowns ?? 0) - auction.buyoutPrice;
+    buyer.auctionsWon = (buyer.auctionsWon ?? 0) + 1;
     await buyer.save();
 
     await Package.create({

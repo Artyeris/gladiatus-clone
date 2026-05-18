@@ -175,6 +175,7 @@ export async function buyFromShop({
     }
 
     character.crowns = (character.crowns ?? 0) - price;
+    character.merchantBuys = (character.merchantBuys ?? 0) + 1;
     await character.save();
 
     // Shop purchases ship to the player's Packages mailbox rather than

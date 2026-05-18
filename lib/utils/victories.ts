@@ -3,7 +3,6 @@ import { CharacterInterface } from '@/lib/interfaces/character.interface';
 export type VictoryCategory =
   | 'general'
   | 'items'
-  | 'social'
   | 'guild'
   | 'trade'
   | 'arena'
@@ -14,7 +13,6 @@ export type VictoryCategory =
 export const CATEGORY_LABELS: Record<VictoryCategory, string> = {
   general: 'General',
   items: 'Items',
-  social: 'Social',
   guild: 'Guild',
   trade: 'Trade',
   arena: 'Arena',
@@ -61,9 +59,7 @@ export const VICTORIES: VictoryDef[] = [
   { id: 'train_charisma',      category: 'general', name: 'Train charisma',           description: 'Train your charisma.',                         statKey: 'trainCount.charisma',     tiers: tieredProgress },
   { id: 'train_intelligence',  category: 'general', name: 'Train intelligence',       description: 'Train your intelligence.',                     statKey: 'trainCount.intelligence', tiers: tieredProgress },
   { id: 'collect_honour',      category: 'general', name: 'Collect honour',           description: 'Accumulate honour from battles.',              statKey: 'honor',           tiers: tieredProgress },
-  { id: 'collect_honour_prov', category: 'general', name: 'Collect honour (Provinciarum)', description: 'Honour earned in Provinciarum arenas.',  statKey: 'honorProvinciarum', tiers: tieredProgress },
   { id: 'fame',                category: 'general', name: 'Get fame',                 description: 'Earn fame from dungeons.',                     statKey: 'fame',            tiers: tieredProgress },
-  { id: 'fame_prov',           category: 'general', name: 'Get fame (Provinciarum)',  description: 'Fame earned in Circus Provinciarum.',          statKey: 'fameProvinciarum', tiers: tieredProgress },
   { id: 'work',                category: 'general', name: 'Go to work',               description: 'Complete jobs at the workplaces.',             statKey: 'workCount',       tiers: tieredProgress },
 
   // Items
@@ -71,11 +67,6 @@ export const VICTORIES: VictoryDef[] = [
   { id: 'find_blue',           category: 'items',   name: 'Find blue items',          description: 'Find blue (Neptune) items.',                   statKey: 'itemsFoundBlue',      tiers: tieredProgress },
   { id: 'find_purple',         category: 'items',   name: 'Find purple items',        description: 'Find purple (Martian) items.',                 statKey: 'itemsFoundPurple',    tiers: tieredProgress },
   { id: 'find_orange',         category: 'items',   name: 'Find orange items',        description: 'Find orange (Jupiter) items.',                 statKey: 'itemsFoundOrange',    tiers: tieredProgress },
-
-  // Social
-  { id: 'circle_buddies',      category: 'social',  name: 'Increase circle of buddies', description: 'Add gladiators to your Familia.',            statKey: 'buddiesAdded',        tiers: tieredProgress },
-  { id: 'look_profiles',       category: 'social',  name: 'Look at profiles',         description: 'View other gladiators\' profiles.',            statKey: 'profilesViewed',      tiers: tieredProgress },
-  { id: 'be_seen',             category: 'social',  name: 'Be the centre of attention', description: 'Other players viewed your profile.',         statKey: 'profileViews',        tiers: tieredProgress },
 
   // Guild
   { id: 'guild_donate',        category: 'guild',   name: 'Donate gold',              description: 'Donate gold to the guild bank.',               statKey: 'guildGoldDonated',    tiers: tieredProgress },
@@ -98,7 +89,6 @@ export const VICTORIES: VictoryDef[] = [
 
   // Arena
   { id: 'arena_wins',          category: 'arena',   name: 'Win in the arena',         description: 'Defeat other gladiators in your league.',      statKey: 'arenaWins',           tiers: tieredProgress },
-  { id: 'arena_wins_prov',     category: 'arena',   name: 'Win in the arena (Provinciarum)', description: 'Win Provinciarum arena battles.',     statKey: 'arenaWinsProvinciarum', tiers: tieredProgress },
   { id: 'arena_dmg_dealt',     category: 'arena',   name: 'Deal out damage',          description: 'Damage dealt to gladiators.',                  statKey: 'arenaDamageDealt',    tiers: tieredProgress },
   { id: 'arena_dmg_taken',     category: 'arena',   name: 'Accept damage',            description: 'Damage received from gladiators.',             statKey: 'arenaDamageTaken',    tiers: tieredProgress },
   { id: 'arena_dmg_absorbed',  category: 'arena',   name: 'Absorb damage',            description: 'Damage absorbed by armor.',                    statKey: 'arenaDamageAbsorbed', tiers: tieredProgress },
@@ -110,7 +100,6 @@ export const VICTORIES: VictoryDef[] = [
 
   // Circus Turma
   { id: 'circus_wins',         category: 'circus',  name: 'Win in Circus Turma',      description: 'Defeat enemy groups in Circus Turma.',         statKey: 'circusWins',          tiers: tieredProgress },
-  { id: 'circus_wins_prov',    category: 'circus',  name: 'Defeat in Circus Turma (Provinciarum)', description: 'Win Circus Provinciarum.',     statKey: 'circusWinsProvinciarum', tiers: tieredProgress },
   { id: 'circus_dmg_dealt',    category: 'circus',  name: 'Deal out damage',          description: 'Damage dealt against groups.',                 statKey: 'circusDamageDealt',   tiers: tieredProgress },
   { id: 'circus_dmg_taken',    category: 'circus',  name: 'Accept damage',            description: 'Damage taken from groups.',                    statKey: 'circusDamageTaken',   tiers: tieredProgress },
   { id: 'circus_dmg_absorbed', category: 'circus',  name: 'Absorb damage',            description: 'Damage absorbed in Circus Turma.',             statKey: 'circusDamageAbsorbed', tiers: tieredProgress },
@@ -141,6 +130,13 @@ const STAT_ALIAS: Record<string, string> = {
   arenaWins:         'journal.arena.wins',
   arenaDamageDealt:  'journal.arena.damageInflicted',
   arenaDamageTaken:  'journal.arena.damageReceived',
+  // Trade counters - persisted directly on the character document by
+  // the shop / market / auction action handlers.
+  merchantSells:     'merchantSells',
+  merchantBuys:      'merchantBuys',
+  marketSells:       'marketSells',
+  marketBuys:        'marketBuys',
+  auctionsWon:       'auctionsWon',
 };
 
 // Read a possibly nested key from the character object.

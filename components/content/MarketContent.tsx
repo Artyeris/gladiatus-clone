@@ -93,6 +93,8 @@ function Board({ character, listings }: Props) {
   const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
   const [qualityFilter, setQualityFilter] = useState<QualityFilterValue>('all');
   const [sortBy, setSortBy] = useState<SortMode>('default');
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 15;
 
   const filteredListings = listings
     .filter((l) => matchesType(l.item, typeFilter) && matchesQuality(l.item, qualityFilter))
@@ -100,8 +102,20 @@ function Board({ character, listings }: Props) {
     .sort((a, b) => {
       if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
       if (sortBy === 'levelDesc') return (b.item?.level ?? 0) - (a.item?.level ?? 0);
+      if (sortBy === 'priceAsc')  return (a.price ?? 0) - (b.price ?? 0);
+      if (sortBy === 'priceDesc') return (b.price ?? 0) - (a.price ?? 0);
       return 0;
     });
+
+  const pageCount = Math.max(1, Math.ceil(filteredListings.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pageListings = filteredListings.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+
+  // Snap the current page back to a valid range whenever filters/sort
+  // change the page count (e.g. flipping a filter removes a page).
+  useEffect(() => {
+    if (page > pageCount - 1) setPage(0);
+  }, [pageCount, page]);
 
   useEffect(() => {
     setEntries(entriesFromCharacter(character));
@@ -152,10 +166,10 @@ function Board({ character, listings }: Props) {
           <Image
             src='/images/market.webp'
             alt='market'
-            width={120}
-            height={120}
-            className='rounded-sm shrink-0'
-            style={{ width: 'auto', height: 'auto' }}
+            width={140}
+            height={140}
+            className='rounded-sm shrink-0 object-cover'
+            style={{ width: '140px', height: '140px' }}
           />
           <div className='flex flex-col gap-1'>
             <p>
@@ -210,16 +224,58 @@ function Board({ character, listings }: Props) {
               : 'No listings match the selected filter.'}
           </div>
         ) : (
-          filteredListings.map((listing, idx) => (
+          pageListings.map((listing, idx) => (
             <ListingRow
               key={listing._id}
               listing={listing}
-              last={idx === filteredListings.length - 1}
+              last={idx === pageListings.length - 1}
               busy={busy}
               onCancel={onCancel}
               onBuy={onBuy}
             />
           ))
+        )}
+        {pageCount > 1 && (
+          <div className='flex items-center justify-between gap-2 px-3 py-2 border-t-[2px] border-cream2 text-xs'>
+            <span className='opacity-80'>
+              Page <strong>{safePage + 1}</strong> of <strong>{pageCount}</strong>
+              {' '}&middot; {filteredListings.length} listings
+            </span>
+            <div className='flex gap-1'>
+              <button
+                type='button'
+                onClick={() => setPage(0)}
+                disabled={safePage === 0}
+                className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'
+              >
+                « First
+              </button>
+              <button
+                type='button'
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'
+              >
+                ‹ Prev
+              </button>
+              <button
+                type='button'
+                onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                disabled={safePage >= pageCount - 1}
+                className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'
+              >
+                Next ›
+              </button>
+              <button
+                type='button'
+                onClick={() => setPage(pageCount - 1)}
+                disabled={safePage >= pageCount - 1}
+                className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'
+              >
+                Last »
+              </button>
+            </div>
+          </div>
         )}
       </Section>
     </div>

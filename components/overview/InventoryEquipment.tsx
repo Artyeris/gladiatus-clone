@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import toast from 'react-hot-toast';
@@ -92,6 +93,7 @@ function entriesFromCharacter(character: CharacterInterface): InventoryEntry[] {
 const ACTIVE_BAG_KEY = 'gladiatus.activeBag';
 
 function Board({ character }: Props) {
+  const router = useRouter();
   const [entries, setEntries] = useState<InventoryEntry[]>(entriesFromCharacter(character));
   const [equipment, setEquipment] = useState<EquipmentMap>(character.equipment ?? {});
   const [activeBag, setActiveBag] = useState(0);
@@ -200,7 +202,12 @@ function Board({ character }: Props) {
       toast.error(response.error.message);
       setEntries(prevEntries);
       setEquipment(prevEquipment);
+      return;
     }
+    // Refresh so we re-read the saved state from the server -- catches
+    // any persistence-side drift (e.g. cached Mongoose schema dropping
+    // the bag field) instead of letting the optimistic UI lie.
+    router.refresh();
   };
 
   // Double-click an inventory item -> auto-equip it (pick the first

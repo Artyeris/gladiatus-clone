@@ -110,10 +110,10 @@ const AuctionContent = ({ character, auctions }: Props) => {
           <Image
             src='/images/auction.webp'
             alt='auctioneer'
-            width={120}
-            height={120}
-            className='rounded-sm shrink-0'
-            style={{ width: 'auto', height: 'auto' }}
+            width={140}
+            height={140}
+            className='rounded-sm shrink-0 object-cover'
+            style={{ width: '140px', height: '140px' }}
           />
           <div className='flex flex-col gap-1'>
             <p>

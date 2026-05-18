@@ -20,6 +20,7 @@ import {
 } from '@/lib/utils/statUtils';
 import CombatRows from '@/components/overview/CombatRows';
 import StatBar from '@/components/shared/StatBar';
+import PowerTooltip from '@/components/shared/PowerTooltip';
 
 interface Props {
   character: CharacterInterface;
@@ -145,7 +146,11 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
           </div>
 
           <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
-            <Row label='Power' value={String(calculatePower(character))} last />
+            <PowerTooltip character={character}>
+              <div className='cursor-help'>
+                <Row label='Power' value={String(calculatePower(character))} last />
+              </div>
+            </PowerTooltip>
           </div>
         </div>
 
@@ -158,7 +163,6 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
               borderRadius: '5px',
             }}
           >
-            <h3 className='text-center font-semibold text-brown2 mb-2'>Equipment</h3>
             <div
               style={{
                 display: 'grid',

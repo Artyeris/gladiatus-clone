@@ -15,7 +15,6 @@ interface Props {
 const CATEGORY_ORDER: VictoryCategory[] = [
   'general',
   'items',
-  'social',
   'guild',
   'trade',
   'arena',
