@@ -62,12 +62,12 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
     <>
       <div className='flex gap-4'>
         <Image
-          width={200}
-          height={200}
+          width={240}
+          height={240}
           src={`/images/barracks.webp`}
           alt='barracks'
-          className='rounded-sm shrink-0 object-cover'
-          style={{ width: '200px', height: '200px' }}
+          className='rounded-sm shrink-0 object-contain'
+          style={{ width: '240px', height: '240px' }}
         />
         <DescriptionCard
           title='Training'

@@ -90,10 +90,10 @@ const WorkContent = ({ character }: Props) => {
           <Image
             src='/images/work.webp'
             alt='work foreman'
-            width={200}
-            height={200}
-            className='rounded-sm shrink-0 object-cover'
-            style={{ width: '200px', height: '200px' }}
+            width={240}
+            height={240}
+            className='rounded-sm shrink-0 object-contain'
+            style={{ width: '240px', height: '240px' }}
           />
           <div className='flex flex-col gap-1'>
             <p>

@@ -166,10 +166,10 @@ function Board({ character, listings }: Props) {
           <Image
             src='/images/market.webp'
             alt='market'
-            width={200}
-            height={200}
-            className='rounded-sm shrink-0 object-cover'
-            style={{ width: '200px', height: '200px' }}
+            width={240}
+            height={240}
+            className='rounded-sm shrink-0 object-contain'
+            style={{ width: '240px', height: '240px' }}
           />
           <div className='flex flex-col gap-1'>
             <p>
@@ -441,8 +441,8 @@ function InventoryView({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 36px)`,
-          gap: '4px',
+          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 48px)`,
+          gap: '5px',
         }}
       >
         {Array.from({ length: INVENTORY_ROWS }).flatMap((_, x) =>
@@ -453,8 +453,8 @@ function InventoryView({
                 key={`${x}-${y}`}
                 style={{
                   position: 'relative',
-                  width: '36px',
-                  height: '36px',
+                  width: '48px',
+                  height: '48px',
                   background: '#3e2714',
                   border: '1px solid #8b5a2b',
                   borderRadius: '2px',
@@ -551,7 +551,7 @@ function DraggableInventoryItem({
           imageId={item.image}
           alt={item.name}
           fill
-          sizes='36px'
+          sizes='48px'
           style={{ objectFit: 'contain', padding: '2px' }}
         />
       </div>

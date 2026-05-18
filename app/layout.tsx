@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Inter } from "next/font/google";
 import "./globals.css";
+import ThemeScript from "@/components/shared/ThemeScript";
 
 const inter = Inter({ subsets: ['latin'] });
 const cinzel = Cinzel({
@@ -21,6 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cinzel.variable}>
+      <head>
+        <ThemeScript />
+      </head>
       <body className={`${inter.className} main-scroll main-container`}>
         {children}
       </body>

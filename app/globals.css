@@ -208,3 +208,67 @@ body::-webkit-scrollbar {
 	height: 18px;
   border-radius: 2px;
 }
+
+/* ---------- UI THEMES ----------
+ * Default theme is the existing palette. Dark / Light themes
+ * override the small set of "card" classes (and a couple of text
+ * colours) used everywhere via theme-scoped selectors. The active
+ * theme is selected via data-theme="dark|light" on <html>, set
+ * client-side from localStorage in the layout's pre-hydration
+ * script, so a refresh doesn't flash the default skin.
+ */
+
+html[data-theme="dark"] body {
+  filter: brightness(0.78) saturate(0.82);
+}
+html[data-theme="dark"] .red-card,
+html[data-theme="dark"] .main-red-card {
+  background-color: #5c2625;
+  outline-color: #5c2625;
+}
+html[data-theme="dark"] .orange-card {
+  background-color: #6a4630;
+  outline-color: #6a4630;
+}
+html[data-theme="dark"] .brown-card {
+  background-color: #6e5a3c;
+  outline-color: #6e5a3c;
+}
+html[data-theme="dark"] .general-button {
+  background-color: #503c20;
+  outline-color: #503c20;
+  color: #e8d6a4;
+}
+html[data-theme="dark"] .info-card,
+html[data-theme="dark"] .main-cream-card {
+  background-color: #b9a279;
+  background-image: linear-gradient(to bottom, #ad9468, #b9a279);
+}
+html[data-theme="dark"] .text-red3,
+html[data-theme="dark"] .text-brown2 {
+  color: #2f1d10;
+}
+
+html[data-theme="light"] .red-card,
+html[data-theme="light"] .main-red-card {
+  background-color: #c47373;
+  outline-color: #c47373;
+}
+html[data-theme="light"] .orange-card {
+  background-color: #f0b58a;
+  outline-color: #f0b58a;
+}
+html[data-theme="light"] .brown-card {
+  background-color: #d6c391;
+  outline-color: #d6c391;
+}
+html[data-theme="light"] .general-button {
+  background-color: #c6a778;
+  outline-color: #c6a778;
+  color: #2f1d10;
+}
+html[data-theme="light"] .info-card,
+html[data-theme="light"] .main-cream-card {
+  background-color: #fbf2d6;
+  background-image: linear-gradient(to bottom, #f4e8c0, #fbf2d6);
+}

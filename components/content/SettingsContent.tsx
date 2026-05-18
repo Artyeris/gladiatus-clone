@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { updateLanguage } from '@/lib/actions/user/updateSettings.action';
@@ -21,12 +21,50 @@ const LANGUAGES: { id: 'en' | 'lt'; label: string; native: string }[] = [
   { id: 'lt', label: 'Lithuanian', native: 'Lietuvių' },
 ];
 
+type Theme = 'default' | 'dark' | 'light';
+const THEMES: { id: Theme; label: string; note: string }[] = [
+  { id: 'default', label: 'Default', note: 'The original Gladiatus skin (warm browns and red).' },
+  { id: 'dark',    label: 'Dark',    note: 'Muted, dimmer palette for low-light play.' },
+  { id: 'light',   label: 'Light',   note: 'Brighter cream/orange palette.' },
+];
+
+const THEME_KEY = 'gladiatus.theme';
+
+function applyTheme(theme: Theme) {
+  try {
+    if (theme === 'default') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    window.localStorage.setItem(THEME_KEY, theme);
+  } catch {}
+}
+
 const SettingsContent = ({ currentLanguage, godMode }: Props) => {
   const router = useRouter();
   const [language, setLanguage] = useState<'en' | 'lt'>(currentLanguage);
   const [saving, setSaving] = useState(false);
   const [devBusy, setDevBusy] = useState(false);
   const [god, setGod] = useState(godMode);
+  const [theme, setTheme] = useState<Theme>('default');
+
+  // Restore the saved theme on mount (the ThemeScript already applied
+  // it pre-hydration so this just syncs the picker state).
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(THEME_KEY);
+      if (stored === 'dark' || stored === 'light' || stored === 'default') {
+        setTheme(stored);
+      }
+    } catch {}
+  }, []);
+
+  const onPickTheme = (next: Theme) => {
+    setTheme(next);
+    applyTheme(next);
+    toast.success(`Theme: ${THEMES.find((t) => t.id === next)?.label}`);
+  };
 
   const onSave = async () => {
     if (language === currentLanguage) {
@@ -73,6 +111,34 @@ const SettingsContent = ({ currentLanguage, godMode }: Props) => {
     <div className='px-6 flex flex-col gap-3 text-brown2'>
       <div className='red-card text-cream2 font-semibold text-sm px-3 py-1 rounded-sm'>
         Settings
+      </div>
+
+      <div className='brown-card rounded-sm flex flex-col text-sm overflow-hidden'>
+        <div className='red-card text-cream2 font-semibold text-sm px-3 py-1'>Theme</div>
+        <div className='flex flex-col gap-2 px-3 py-3'>
+          <p className='text-xs opacity-80'>
+            Pick a UI palette. Stored in this browser only.
+          </p>
+          <div className='flex flex-wrap gap-2'>
+            {THEMES.map((opt) => (
+              <button
+                key={opt.id}
+                type='button'
+                onClick={() => onPickTheme(opt.id)}
+                className={`px-3 py-1 rounded-sm text-xs font-semibold border-[2px] ${
+                  theme === opt.id
+                    ? 'border-red3 text-red3 bg-cream2/60'
+                    : 'border-cream2 hover:bg-cream2/60'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <span className='text-[10px] opacity-70'>
+            {THEMES.find((t) => t.id === theme)?.note}
+          </span>
+        </div>
       </div>
 
       <div className='brown-card rounded-sm flex flex-col text-sm overflow-hidden'>

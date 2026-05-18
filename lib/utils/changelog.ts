@@ -10,6 +10,15 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.5',
+    date: '2026-05-18',
+    changes: [
+      'Market inventory cells enlarged (36 -> 48px) so the grid fills the panel out to the corners.',
+      'Page portraits bumped to 240x240 and switched to object-contain so the full artwork is visible without cropping.',
+      'Settings: UI Theme picker (Default / Dark / Light) with a pre-hydration script that applies the saved theme before React mounts.',
+    ],
+  },
+  {
     version: '0.19.4',
     date: '2026-05-18',
     changes: [

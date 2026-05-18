@@ -75,10 +75,10 @@ const ShopContent = ({ shop, character, title, tagline, refreshCost }: Props) =>
         <Image
           src='/images/market.webp'
           alt='merchant'
-          width={200}
-          height={200}
-          className='rounded-sm shrink-0 object-cover'
-          style={{ width: '200px', height: '200px' }}
+          width={240}
+          height={240}
+          className='rounded-sm shrink-0 object-contain'
+          style={{ width: '240px', height: '240px' }}
         />
         <div className='flex flex-col gap-1'>
           <p>{tagline}</p>
