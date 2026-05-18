@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import {
   deleteAllMessages,
   deleteMessage,
+  markAllMessagesRead,
   markMessageRead,
   MessageView,
   MessageKind,
@@ -35,6 +36,24 @@ const MessagesContent = ({ messages, unread }: Props) => {
       await markMessageRead({ id: msg._id });
       router.refresh();
     }
+  };
+
+  const onMarkRead = async (id: string) => {
+    setBusy(true);
+    const res = await markMessageRead({ id });
+    setBusy(false);
+    if (res?.error) return toast.error(res.error.message);
+    router.refresh();
+  };
+
+  const onMarkAllRead = async () => {
+    if (unread === 0) return;
+    setBusy(true);
+    const res = await markAllMessagesRead();
+    setBusy(false);
+    if (res?.error) return toast.error(res.error.message);
+    toast.success(`Marked ${res.updated ?? 0} as read`);
+    router.refresh();
   };
 
   const onDelete = async (id: string) => {
@@ -87,6 +106,17 @@ const MessagesContent = ({ messages, unread }: Props) => {
                 <span className='text-xs opacity-70'>
                   {new Date(msg.createdAt).toLocaleString()}
                 </span>
+                {!msg.read && (
+                  <button
+                    type='button'
+                    onClick={() => onMarkRead(msg._id)}
+                    disabled={busy}
+                    className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+                    title='Mark this message as read'
+                  >
+                    Mark read
+                  </button>
+                )}
                 <button
                   type='button'
                   onClick={() => onDelete(msg._id)}
@@ -107,7 +137,17 @@ const MessagesContent = ({ messages, unread }: Props) => {
       </div>
 
       {messages.length > 0 && (
-        <div className='flex justify-end'>
+        <div className='flex justify-end gap-2'>
+          {unread > 0 && (
+            <button
+              type='button'
+              onClick={onMarkAllRead}
+              disabled={busy}
+              className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+            >
+              Mark all read ({unread})
+            </button>
+          )}
           <button
             type='button'
             onClick={onDeleteAll}

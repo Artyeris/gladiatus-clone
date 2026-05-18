@@ -9,16 +9,15 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
 
   return (
     <div className='flex flex-col brown-card w-full h-[75px] drop-shadow-2xl rounded-sm overflow-hidden'>
-      <div className='grid grid-cols-3 px-2 py-[2px] text-[11px] font-semibold text-red3 gap-1'>
+      <div className='grid grid-cols-2 px-2 py-[2px] text-[11px] font-semibold text-red3 gap-1'>
         <Stat src='/images/crowns.png'      alt='gold'  value={character.crowns} />
         <Stat diamond                                     value={(character as any).diamonds ?? 0} />
-        <Stat src='/images/power-rank.png'  alt='power' value={calculatePower(character)} />
       </div>
       <div className='border-b-cream2 border-b-[3px] w-full' />
       <div className='grid grid-cols-3 px-2 py-[2px] text-[11px] font-semibold text-red3 gap-1'>
-        <Stat src='/images/honor.png' alt='honor' value={character.honor} />
-        <Stat src='/images/level.png' alt='level' value={character.level} />
-        <span />
+        <Stat src='/images/honor.png'      alt='honor' value={character.honor} />
+        <Stat src='/images/level.png'      alt='level' value={character.level} />
+        <Stat src='/images/power-rank.png' alt='power' value={calculatePower(character)} />
       </div>
       <div className='border-b-cream2 border-b-[3px] w-full' />
       <div className='flex flex-row gap-1 items-center justify-center w-full px-2 py-[2px] font-semibold text-[11px] text-red3'>

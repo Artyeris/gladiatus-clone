@@ -32,10 +32,11 @@ const ExpeditionContent = ({ enemies, expeditionName, character }: ExpeditionCon
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-        gap: '24px',
-        padding: '0 20px',
+        gridTemplateColumns: `repeat(${Math.max(1, enemies.length)}, 1fr)`,
+        gap: '16px',
+        padding: '0 12px',
         justifyContent: 'center',
+        alignItems: 'start',
       }}
     >
       {enemies.map((enemy) => (

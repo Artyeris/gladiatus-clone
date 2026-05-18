@@ -266,16 +266,16 @@ function SellPanel({
 
   return (
     <div
-      className='flex flex-col gap-2 shrink-0'
-      style={{ width: '160px' }}
+      className='flex flex-col gap-2 shrink-0 items-center'
+      style={{ width: '210px' }}
     >
       <div
         ref={(node) => {
           drop(node);
         }}
         style={{
-          width: '120px',
-          height: '120px',
+          width: '160px',
+          height: '160px',
           background: slotBg,
           border: '2px solid #5c3a21',
           borderRadius: '4px',
@@ -296,20 +296,20 @@ function SellPanel({
                 imageId={picked.image}
                 alt={picked.name}
                 fill
-                sizes='120px'
-                style={{ objectFit: 'contain', padding: '6px' }}
+                sizes='160px'
+                style={{ objectFit: 'contain', padding: '8px' }}
               />
             </div>
           </ItemTooltip>
         ) : (
-          <span style={{ fontSize: '11px', color: '#cdb88a', fontWeight: 600 }}>
+          <span style={{ fontSize: '12px', color: '#cdb88a', fontWeight: 600 }}>
             Drop item here
           </span>
         )}
       </div>
 
-      <label className='text-xs font-semibold mt-1'>Market price</label>
-      <div className='flex items-center gap-1'>
+      <label className='text-xs font-semibold mt-1 self-start ml-[25px]'>Market price</label>
+      <div className='flex items-center gap-1 w-[160px]'>
         <input
           type='number'
           min={1}
@@ -324,7 +324,7 @@ function SellPanel({
       <button
         onClick={onPlace}
         disabled={busy || !picked}
-        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50'
+        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-[160px]'
       >
         Confirm
       </button>

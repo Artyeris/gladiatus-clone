@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import {
+  EQUIPMENT_SLOTS,
   EquipmentSlot,
   EquipmentMap,
   SLOT_LABELS,
@@ -25,6 +26,7 @@ import {
   canPlaceItem,
   findEntry,
   findFreePosition,
+  findFreePositionAnyBag,
   placeItem,
   removeItem,
 } from '@/lib/utils/inventory/grid';
@@ -85,6 +87,10 @@ function entriesFromCharacter(character: CharacterInterface): InventoryEntry[] {
   return out;
 }
 
+// localStorage key for the active inventory bag (so a page refresh
+// doesn't drop you back on tab I if you were viewing tab V).
+const ACTIVE_BAG_KEY = 'gladiatus.activeBag';
+
 function Board({ character }: Props) {
   const [entries, setEntries] = useState<InventoryEntry[]>(entriesFromCharacter(character));
   const [equipment, setEquipment] = useState<EquipmentMap>(character.equipment ?? {});
@@ -95,8 +101,42 @@ function Board({ character }: Props) {
     setEquipment(character.equipment ?? {});
   }, [character]);
 
+  // Restore the active bag from localStorage on mount, then mirror
+  // every change back so it survives navigation and refresh.
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(ACTIVE_BAG_KEY);
+      if (stored != null) {
+        const n = Number(stored);
+        if (Number.isFinite(n) && n >= 0 && n < BAG_COUNT) setActiveBag(n);
+      }
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try { window.localStorage.setItem(ACTIVE_BAG_KEY, String(activeBag)); } catch {}
+  }, [activeBag]);
+
+  // Snap target coordinates so a multi-cell item dropped near the
+  // edge still fits. Without this, a 2x2 dropped on the last row
+  // would be rejected for clipping; snapping pulls it up/left by
+  // (height-1) / (width-1) so the cursor cell becomes the bottom-
+  // -right rather than the top-left of the placed rectangle.
+  const clampTarget = (item: ItemInterface | any, x: number, y: number) => {
+    const w = Math.max(1, item?.width ?? 1);
+    const h = Math.max(1, item?.height ?? 1);
+    return {
+      x: Math.max(0, Math.min(x, INVENTORY_ROWS - w)),
+      y: Math.max(0, Math.min(y, INVENTORY_COLS - h)),
+    };
+  };
+
   const onDrop = async (payload: DragPayload, target: Source) => {
     const { item, source } = payload;
+
+    if (target.kind === 'inventory') {
+      const snapped = clampTarget(item, target.x, target.y);
+      target = { ...target, x: snapped.x, y: snapped.y };
+    }
 
     if (
       (source.kind === 'inventory' &&
@@ -163,6 +203,34 @@ function Board({ character }: Props) {
     }
   };
 
+  // Double-click an inventory item -> auto-equip it (pick the first
+  // compatible empty slot, otherwise swap into the first compatible
+  // occupied slot). Double-click an equipped item -> unequip into the
+  // first free inventory cell across any bag.
+  const onDoubleClick = (item: ItemInterface, source: Source) => {
+    if (source.kind === 'inventory') {
+      const compatible = EQUIPMENT_SLOTS.filter((s) => slotAcceptsItem(s, item));
+      if (compatible.length === 0) {
+        toast.error(`${item.name} is not equippable`);
+        return;
+      }
+      const empty = compatible.find((s) => !equipment[s]);
+      const targetSlot = empty ?? compatible[0];
+      void onDrop({ item, source }, { kind: 'equipment', slot: targetSlot });
+    } else {
+      // Equipment -> inventory. Find a free cell in any bag.
+      const free = findFreePositionAnyBag(entries, item);
+      if (!free) {
+        toast.error('Inventory is full');
+        return;
+      }
+      void onDrop(
+        { item, source },
+        { kind: 'inventory', x: free.x, y: free.y, bag: free.bag },
+      );
+    }
+  };
+
   // Drag-drop onto a tab button → move the dragged item into that bag's
   // first free cell. From inventory we keep the same coords if free,
   // else search; from equipment we just find the first free slot.
@@ -191,13 +259,14 @@ function Board({ character }: Props) {
 
   return (
     <div className='flex flex-col items-center gap-5'>
-      <EquipmentBoard equipment={equipment} onDrop={onDrop} />
+      <EquipmentBoard equipment={equipment} onDrop={onDrop} onDoubleClick={onDoubleClick} />
       <InventoryBoard
         entries={entries}
         activeBag={activeBag}
         onSelectBag={setActiveBag}
         onDrop={onDrop}
         onTabDrop={onTabDrop}
+        onDoubleClick={onDoubleClick}
       />
     </div>
   );
@@ -227,9 +296,11 @@ const EQUIPMENT_LAYOUT: (EquipmentSlot | null)[][] = [
 function EquipmentBoard({
   equipment,
   onDrop,
+  onDoubleClick,
 }: {
   equipment: EquipmentMap;
   onDrop: (payload: DragPayload, target: Source) => void;
+  onDoubleClick: (item: ItemInterface, source: Source) => void;
 }) {
   return (
     <div
@@ -256,6 +327,7 @@ function EquipmentBoard({
                 slot={slot}
                 item={(equipment[slot] as ItemInterface | null | undefined) ?? null}
                 onDrop={onDrop}
+                onDoubleClick={onDoubleClick}
               />
             ) : (
               <div key={`${ri}-${ci}`} />
@@ -271,10 +343,12 @@ function EquipmentDropSlot({
   slot,
   item,
   onDrop,
+  onDoubleClick,
 }: {
   slot: EquipmentSlot;
   item: ItemInterface | null;
   onDrop: (payload: DragPayload, target: Source) => void;
+  onDoubleClick: (item: ItemInterface, source: Source) => void;
 }) {
   const [{ isOver, canAccept }, drop] = useDrop(
     () => ({
@@ -315,6 +389,7 @@ function EquipmentDropSlot({
           item={item}
           source={{ kind: 'equipment', slot }}
           size={66}
+          onDoubleClick={() => onDoubleClick(item, { kind: 'equipment', slot })}
         />
       ) : (
         <div
@@ -347,12 +422,14 @@ function InventoryBoard({
   onSelectBag,
   onDrop,
   onTabDrop,
+  onDoubleClick,
 }: {
   entries: InventoryEntry[];
   activeBag: number;
   onSelectBag: (bag: number) => void;
   onDrop: (payload: DragPayload, target: Source) => void;
   onTabDrop: (payload: DragPayload, bag: number) => void;
+  onDoubleClick: (item: ItemInterface, source: Source) => void;
 }) {
   const grid = buildGrid(entries, activeBag);
   const counts = bagFillCounts(entries);
@@ -403,6 +480,7 @@ function InventoryBoard({
               cell={grid[x]?.[y]}
               entries={entries}
               onDrop={onDrop}
+              onDoubleClick={onDoubleClick}
             />
           ))
         )}
@@ -474,6 +552,7 @@ function InventoryDropCell({
   cell,
   entries,
   onDrop,
+  onDoubleClick,
 }: {
   x: number;
   y: number;
@@ -481,6 +560,7 @@ function InventoryDropCell({
   cell: { item: ItemInterface | null; isAnchor: boolean } | undefined;
   entries: InventoryEntry[];
   onDrop: (payload: DragPayload, target: Source) => void;
+  onDoubleClick: (item: ItemInterface, source: Source) => void;
 }) {
   const [{ isOver, canAccept }, drop] = useDrop(
     () => ({
@@ -521,6 +601,7 @@ function InventoryDropCell({
           item={cell.item}
           source={{ kind: 'inventory', x, y, bag }}
           size={44}
+          onDoubleClick={() => onDoubleClick(cell.item!, { kind: 'inventory', x, y, bag })}
         />
       )}
     </div>
@@ -531,10 +612,12 @@ function DraggableItem({
   item,
   source,
   size,
+  onDoubleClick,
 }: {
   item: ItemInterface;
   source: Source;
   size: number;
+  onDoubleClick?: () => void;
 }) {
   const [{ isDragging }, drag] = useDrag(
     () => ({
@@ -553,6 +636,7 @@ function DraggableItem({
         ref={(node) => {
           drag(node);
         }}
+        onDoubleClick={onDoubleClick}
         style={{
           position: 'absolute',
           inset: 0,

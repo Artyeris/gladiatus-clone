@@ -38,7 +38,7 @@ function Tab({ href, label, active }: { href: string; label: string; active?: bo
     return (
       <a
         href={href}
-        className='px-8 py-2 rounded-sm font-semibold text-cream2 cursor-default text-base'
+        className='px-8 py-1 rounded-sm font-semibold text-cream2 cursor-default text-sm'
         style={{
           background: '#974342',
           border: '2px solid #eed7a1',
@@ -52,7 +52,7 @@ function Tab({ href, label, active }: { href: string; label: string; active?: bo
   return (
     <a
       href={href}
-      className='px-8 py-2 rounded-sm font-semibold text-brown2 hover:text-red3 transition text-base'
+      className='px-8 py-1 rounded-sm font-semibold text-brown2 hover:text-red3 transition text-sm'
       style={{
         background: '#b59964',
         border: '2px solid #eed7a1',

@@ -22,9 +22,9 @@ const ItemImage = ({ imageId, alt, size, fill, sizes, style, className }: Props)
   const [errored, setErrored] = useState(false);
 
   if (errored) {
-    // Empty stylised box with the alt only on the native tooltip --
-    // the surrounding ItemTooltip already shows the item name on hover,
-    // so an inline label here would duplicate it.
+    // Empty stylised box. Deliberately no `title` attribute so the
+    // browser's native tooltip cannot overlap with the surrounding
+    // in-game ItemTooltip (which already shows the item name).
     return (
       <div
         className={className}
@@ -35,7 +35,6 @@ const ItemImage = ({ imageId, alt, size, fill, sizes, style, className }: Props)
           background: 'linear-gradient(135deg, #5c3a21, #8b5a2b)',
           overflow: 'hidden',
         }}
-        title={alt}
         aria-label={alt}
       />
     );

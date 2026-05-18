@@ -99,6 +99,24 @@ export async function markMessageRead({ id }: { id: string }) {
   }
 }
 
+export async function markAllMessagesRead() {
+  const charId = await getMyCharacterId();
+  if (!charId) return { error: { message: 'Not authenticated' } };
+
+  try {
+    await connectToDB();
+    const result = await Message.updateMany(
+      { recipient: charId, read: false },
+      { $set: { read: true } },
+    );
+    revalidatePath('/game/messages');
+    return { ok: true, updated: (result as any)?.modifiedCount ?? 0 };
+  } catch (err: any) {
+    console.log(`${new Date()} - markAllMessagesRead failed - ${err}`);
+    return { error: { message: err?.message || 'Failed' } };
+  }
+}
+
 export async function deleteMessage({ id }: { id: string }) {
   const charId = await getMyCharacterId();
   if (!charId) return { error: { message: 'Not authenticated' } };
