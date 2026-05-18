@@ -1,9 +1,9 @@
 import { ArenaTier, tierLevelRange } from '@/lib/utils/arena';
 
-// The clone runs as a "5x server", so all hourly rates effectively tick
-// 5x faster than the original game. Centralised here so it's easy to
-// tune later.
-export const SERVER_SPEED = 5;
+// SERVER_SPEED multiplies hourly tick rates against real time. At 1x
+// one real hour equals one in-game hour. Centralised here so it's
+// easy to tune later.
+export const SERVER_SPEED = 1;
 
 // Reference level for a tier when computing pot/salary scaling -- use
 // the top of the bracket so the late-game leagues earn more.
@@ -25,7 +25,7 @@ export function potGrowthPerHour(tier: ArenaTier): number {
 }
 
 // Wall-clock hours since `since` (clamped to 0). Multiplied by
-// SERVER_SPEED so "1 real hour" is 5 game hours on a 5x server.
+// SERVER_SPEED so "1 real hour" maps to N in-game hours at Nx.
 export function gameHoursSince(since: Date | null | undefined): number {
   if (!since) return 0;
   const ms = Date.now() - new Date(since).getTime();

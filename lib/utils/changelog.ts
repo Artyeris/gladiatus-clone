@@ -10,6 +10,15 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.4',
+    date: '2026-05-18',
+    changes: [
+      'Shortcut row reordered to Packages / Battle Reports / Messages / News.',
+      'Page portraits enlarged to 200x200 across Training, Arena, Auction, Market, Shop and Work.',
+      'Server speed restored to 1x: work jobs take their full real-time hours, expedition/arena cooldowns back to 60s, auctions run for 2.5 real hours and shops restock every 5 real hours.',
+    ],
+  },
+  {
     version: '0.19.3',
     date: '2026-05-18',
     changes: [

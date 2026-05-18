@@ -1,6 +1,6 @@
 // Work job catalog. Hourly gold is 20 * level + 20 multiplied by the job's
-// goldMultiplier. The 5x server speed turns each game-hour into 12 real
-// minutes -- the action layer handles that conversion.
+// goldMultiplier. SERVER_SPEED controls how compressed in-game hours are
+// against real time -- 1 means a 1-hour job takes a real hour.
 
 export interface WorkJob {
   id: string;
@@ -15,10 +15,10 @@ export interface WorkJob {
   premiumCost?: number;
 }
 
-export const SERVER_SPEED = 5;
+export const SERVER_SPEED = 1;
 
 // One real minute corresponds to SERVER_SPEED minutes of in-game time, so a
-// 1-hour job ends after 60 / SERVER_SPEED = 12 real minutes.
+// 1-hour job ends after 60 / SERVER_SPEED real minutes (1 real hour at 1x).
 export const REAL_MINUTES_PER_GAME_HOUR = 60 / SERVER_SPEED;
 
 export const WORK_JOBS: WorkJob[] = [

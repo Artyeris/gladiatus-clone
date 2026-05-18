@@ -28,9 +28,8 @@ export const SHOP_CATEGORIES: Record<ShopType, string[]> = {
   alchemist: ['ring', 'necklace'],
 };
 
-// Real Gladiatus restocks every ~5 hours. On a 5x server that's 1
-// real hour, which keeps the rotation fresh without spamming items.
-export const SHOP_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+// At 1x server speed we mirror the original ~5-hour merchant rotation.
+export const SHOP_REFRESH_INTERVAL_MS = 5 * 60 * 60 * 1000;
 export const SHOP_SLOTS = 12;
 // Buy price is sellPrice * 3 (Gladiatus markup roughly matches).
 export const BUY_PRICE_MULTIPLIER = 3;

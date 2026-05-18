@@ -16,14 +16,14 @@ const GameHeaderShortcuts = async () => {
 
   return (
     <div className='flex flex-row gap-2 w-full justify-center'>
-      <Shortcut href='/game/messages' label='Messages' badge={unread}>
-        <Mail className='w-5 h-5' />
+      <Shortcut href='/game/packages' label='Packages' badge={packages}>
+        <Package className='w-5 h-5' />
       </Shortcut>
       <Shortcut href='/game/reports' label='Battle reports'>
         <Swords className='w-5 h-5' />
       </Shortcut>
-      <Shortcut href='/game/packages' label='Packages' badge={packages}>
-        <Package className='w-5 h-5' />
+      <Shortcut href='/game/messages' label='Messages' badge={unread}>
+        <Mail className='w-5 h-5' />
       </Shortcut>
       <Shortcut href='/game/news' label='News'>
         <Newspaper className='w-5 h-5' />

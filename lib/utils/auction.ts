@@ -1,17 +1,19 @@
-// Auction phase logic. Server runs at 5x speed: a 1x cycle of 2.5h
-// becomes a 30-minute cycle. Phases are derived from time remaining
-// so the UI never shows an exact countdown.
+// Auction phase logic. At 1x server speed each auction lives for the
+// original 2.5-hour cycle. Phases are derived from time remaining so
+// the UI never shows an exact countdown.
 
-export const AUCTION_TOTAL_SECONDS = 30 * 60; // 5x of 1x 2.5h cycle
+export const AUCTION_TOTAL_SECONDS = 150 * 60; // 1x 2.5h cycle
 
 export type AuctionPhase = 'Very Long' | 'Long' | 'Medium' | 'Short' | 'Very Short' | 'Ended';
 
+// Same phase shape as before, scaled up 5x so the bands feel right
+// for a 2.5h auction (was tuned for a compressed 30-minute cycle).
 const PHASE_THRESHOLDS: { name: AuctionPhase; min: number }[] = [
-  { name: 'Very Long', min: 24 * 60 },
-  { name: 'Long',      min: 18 * 60 },
-  { name: 'Medium',    min: 12 * 60 },
-  { name: 'Short',     min:  6 * 60 },
-  { name: 'Very Short', min: 0 },
+  { name: 'Very Long', min: 120 * 60 },
+  { name: 'Long',      min:  90 * 60 },
+  { name: 'Medium',    min:  60 * 60 },
+  { name: 'Short',     min:  30 * 60 },
+  { name: 'Very Short', min:  0 },
 ];
 
 export function auctionPhase(endsAt: Date | string | number): AuctionPhase {

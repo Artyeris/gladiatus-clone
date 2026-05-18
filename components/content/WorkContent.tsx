@@ -90,10 +90,10 @@ const WorkContent = ({ character }: Props) => {
           <Image
             src='/images/work.webp'
             alt='work foreman'
-            width={170}
-            height={170}
+            width={200}
+            height={200}
             className='rounded-sm shrink-0 object-cover'
-            style={{ width: '170px', height: '170px' }}
+            style={{ width: '200px', height: '200px' }}
           />
           <div className='flex flex-col gap-1'>
             <p>
@@ -102,7 +102,7 @@ const WorkContent = ({ character }: Props) => {
               work, and come back to collect your wages.
             </p>
             <p className='text-xs italic'>
-              Server runs at 5x speed: every game-hour ends in 12 real minutes.
+              Server runs at 1x speed: every game-hour ends in 60 real minutes.
             </p>
             <div className='font-semibold mt-1'>
               Your balance: {character.crowns}
