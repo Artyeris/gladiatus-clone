@@ -72,19 +72,26 @@ const ReportsContent = ({ reports }: Props) => {
   return (
     <div className='px-6 flex flex-col gap-3 text-brown2'>
       <div className='flex gap-2'>
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`px-4 py-1 border-b-[3px] font-semibold text-sm ${
-              tab === t.id
-                ? 'border-red3 text-red3'
-                : 'border-transparent hover:text-red3'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type='button'
+              onClick={() => setTab(t.id)}
+              className={`px-8 py-1 rounded-sm font-semibold text-sm transition ${
+                active ? 'text-cream2 cursor-default' : 'text-brown2 hover:text-red3'
+              }`}
+              style={{
+                background: active ? '#974342' : '#b59964',
+                border: '2px solid #eed7a1',
+                outline: `2px solid ${active ? '#974342' : '#b59964'}`,
+              }}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className='brown-card rounded-sm flex flex-col text-sm overflow-hidden'>

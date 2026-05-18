@@ -134,17 +134,33 @@ export async function moveItemAction({ itemId, source, target }: MoveItemParams)
       equipment[target.slot] = item._id;
     }
 
-    character.set('inventory', entries.map((e) => ({
+    const serialized = entries.map((e) => ({
       item: (e.item && typeof e.item === 'object' && '_id' in e.item) ? e.item._id : e.item,
       x: e.x,
       y: e.y,
       bag: e.bag ?? 0,
-    })));
+    }));
+
+    character.set('inventory', serialized);
     character.set('equipment', equipment);
     character.markModified('inventory');
     character.markModified('equipment');
 
     await character.save();
+
+    // Belt-and-braces: write the inventory array straight through the
+    // underlying MongoDB driver so the `bag` field survives even if a
+    // cached Mongoose schema (e.g. from an old hot-reload) would have
+    // stripped it. character.save() handles equipment / other state.
+    try {
+      await Character.collection.updateOne(
+        { _id: character._id },
+        { $set: { inventory: serialized } },
+      );
+    } catch (e) {
+      console.log(`${new Date()} - inventory raw-write fallback failed - ${e}`);
+    }
+
     revalidatePath('/game/overview');
     revalidatePath('/game/market');
     return { ok: true };

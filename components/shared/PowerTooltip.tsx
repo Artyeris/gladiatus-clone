@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/hover-card';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { calculatePower } from '@/lib/utils/characterUtils';
-import { effectiveStats } from '@/lib/utils/combatStats';
+import { calculateCombatStats, effectiveStats } from '@/lib/utils/combatStats';
 import { stats } from '@/constants';
 
 interface Props {
@@ -24,11 +24,16 @@ interface Props {
 // level + sum(stats).
 const PowerTooltip = ({ character, children }: Props) => {
   const eff = effectiveStats(character);
+  const combat = (() => {
+    try { return calculateCombatStats(character as any); } catch { return null; }
+  })();
   const level = character.level ?? 1;
   const levelContribution = level * 10;
   const total = calculatePower(character);
 
   const baseStat = (id: string) => Number((character as any)[id] ?? 5);
+  const avgWeapon = combat ? Math.round((combat.weaponMin + combat.weaponMax) / 2) : 0;
+  const armorVal = combat?.armor ?? 0;
 
   return (
     <HoverCard openDelay={120} closeDelay={0}>
@@ -66,9 +71,19 @@ const PowerTooltip = ({ character, children }: Props) => {
             );
           })}
 
+          <div className='h-px bg-cream2/40 my-1' />
+
+          <Row
+            label='Weapon (avg dmg)'
+            value={avgWeapon > 0 ? `+${avgWeapon}` : '-'}
+            hint={combat ? `Damage range ${combat.weaponMin}-${combat.weaponMax}` : undefined}
+          />
+          <Row label='Armor' value={armorVal > 0 ? `+${armorVal}` : '-'} />
+
           <div className='text-[10px] opacity-80 italic mt-1 border-t border-cream2/40 pt-1'>
-            Item bonuses come from equipped weapon, armour, rings and
-            amulets - they show as the +N on each stat row above.
+            Weapon contributes its average damage and armour adds its
+            value. Stat bonuses from rings, amulets and gear show as
+            the +N on each stat row above.
           </div>
         </div>
       </HoverCardContent>

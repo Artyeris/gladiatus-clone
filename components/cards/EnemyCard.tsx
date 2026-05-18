@@ -43,83 +43,83 @@ const EnemyCard = ({ enemy, expedition, canFight }: EnemyCardProps) => {
               />
             </HoverCardTrigger>
             <HoverCardContent>
-              <div className='red-card flex flex-col min-w-[130px] px-2 text-cream2 text-xs'>
+              <div className='red-card flex flex-col min-w-[210px] px-3 py-2 text-cream2 text-xs gap-[3px]'>
 
-                <span className='font-semibold text-sm'>
+                <span className='font-semibold text-sm border-b border-cream2 pb-1 mb-1'>
                   {enemy.name}
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Level:
                   <span>
                     {enemy.level ? `${enemy.level[0]} - ${enemy.level[enemy.level.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Experience:
                   <span>
                     {enemy.experience ? `${enemy.experience[0]} - ${enemy.experience[enemy.experience.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Gold:
                   <span>
                     {enemy.crowns ? `${enemy.crowns[0]} - ${enemy.crowns[enemy.crowns.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Strength:
                   <span>
                     {enemy.strength ? `${enemy.strength[0]} - ${enemy.strength[enemy.strength.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Endurance:
                   <span>
                     {enemy.endurance ? `${enemy.endurance[0]} - ${enemy.endurance[enemy.endurance.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Dexterity:
                   <span>
                     {enemy.dexterity ? `${enemy.dexterity[0]} - ${enemy.dexterity[enemy.dexterity.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Agility:
                   <span>
                     {enemy.agility ? `${enemy.agility[0]} - ${enemy.agility[enemy.agility.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Intelligence:
                   <span>
                     {enemy.intelligence ? `${enemy.intelligence[0]} - ${enemy.intelligence[enemy.intelligence.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Charisma:
                   <span>
                     {enemy.charisma ? `${enemy.charisma[0]} - ${enemy.charisma[enemy.charisma.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Armor:
                   <span>
                     {enemy.armor ? `${enemy.armor[0]} - ${enemy.armor[enemy.armor.length - 1]}` : '?'}
                   </span>
                 </span>
 
-                <span className='flex justify-between'>
+                <span className='flex justify-between gap-4 leading-tight'>
                   Damage:
                   <span>
                     {enemy.damage ? `${enemy.damage[0]} - ${enemy.damage[enemy.damage.length - 1]}` : '?'}
