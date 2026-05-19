@@ -5,7 +5,11 @@ export interface IUser extends Document {
   username?: string;
   email?: string;
   password?: string;
+  // `character` is the *active* gladiator. `characters` holds every
+  // gladiator the user owns (max 10) so they can switch between them
+  // from the My Account -> Gladiators screen.
   character?: mongoose.Types.ObjectId;
+  characters?: mongoose.Types.ObjectId[];
   level?: number;
   strength?: number;
   endurance?: number;
@@ -47,6 +51,13 @@ const userSchema = new Schema<IUser>({
     ref: 'Character',
     default: null,
   },
+  // Every gladiator this account owns. Capped to MAX_GLADIATORS in
+  // the create-character action; older characters keep existing in
+  // the same world so the player can switch back any time.
+  characters: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character',
+  }],
 
   // Legacy fields keep older local test users readable while Character owns game stats.
   level: { type: Number, default: 1 },
@@ -100,6 +111,13 @@ if (!User.schema.path('character')) {
     ref: 'Character',
     default: null,
   };
+}
+
+if (!User.schema.path('characters')) {
+  missingCachedPaths.characters = [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character',
+  }];
 }
 
 if (Object.keys(missingCachedPaths).length > 0) {

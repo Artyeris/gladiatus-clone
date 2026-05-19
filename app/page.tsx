@@ -47,9 +47,6 @@ export default function Home() {
                   of your tier and collect a passive gold salary the whole
                   time you sit at the top.
                 </p>
-                <p className='italic opacity-80 text-sm'>
-                  A solo project built for learning, not for profit.
-                </p>
               </div>
             </DescriptionCard>
 

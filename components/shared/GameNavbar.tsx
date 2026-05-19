@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { logOutUser } from '@/lib/actions/user/logOut.action';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings, Shield, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -53,6 +53,12 @@ const GameNavbar = () => {
                   <Link href='/game/profile'>
                     <User className='mr-2 h-4 w-4 text-cream2' />
                     <span className='text-cream2'>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className='hover:bg-red2 cursor-pointer'>
+                  <Link href='/game/gladiators'>
+                    <Shield className='mr-2 h-4 w-4 text-cream2' />
+                    <span className='text-cream2'>Gladiators</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className='hover:bg-red2 cursor-pointer'>

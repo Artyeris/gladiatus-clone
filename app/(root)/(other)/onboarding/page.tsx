@@ -7,7 +7,10 @@ const Page = async () => {
 
   if (!user) return null;
 
-  if (user.character) redirect('/game/overview');
+  // Used both for first-time setup (no character yet) and for adding
+  // an extra gladiator from the Gladiators roster, so we no longer
+  // redirect when a character already exists. The create action
+  // enforces the 10-gladiator cap and name uniqueness.
 
   return (
     <div className='mb-4 flex flex-col items-center gap-6 px-10'>

@@ -10,6 +10,17 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.7',
+    date: '2026-05-19',
+    changes: [
+      'Quest section crash fixed: QUEST_TAKE_COOLDOWN_MS is no longer exported from a "use server" file.',
+      'Landing page: removed the "A solo project built for learning, not for profit." note.',
+      'New Gladiators screen under My Account: lists up to 10 characters per account with their level / power / honor and a Switch button. Active gladiator marked with a red border and "Active" badge.',
+      'Onboarding is reusable as a "create new gladiator" flow; the redirect-on-existing-character guard was dropped.',
+      'createCharacter backfills the new user.characters array from any legacy single user.character so existing accounts see their original gladiator in the roster.',
+    ],
+  },
+  {
     version: '0.19.6',
     date: '2026-05-19',
     changes: [

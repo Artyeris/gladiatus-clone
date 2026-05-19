@@ -73,8 +73,9 @@ export async function listMyQuests(): Promise<{
 // the "New quest" button on the Gladiatus quests panel -- the player
 // can't cherry-pick which one drops.
 // Cooldown between accepting quests. Prevents spam-claim of the
-// best-reward templates back-to-back.
-export const QUEST_TAKE_COOLDOWN_MS = 10 * 60 * 1000;
+// best-reward templates back-to-back. Local-only (not exported)
+// because 'use server' files may not export non-async values.
+const QUEST_TAKE_COOLDOWN_MS = 10 * 60 * 1000;
 
 export async function acceptRandomQuest() {
   const character = await getMyCharacter();
