@@ -313,8 +313,12 @@ function CurrentShift({
   const job = findJob(work.jobId);
   const wage = job ? jobGoldPerHour(level, job) : 0;
   const totalGold = wage * work.hours;
-  const m = Math.floor(secondsLeft / 60);
+  const h = Math.floor(secondsLeft / 3600);
+  const m = Math.floor((secondsLeft % 3600) / 60);
   const s = secondsLeft % 60;
+  const remaining = h > 0
+    ? `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`
+    : `${m}m ${s.toString().padStart(2, '0')}s`;
 
   return (
     <div className='flex items-center gap-3 px-3 py-2 text-sm'>
@@ -325,7 +329,7 @@ function CurrentShift({
         <div className='text-xs opacity-80'>
           {ready
             ? 'Shift complete -- claim your wages.'
-            : `Ready in ${m}m ${s.toString().padStart(2, '0')}s`}
+            : `Ready in ${remaining}`}
         </div>
       </div>
       <div className='font-semibold flex items-center gap-1'>

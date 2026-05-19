@@ -58,8 +58,11 @@ const battleReportSchema = new mongoose.Schema({
     type: Number,
   },
   // Loot summary surfaced on the battle report page so the player can
-  // see expedition drops without checking inventory.
+  // see expedition drops without checking inventory. `itemId` is set
+  // for new drops so the page can re-fetch the full item document and
+  // render the same tooltip used in the bag.
   loot: {
+    itemId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Item' },
     name:    { type: String },
     quality: { type: String },
     image:   { type: String },

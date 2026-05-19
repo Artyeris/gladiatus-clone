@@ -7,17 +7,21 @@ import toast from 'react-hot-toast';
 
 import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
-import ItemTypeFilter, {
+import ItemTypeDropdown from '@/components/shared/ItemTypeDropdown';
+import {
   countByType,
   matchesType,
   type ItemTypeFilterValue,
 } from '@/components/shared/ItemTypeFilter';
-import QualityFilter, {
+import QualityDropdown from '@/components/shared/QualityDropdown';
+import {
   countByQuality,
   matchesQuality,
   type QualityFilterValue,
 } from '@/components/shared/QualityFilter';
-import SortStrip, { type SortMode } from '@/components/shared/SortStrip';
+import SortDropdown from '@/components/shared/SortDropdown';
+import type { SortMode } from '@/components/shared/SortStrip';
+import LevelRangeFilter from '@/components/shared/LevelRangeFilter';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import {
@@ -145,45 +149,28 @@ const AuctionContent = ({ character, auctions }: Props) => {
       </Section>
 
       <Section title='Active auctions'>
-        <ItemTypeFilter
-          value={typeFilter}
-          onChange={setTypeFilter}
-          counts={countByType(auctions.map((a) => a.item))}
-        />
-        <QualityFilter
-          value={qualityFilter}
-          onChange={setQualityFilter}
-          counts={countByQuality(auctions.map((a) => a.item))}
-        />
-        <SortStrip value={sortBy} onChange={setSortBy} />
-        <div className='flex flex-wrap items-center gap-2 px-2 py-2 border-b-[2px] border-cream2 bg-cream2/40 text-xs'>
-          <span className='font-semibold opacity-80'>Level range:</span>
-          <input
-            type='number'
-            min={1}
-            value={minLvl}
-            onChange={(e) => setMinLvl(e.target.value)}
-            placeholder='min'
-            className='border border-brown2 px-2 py-[2px] rounded-sm w-16 bg-cream-card tabular-nums'
+        <div className='flex flex-wrap items-center gap-4 px-3 py-2 border-b-[2px] border-cream2 bg-cream2/40'>
+          <ItemTypeDropdown
+            value={typeFilter}
+            onChange={setTypeFilter}
+            counts={countByType(auctions.map((a) => a.item))}
           />
-          <span className='opacity-60'>to</span>
-          <input
-            type='number'
-            min={1}
-            value={maxLvl}
-            onChange={(e) => setMaxLvl(e.target.value)}
-            placeholder='max'
-            className='border border-brown2 px-2 py-[2px] rounded-sm w-16 bg-cream-card tabular-nums'
+          <QualityDropdown
+            value={qualityFilter}
+            onChange={setQualityFilter}
+            counts={countByQuality(auctions.map((a) => a.item))}
           />
-          {(minLvl !== '' || maxLvl !== '') && (
-            <button
-              type='button'
-              onClick={() => { setMinLvl(''); setMaxLvl(''); }}
-              className='ml-1 text-xs font-semibold underline text-red3'
-            >
-              clear
-            </button>
-          )}
+          <SortDropdown
+            value={sortBy}
+            onChange={setSortBy}
+            allow={['default', 'levelAsc', 'levelDesc']}
+          />
+          <LevelRangeFilter
+            min={minLvl}
+            max={maxLvl}
+            onMinChange={setMinLvl}
+            onMaxChange={setMaxLvl}
+          />
         </div>
         {filteredAuctions.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>

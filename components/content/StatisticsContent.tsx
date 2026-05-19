@@ -7,6 +7,7 @@ import { EQUIPMENT_SLOTS } from '@/lib/utils/equipment';
 
 interface Props {
   character: CharacterInterface;
+  packagesValue?: number;
 }
 
 function valueOfItems(items: ItemInterface[]): number {
@@ -53,7 +54,7 @@ function pct(n: number, total: number): string {
   return `${Math.round((n / total) * 100)}%`;
 }
 
-const StatisticsContent = ({ character }: Props) => {
+const StatisticsContent = ({ character, packagesValue = 0 }: Props) => {
   const equipped = gatherEquipped(character);
   const inventory = gatherInventory(character);
 
@@ -116,6 +117,7 @@ const StatisticsContent = ({ character }: Props) => {
       <Section title='Wealth'>
         <Row label='Equipment value' value={String(equipmentValue)} coin />
         <Row label='Inventory value' value={String(inventoryValue)} coin />
+        <Row label='Packages value'  value={String(packagesValue)}  coin />
         <Row label='Gold on hand' value={String(character.crowns ?? 0)} coin />
       </Section>
 

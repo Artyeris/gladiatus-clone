@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { CATEGORY_ICON, CATEGORY_LABEL, QuestCategory } from '@/constants/quests';
@@ -17,13 +17,38 @@ interface Props {
   quests: QuestView[];
   max: number;
   hasMoreToAccept: boolean;
+  nextQuestReadyAt: string | null;
+}
+
+function formatCountdown(ms: number): string {
+  if (ms <= 0) return '0s';
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  if (m > 0) return `${m}m ${sec}s`;
+  return `${sec}s`;
 }
 
 const CATEGORY_ORDER: QuestCategory[] = ['arena', 'expedition', 'work', 'items'];
 
-const QuestsContent = ({ quests, max, hasMoreToAccept }: Props) => {
+const QuestsContent = ({ quests, max, hasMoreToAccept, nextQuestReadyAt }: Props) => {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+
+  // Live countdown until a new quest can be taken. Ticks every second
+  // while the cooldown is active; when it hits zero we refresh so the
+  // "New quest" button re-enables on the next render.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!nextQuestReadyAt) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [nextQuestReadyAt]);
+
+  const cooldownMs = nextQuestReadyAt
+    ? Math.max(0, new Date(nextQuestReadyAt).getTime() - now)
+    : 0;
+  const cooldownActive = cooldownMs > 0;
 
   const sorted = [...quests].sort((a, b) => {
     const ai = CATEGORY_ORDER.indexOf(a.category as QuestCategory);
@@ -60,7 +85,7 @@ const QuestsContent = ({ quests, max, hasMoreToAccept }: Props) => {
     router.refresh();
   };
 
-  const canAccept = quests.length < max && hasMoreToAccept;
+  const canAccept = quests.length < max && hasMoreToAccept && !cooldownActive;
 
   return (
     <div className='px-6 flex flex-col gap-3 text-brown2'>
@@ -94,9 +119,9 @@ const QuestsContent = ({ quests, max, hasMoreToAccept }: Props) => {
           disabled={busy || !canAccept}
           className='general-button px-4 py-2 rounded-sm text-sm font-semibold hover:brightness-110 disabled:opacity-50'
         >
-          New quest
+          {cooldownActive ? `New quest in ${formatCountdown(cooldownMs)}` : 'New quest'}
         </button>
-        {!canAccept && (
+        {!canAccept && !cooldownActive && (
           <span className='text-xs opacity-70 italic'>
             {quests.length >= max
               ? `You hold the maximum of ${max} quests -- claim or abandon one first.`

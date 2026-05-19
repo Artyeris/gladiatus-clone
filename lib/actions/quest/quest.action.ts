@@ -52,9 +52,10 @@ export async function listMyQuests(): Promise<{
   quests: QuestView[];
   max: number;
   availableTemplateIds: string[];
+  nextQuestReadyAt: string | null;
 }> {
   const character = await getMyCharacter();
-  if (!character) return { quests: [], max: MAX_ACTIVE_QUESTS, availableTemplateIds: [] };
+  if (!character) return { quests: [], max: MAX_ACTIVE_QUESTS, availableTemplateIds: [], nextQuestReadyAt: null };
 
   const docs = await Quest.find({ owner: character._id }).sort({ acceptedAt: 1 }).lean();
   const activeIds = new Set(docs.map((d: any) => d.templateId));
@@ -62,16 +63,20 @@ export async function listMyQuests(): Promise<{
     .filter((t) => !activeIds.has(t.id))
     .map((t) => t.id);
 
+  const last = (character as any).lastQuestTakenAt
+    ? new Date((character as any).lastQuestTakenAt).getTime()
+    : 0;
+  const readyAt = last > 0 ? last + QUEST_TAKE_COOLDOWN_MS : 0;
+  const nextQuestReadyAt = readyAt > Date.now() ? new Date(readyAt).toISOString() : null;
+
   return {
     quests: docs.map(viewOf),
     max: MAX_ACTIVE_QUESTS,
     availableTemplateIds,
+    nextQuestReadyAt,
   };
 }
 
-// Accept a random quest the character doesn't already have. Mirrors
-// the "New quest" button on the Gladiatus quests panel -- the player
-// can't cherry-pick which one drops.
 // Cooldown between accepting quests. Prevents spam-claim of the
 // best-reward templates back-to-back. Local-only (not exported)
 // because 'use server' files may not export non-async values.

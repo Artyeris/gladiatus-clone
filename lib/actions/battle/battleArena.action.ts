@@ -119,6 +119,22 @@ export async function battleArena(defenderId: string) {
       }
       attacker.weeklyWins = (attacker.weeklyWins ?? 0) + 1;
 
+      // Arena gold reward. Roughly 20 * defender_level + 50 to keep
+      // it modest compared to expedition gold. Under level 100 we
+      // suppress the reward when the attacker is at least 5 levels
+      // above the defender so farming weaker rivals stops paying;
+      // at 100+ the cap no longer applies.
+      const atkLvl = attacker.level ?? 1;
+      const defLvl = defender.level ?? 1;
+      const eligibleForGold = atkLvl >= 100 || (atkLvl - defLvl) < 5;
+      if (eligibleForGold) {
+        const gold = Math.max(1, 20 * defLvl + 50);
+        attacker.crowns = (attacker.crowns ?? 0) + gold;
+        (battleReport.result as any).crownsDrop = gold;
+      } else {
+        (battleReport.result as any).crownsDrop = 0;
+      }
+
       // Rank takeover: if the attacker ranked below the defender on the
       // honor leaderboard, they swap honor values. That promotes the
       // winner straight into the loser's rank (e.g. 5th beats 1st ->

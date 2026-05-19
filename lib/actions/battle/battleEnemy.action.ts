@@ -92,7 +92,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
     const isDraw = winnerKey === 'Draw';
 
     // If the character won.
-    let droppedItemSummary: { name: string; quality: string; image: string } | null = null;
+    let droppedItemSummary: { itemId: any; name: string; quality: string; image: string } | null = null;
     let expeditionHonorDelta = 0;
     if (playerWon) {
       journal.world.battles++;
@@ -157,6 +157,7 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
           });
           character.itemsFound = (character.itemsFound ?? 0) + 1;
           droppedItemSummary = {
+            itemId: created._id,
             name: created.name,
             quality: created.quality ?? 'common',
             image: created.image,

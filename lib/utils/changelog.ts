@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.8',
+    date: '2026-05-19',
+    changes: [
+      'Quests: live countdown on the "New quest" button while the 10-minute take cooldown is active; listMyQuests now surfaces nextQuestReadyAt.',
+      'Market Sell row redesigned: 220px drop panel on the left (180x180 slot, full-width Market price + Confirm), inventory grid on the right at 52px cells. Both panels framed with a red border.',
+      'Filters consolidated into dropdowns: Market and Auction both use compact Type / Quality / Sort selects plus a Level min-max range input on one row.',
+      'Work shift footer formats time as h:m:s once the remaining duration crosses an hour.',
+      'Battle report Loot row now resolves the dropped item and shows the full ItemTooltip on hover (stats, level, value, durability).',
+      'Arena gold reward on wins: 20 * defender_level + 50. Under level 100 the reward is suppressed when the attacker is 5+ levels above the defender; level 100+ always earns gold.',
+      'Wealth panel gained a "Packages value" row (sum of pending package items\' sellPrice).',
+    ],
+  },
+  {
     version: '0.19.7',
     date: '2026-05-19',
     changes: [

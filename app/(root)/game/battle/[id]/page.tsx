@@ -6,10 +6,13 @@ import { BattleReport } from '@/lib/interfaces/battleReport.interface';
 import DescriptionCard from '@/components/cards/DescriptionCard';
 import FighterCard from '@/components/cards/FighterCard';
 import ItemImage from '@/components/shared/ItemImage';
+import ItemTooltip from '@/components/overview/ItemTooltip';
+import Item from '@/lib/models/item.model';
 import { getBattleReport } from '@/lib/actions/battle/getBattleReport.action';
 import { getUser } from '@/lib/actions/user/getUser.action';
 import { redirect } from 'next/navigation';
 import NoResults from '@/components/shared/NoResults';
+import type { ItemInterface } from '@/lib/interfaces/item.interface';
 
 const Page = async ({ params }: { params: { id: string } }) => {
   const user = await getUser().catch(() => redirect('/'));
@@ -26,6 +29,18 @@ const Page = async ({ params }: { params: { id: string } }) => {
   const currentCharacter = user.character;
 
   if (!battleReport || !attacker || !defender) return <NoResults />;
+
+  // If the report has an item id on its loot summary, resolve the
+  // full Item doc so the loot row can render the same hover tooltip
+  // the inventory uses (stats / level / value / durability).
+  let lootItem: ItemInterface | null = null;
+  const lootItemId = (battleReport.loot as any)?.itemId;
+  if (lootItemId) {
+    try {
+      const doc = await Item.findById(lootItemId).lean();
+      if (doc) lootItem = JSON.parse(JSON.stringify(doc)) as ItemInterface;
+    } catch {}
+  }
 
   // If the defender has "id" property (not "_id") it means is an npc enemy, if it doesn't, then its an another player character.
   const isNpc = 'id' in battleReport.defender
@@ -83,29 +98,65 @@ const Page = async ({ params }: { params: { id: string } }) => {
           {battleReport.loot && (
             <p className='text-sm px-2 py-1 font-semibold text-red3 flex items-center gap-2'>
               <span>Loot:</span>
-              {battleReport.loot.image && (
-                <span
-                  className='relative inline-block shrink-0'
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    background: '#a89f91',
-                    border: '1px solid #5c3a21',
-                    borderRadius: '2px',
-                  }}
-                >
-                  <ItemImage
-                    imageId={battleReport.loot.image}
-                    alt={battleReport.loot.name}
-                    fill
-                    sizes='24px'
-                    style={{ objectFit: 'contain', padding: '2px' }}
-                  />
-                </span>
-              )}
-              <span>{battleReport.loot.name}</span>
-              {battleReport.loot.quality && battleReport.loot.quality !== 'common' && (
-                <span className='opacity-80 font-normal'>({battleReport.loot.quality.replace('_plus', '+')})</span>
+              {/* Wrap the icon + name in ItemTooltip so hovering shows
+                  the same stat card the inventory uses. Falls back to
+                  the plain icon when we couldn't resolve the Item. */}
+              {lootItem ? (
+                <ItemTooltip item={lootItem}>
+                  <span className='flex items-center gap-2 cursor-help'>
+                    {battleReport.loot.image && (
+                      <span
+                        className='relative inline-block shrink-0'
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          background: '#a89f91',
+                          border: '1px solid #5c3a21',
+                          borderRadius: '2px',
+                        }}
+                      >
+                        <ItemImage
+                          imageId={battleReport.loot.image}
+                          alt={battleReport.loot.name}
+                          fill
+                          sizes='24px'
+                          style={{ objectFit: 'contain', padding: '2px' }}
+                        />
+                      </span>
+                    )}
+                    <span>{battleReport.loot.name}</span>
+                    {battleReport.loot.quality && battleReport.loot.quality !== 'common' && (
+                      <span className='opacity-80 font-normal'>({battleReport.loot.quality.replace('_plus', '+')})</span>
+                    )}
+                  </span>
+                </ItemTooltip>
+              ) : (
+                <>
+                  {battleReport.loot.image && (
+                    <span
+                      className='relative inline-block shrink-0'
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        background: '#a89f91',
+                        border: '1px solid #5c3a21',
+                        borderRadius: '2px',
+                      }}
+                    >
+                      <ItemImage
+                        imageId={battleReport.loot.image}
+                        alt={battleReport.loot.name}
+                        fill
+                        sizes='24px'
+                        style={{ objectFit: 'contain', padding: '2px' }}
+                      />
+                    </span>
+                  )}
+                  <span>{battleReport.loot.name}</span>
+                  {battleReport.loot.quality && battleReport.loot.quality !== 'common' && (
+                    <span className='opacity-80 font-normal'>({battleReport.loot.quality.replace('_plus', '+')})</span>
+                  )}
+                </>
               )}
             </p>
           )}
@@ -117,16 +168,24 @@ const Page = async ({ params }: { params: { id: string } }) => {
           {battleReport.result.winner === attacker.name ?
           <>
             <p className='text-sm px-2 py-1 flex items-center gap-1'>
-              <span className='font-semibold'>{attacker.name}</span> earned {battleReport.result.honorEarned} honor. 
+              <span className='font-semibold'>{attacker.name}</span> earned {battleReport.result.honorEarned} honor.
             </p>
             <p className='text-sm px-2 py-1'>
               <span className='font-semibold'>{defender.name}</span> has lost {battleReport.result.honorLost * -1} honor.
             </p>
+            {(battleReport.result.crownsDrop ?? 0) > 0 && (
+              <p className='text-sm px-2 py-1 flex items-center gap-1'>
+                <span className='font-semibold'>{attacker.name}</span> looted{' '}
+                {battleReport.result.crownsDrop}
+                <Image src={'/images/crowns.png'} width={12} height={12} alt='gold' style={{ width: 'auto', height: 'auto' }} />
+                {' '}from the win.
+              </p>
+            )}
           </>
           :
           <>
             <p className='text-sm px-2 py-1 flex items-center gap-1'>
-              <span className='font-semibold'>{defender.name}</span> earned {battleReport.result.honorEarned} honor. 
+              <span className='font-semibold'>{defender.name}</span> earned {battleReport.result.honorEarned} honor.
             </p>
             <p className='text-sm px-2 py-1'>
               <span className='font-semibold'>{attacker.name}</span> has lost {battleReport.result.honorLost * -1} honor.

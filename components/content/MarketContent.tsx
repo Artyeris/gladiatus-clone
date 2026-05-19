@@ -9,17 +9,21 @@ import toast from 'react-hot-toast';
 
 import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
-import ItemTypeFilter, {
+import ItemTypeDropdown from '@/components/shared/ItemTypeDropdown';
+import {
   countByType,
   matchesType,
   type ItemTypeFilterValue,
 } from '@/components/shared/ItemTypeFilter';
-import QualityFilter, {
+import QualityDropdown from '@/components/shared/QualityDropdown';
+import {
   countByQuality,
   matchesQuality,
   type QualityFilterValue,
 } from '@/components/shared/QualityFilter';
-import SortStrip, { type SortMode } from '@/components/shared/SortStrip';
+import SortDropdown from '@/components/shared/SortDropdown';
+import type { SortMode } from '@/components/shared/SortStrip';
+import LevelRangeFilter from '@/components/shared/LevelRangeFilter';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { ItemInterface } from '@/lib/interfaces/item.interface';
 import {
@@ -94,10 +98,22 @@ function Board({ character, listings }: Props) {
   const [qualityFilter, setQualityFilter] = useState<QualityFilterValue>('all');
   const [sortBy, setSortBy] = useState<SortMode>('default');
   const [page, setPage] = useState(0);
+  const [minLvl, setMinLvl] = useState<string>('');
+  const [maxLvl, setMaxLvl] = useState<string>('');
   const PAGE_SIZE = 15;
 
+  const minLvlNum = minLvl === '' ? null : Number(minLvl);
+  const maxLvlNum = maxLvl === '' ? null : Number(maxLvl);
+
   const filteredListings = listings
-    .filter((l) => matchesType(l.item, typeFilter) && matchesQuality(l.item, qualityFilter))
+    .filter((l) => {
+      if (!matchesType(l.item, typeFilter)) return false;
+      if (!matchesQuality(l.item, qualityFilter)) return false;
+      const lvl = l.item?.level ?? 0;
+      if (minLvlNum != null && Number.isFinite(minLvlNum) && lvl < minLvlNum) return false;
+      if (maxLvlNum != null && Number.isFinite(maxLvlNum) && lvl > maxLvlNum) return false;
+      return true;
+    })
     .slice()
     .sort((a, b) => {
       if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
@@ -186,11 +202,10 @@ function Board({ character, listings }: Props) {
       </Section>
 
       <Section title='Sell'>
-        {/* Sell panel sits to the left, drop-slot centred within its
-            column. Inventory grid sits next to it; the row is
-            justify-center so the whole pair is balanced inside the
-            slightly-narrower Sell box. */}
-        <div className='flex gap-4 px-3 py-3 text-sm items-center justify-center'>
+        {/* Sell panel (drop slot + price + Confirm) sits on the left;
+            inventory grid sits on the right. Both stretch to fill the
+            available row, with a generous gap between them. */}
+        <div className='flex gap-6 px-4 py-4 text-sm items-start justify-between'>
           <SellPanel
             picked={pickedItem}
             price={price}
@@ -204,17 +219,25 @@ function Board({ character, listings }: Props) {
       </Section>
 
       <Section title='Listings'>
-        <ItemTypeFilter
-          value={typeFilter}
-          onChange={setTypeFilter}
-          counts={countByType(listings.map((l) => l.item))}
-        />
-        <QualityFilter
-          value={qualityFilter}
-          onChange={setQualityFilter}
-          counts={countByQuality(listings.map((l) => l.item))}
-        />
-        <SortStrip value={sortBy} onChange={setSortBy} />
+        <div className='flex flex-wrap items-center gap-4 px-3 py-2 border-b-[2px] border-cream2 bg-cream2/40'>
+          <ItemTypeDropdown
+            value={typeFilter}
+            onChange={setTypeFilter}
+            counts={countByType(listings.map((l) => l.item))}
+          />
+          <QualityDropdown
+            value={qualityFilter}
+            onChange={setQualityFilter}
+            counts={countByQuality(listings.map((l) => l.item))}
+          />
+          <SortDropdown value={sortBy} onChange={setSortBy} />
+          <LevelRangeFilter
+            min={minLvl}
+            max={maxLvl}
+            onMinChange={setMinLvl}
+            onMaxChange={setMaxLvl}
+          />
+        </div>
         {filteredListings.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
             {listings.length === 0
@@ -320,16 +343,20 @@ function SellPanel({
 
   return (
     <div
-      className='flex flex-col gap-2 shrink-0 items-center'
-      style={{ width: '170px' }}
+      className='flex flex-col gap-3 shrink-0 items-center p-3 rounded-sm'
+      style={{
+        width: '220px',
+        background: '#cdb88a',
+        border: '2px solid #974342',
+      }}
     >
       <div
         ref={(node) => {
           drop(node);
         }}
         style={{
-          width: '140px',
-          height: '140px',
+          width: '180px',
+          height: '180px',
           background: slotBg,
           border: '2px solid #5c3a21',
           borderRadius: '4px',
@@ -350,8 +377,8 @@ function SellPanel({
                 imageId={picked.image}
                 alt={picked.name}
                 fill
-                sizes='140px'
-                style={{ objectFit: 'contain', padding: '8px' }}
+                sizes='180px'
+                style={{ objectFit: 'contain', padding: '10px' }}
               />
             </div>
           </ItemTooltip>
@@ -362,8 +389,8 @@ function SellPanel({
         )}
       </div>
 
-      <label className='text-xs font-semibold mt-1 self-start ml-[15px]'>Market price</label>
-      <div className='flex items-center gap-1 w-[140px]'>
+      <label className='text-xs font-semibold self-start'>Market price</label>
+      <div className='flex items-center gap-1 w-full'>
         <input
           type='number'
           min={1}
@@ -378,7 +405,7 @@ function SellPanel({
       <button
         onClick={onPlace}
         disabled={busy || !picked}
-        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-[140px]'
+        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-full'
       >
         Confirm
       </button>
@@ -414,8 +441,9 @@ function InventoryView({
     <div
       style={{
         background: '#5c3a21',
-        padding: '8px',
+        padding: '10px',
         borderRadius: '5px',
+        border: '2px solid #974342',
       }}
     >
       <div
@@ -423,7 +451,7 @@ function InventoryView({
           display: 'grid',
           gridTemplateColumns: `repeat(${BAG_COUNT}, 1fr)`,
           gap: '4px',
-          marginBottom: '6px',
+          marginBottom: '8px',
         }}
       >
         {Array.from({ length: BAG_COUNT }).map((_, i) => (
@@ -439,7 +467,7 @@ function InventoryView({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 48px)`,
+          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 52px)`,
           gap: '5px',
         }}
       >
@@ -451,8 +479,8 @@ function InventoryView({
                 key={`${x}-${y}`}
                 style={{
                   position: 'relative',
-                  width: '48px',
-                  height: '48px',
+                  width: '52px',
+                  height: '52px',
                   background: '#3e2714',
                   border: '1px solid #8b5a2b',
                   borderRadius: '2px',

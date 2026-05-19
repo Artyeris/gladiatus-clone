@@ -16,6 +16,7 @@ const Page = async () => {
       quests={data.quests}
       max={data.max}
       hasMoreToAccept={data.availableTemplateIds.length > 0}
+      nextQuestReadyAt={data.nextQuestReadyAt}
     />
   );
 };
