@@ -10,6 +10,23 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.9a',
+    date: '2026-05-19',
+    changes: [
+      'Health bar now displays the same maxHP the combat engine uses (calculateHP via combatBreakdown). The HealthTooltip math swapped to the real formula: level * 25 + endurance * 2 - 10 + item +HP affixes.',
+      'Level-range min/max inputs and Market price / Auction bid inputs share a new .fancy-input skin (Cinzel font, gilded gradient, gold focus ring) to match the dropdowns.',
+      'Quality dropdown options are now coloured per quality tier in the menu, and the selected value tints the closed select to the matching colour.',
+      'Auction sort dropdown gained Price asc / desc options, sorted by buyout price.',
+      'Diamond glyph: new inline SVG DiamondIcon used by the header chip and the shop Restock button so the gem looks like a real diamond instead of a square.',
+      'Shop Buy button shows the gold coin icon next to the price.',
+      'Auction row controls aligned: fixed-width Time text label, fancy bid input, 60px Bid button, 120px Buy out button so every row lines up.',
+      'Phase shown as a centred colour-coded text label (no chip background) matching the original Gladiatus listing style.',
+      'Packages: type-filter dropdown (All / Weapons / Helmets / ...) above the grid, and 12-items-per-page pagination.',
+      'Messages and Battle Reports paginated at 20 per page with First / Prev / Next / Last controls.',
+      'Version bumped to v0.19.9a.',
+    ],
+  },
+  {
     version: '0.19.9',
     date: '2026-05-19',
     changes: [

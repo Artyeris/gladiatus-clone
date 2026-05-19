@@ -98,6 +98,8 @@ const AuctionContent = ({ character, auctions }: Props) => {
     .sort((a, b) => {
       if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
       if (sortBy === 'levelDesc') return (b.item?.level ?? 0) - (a.item?.level ?? 0);
+      if (sortBy === 'priceAsc')  return (a.buyoutPrice ?? a.currentBid ?? 0) - (b.buyoutPrice ?? b.currentBid ?? 0);
+      if (sortBy === 'priceDesc') return (b.buyoutPrice ?? b.currentBid ?? 0) - (a.buyoutPrice ?? a.currentBid ?? 0);
       return 0;
     });
 
@@ -160,11 +162,7 @@ const AuctionContent = ({ character, auctions }: Props) => {
             onChange={setQualityFilter}
             counts={countByQuality(auctions.map((a) => a.item))}
           />
-          <SortDropdown
-            value={sortBy}
-            onChange={setSortBy}
-            allow={['default', 'levelAsc', 'levelDesc']}
-          />
+          <SortDropdown value={sortBy} onChange={setSortBy} />
           <LevelRangeFilter
             min={minLvl}
             max={maxLvl}
@@ -276,41 +274,44 @@ function AuctionRow({
         </span>
       </div>
 
+      {/* Right-hand controls: Time, Bid input, Bid button, Buy-out
+          button. Fixed column widths so every row lines up vertically
+          regardless of price digit count. Phase is rendered as a
+          centred text label (no chip background) so it reads like the
+          original Gladiatus auction list. */}
       <span
-        className='text-xs font-semibold shrink-0 px-2 py-[2px] rounded-sm'
-        style={{ background: PHASE_COLOR[auction.phase], color: '#fff' }}
+        className='text-xs font-semibold shrink-0 w-[80px] text-center tabular-nums'
+        style={{ color: PHASE_COLOR[auction.phase] }}
       >
         {auction.phase}
       </span>
 
-      <div className='flex items-center gap-1 shrink-0'>
-        <input
-          type='number'
-          min={minBid}
-          value={bid}
-          onChange={(e) => setBid(e.target.value)}
-          className='border border-brown2 px-2 py-1 rounded-sm w-20 bg-cream-card'
-        />
-        <button
-          onClick={() => onBid(auction._id, Number(bid))}
-          disabled={busy || Number(bid) < minBid || characterCrowns < Number(bid)}
-          className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50'
-        >
-          Bid
-        </button>
-        <button
-          onClick={() => onBuyout(auction._id)}
-          disabled={busy || characterCrowns < auction.buyoutPrice}
-          title={`Buy out for ${auction.buyoutPrice}`}
-          className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 flex items-center gap-1'
-        >
-          Buy out
-          <span className='font-normal text-xs flex items-center gap-1'>
-            ({auction.buyoutPrice}
-            <Image src='/images/crowns.png' width={10} height={10} alt='' />)
-          </span>
-        </button>
-      </div>
+      <input
+        type='number'
+        min={minBid}
+        value={bid}
+        onChange={(e) => setBid(e.target.value)}
+        className='fancy-input w-20 text-sm tabular-nums shrink-0'
+      />
+      <button
+        onClick={() => onBid(auction._id, Number(bid))}
+        disabled={busy || Number(bid) < minBid || characterCrowns < Number(bid)}
+        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-[60px] text-center shrink-0'
+      >
+        Bid
+      </button>
+      <button
+        onClick={() => onBuyout(auction._id)}
+        disabled={busy || characterCrowns < auction.buyoutPrice}
+        title={`Buy out for ${auction.buyoutPrice}`}
+        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 inline-flex items-center justify-center gap-1 w-[120px] shrink-0'
+      >
+        <span>Buy out</span>
+        <span className='font-normal text-xs flex items-center gap-1'>
+          ({auction.buyoutPrice}
+          <Image src='/images/crowns.png' width={10} height={10} alt='' style={{ width: 'auto', height: 'auto' }} />)
+        </span>
+      </button>
     </div>
   );
 }

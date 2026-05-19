@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
+import DiamondIcon from '@/components/shared/DiamondIcon';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { buyFromShop, forceRefreshShop } from '@/lib/actions/shop/shop.action';
 import { fullItemName, QUALITY_COLOR } from '@/lib/utils/itemUtils';
@@ -89,9 +90,9 @@ const ShopContent = ({ shop, character, title, tagline, refreshCost }: Props) =>
             type='button'
             onClick={onRefresh}
             disabled={busy}
-            className='general-button px-3 py-1 rounded-sm text-xs font-semibold w-fit hover:brightness-110 disabled:opacity-50 mt-1'
+            className='general-button px-3 py-1 rounded-sm text-xs font-semibold w-fit hover:brightness-110 disabled:opacity-50 mt-1 inline-flex items-center gap-1'
           >
-            Restock now ({refreshCost} ◆)
+            Restock now ({refreshCost} <DiamondIcon size={10} />)
           </button>
         </div>
       </div>
@@ -184,11 +185,12 @@ function ShopSlot({
         type='button'
         onClick={onBuy}
         disabled={disabled}
-        className={`general-button px-2 py-1 rounded-sm text-xs font-semibold w-full mt-auto shrink-0 ${
+        className={`general-button px-2 py-1 rounded-sm text-xs font-semibold w-full mt-auto shrink-0 inline-flex items-center justify-center gap-1 ${
           disabled ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-110'
         }`}
       >
-        Buy {slot.price}
+        <span>Buy {slot.price}</span>
+        <Image src='/images/crowns.png' width={12} height={12} alt='gold' style={{ width: 'auto', height: 'auto' }} />
       </button>
     </div>
   );

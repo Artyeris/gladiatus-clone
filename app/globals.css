@@ -248,6 +248,26 @@ body::-webkit-scrollbar {
   outline-offset: 0;
 }
 
+/* Sibling input style for the level-range and price/bid fields so the
+ * filter bars feel consistent with the dropdown chevrons. */
+.fancy-input {
+  font-family: var(--font-cinzel), 'Cinzel', 'Trajan Pro', serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background-image: linear-gradient(to bottom, #fbf2d6 0%, #e9d6a1 100%);
+  background-color: #eedfb8;
+  border: 1px solid #8b5a2b;
+  outline: 1px solid #eed7a1;
+  color: #5c2625;
+}
+.fancy-input::placeholder { color: #8b5a2b; opacity: 0.7; }
+.fancy-input:focus {
+  outline: 2px solid #e6b749;
+  outline-offset: 0;
+}
+
 html[data-theme="dark"] body {
   filter: brightness(0.78) saturate(0.82);
 }

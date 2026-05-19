@@ -2,6 +2,7 @@ import { calculatePower } from '@/lib/utils/characterUtils';
 import Image from 'next/image';
 import { Swords } from 'lucide-react';
 import ProgressBar from '@/components/arena/ProgressBar';
+import DiamondIcon from '@/components/shared/DiamondIcon';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { calculateNextLevelExperience, calculateProgressPercent } from '@/lib/utils';
 
@@ -50,11 +51,7 @@ function Stat({
   return (
     <div className='flex items-center gap-1 min-w-0' title={label}>
       {diamond ? (
-        <span
-          className='inline-block w-[10px] h-[10px] rounded-[1px] bg-[#7ad0ff] border border-[#3a8fb7] drop-shadow shrink-0'
-          aria-label='diamonds'
-          title='Diamonds'
-        />
+        <DiamondIcon size={11} title='Diamonds' className='shrink-0' />
       ) : power ? (
         <Swords className='w-3 h-3 shrink-0' aria-label='power' />
       ) : (

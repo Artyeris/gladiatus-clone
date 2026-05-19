@@ -397,7 +397,7 @@ function SellPanel({
           min={1}
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          className='border border-brown2 px-2 py-1 rounded-sm w-full bg-cream-card'
+          className='fancy-input w-full text-sm tabular-nums'
           placeholder='0'
         />
         <Image src='/images/crowns.png' width={14} height={14} alt='crowns' />

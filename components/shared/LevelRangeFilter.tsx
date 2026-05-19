@@ -16,7 +16,7 @@ const LevelRangeFilter = ({ min, max, onMinChange, onMaxChange }: Props) => (
       value={min}
       onChange={(e) => onMinChange(e.target.value)}
       placeholder='min'
-      className='border border-brown2 px-2 py-[2px] rounded-sm w-14 bg-cream-card tabular-nums'
+      className='fancy-input w-14 text-xs tabular-nums'
     />
     <span className='opacity-60'>-</span>
     <input
@@ -25,7 +25,7 @@ const LevelRangeFilter = ({ min, max, onMinChange, onMaxChange }: Props) => (
       value={max}
       onChange={(e) => onMaxChange(e.target.value)}
       placeholder='max'
-      className='border border-brown2 px-2 py-[2px] rounded-sm w-14 bg-cream-card tabular-nums'
+      className='fancy-input w-14 text-xs tabular-nums'
     />
     {(min !== '' || max !== '') && (
       <button

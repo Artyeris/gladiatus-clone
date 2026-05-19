@@ -43,15 +43,22 @@ const QualityDropdown = ({ value, onChange, counts }: Props) => {
         value={value}
         onChange={(e) => onChange(e.target.value as QualityFilterValue)}
         className='fancy-select text-xs'
-        style={{ color }}
+        style={{ color, fontWeight: 700 }}
       >
         {ORDER.map((opt) => {
           const count = opt === 'all'
             ? Object.values(counts ?? {}).reduce((s, n) => s + (n ?? 0), 0)
             : counts?.[opt] ?? 0;
           if (opt !== 'all' && counts && count === 0) return null;
+          const optColor = opt === 'all'
+            ? '#5c3a21'
+            : QUALITY_COLOR[opt as keyof typeof QUALITY_COLOR];
           return (
-            <option key={opt} value={opt}>
+            <option
+              key={opt}
+              value={opt}
+              style={{ color: optColor, fontWeight: 700, background: '#fbf2d6' }}
+            >
               {QUALITY_LABEL[opt]}{counts ? ` (${count})` : ''}
             </option>
           );

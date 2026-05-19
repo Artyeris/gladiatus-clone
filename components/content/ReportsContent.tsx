@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import type { ReportRow, ReportCategory } from '@/lib/types/battleReport';
@@ -58,16 +58,31 @@ const ReportsContent = ({ reports }: Props) => {
     router.refresh();
   };
 
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState(0);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pageRows = useMemo(
+    () => filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE),
+    [filtered, safePage],
+  );
+
+  // Reset to page 1 when the tab or filter shrinks the count below the
+  // current page, or when the active tab changes.
+  useEffect(() => { setPage(0); }, [tab]);
+  useEffect(() => { if (page > pageCount - 1) setPage(0); }, [pageCount, page]);
+
   const grouped = useMemo(() => {
     const out = new Map<string, ReportRow[]>();
-    for (const row of filtered) {
+    for (const row of pageRows) {
       const k = dayKey(row.createdAt);
       const list = out.get(k) ?? [];
       list.push(row);
       out.set(k, list);
     }
     return Array.from(out.entries());
-  }, [filtered]);
+  }, [pageRows]);
 
   return (
     <div className='px-6 flex flex-col gap-3 text-brown2'>
@@ -151,6 +166,20 @@ const ReportsContent = ({ reports }: Props) => {
             </div>
           );
         })}
+        {pageCount > 1 && (
+          <div className='flex items-center justify-between gap-2 px-3 py-2 border-t-[2px] border-cream2 text-xs'>
+            <span className='opacity-80'>
+              Page <strong>{safePage + 1}</strong> of <strong>{pageCount}</strong>
+              {' '}&middot; {filtered.length} reports
+            </span>
+            <div className='flex gap-1'>
+              <button type='button' onClick={() => setPage(0)}                                disabled={safePage === 0}              className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'>« First</button>
+              <button type='button' onClick={() => setPage((p) => Math.max(0, p-1))}          disabled={safePage === 0}              className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'>‹ Prev</button>
+              <button type='button' onClick={() => setPage((p) => Math.min(pageCount-1, p+1))} disabled={safePage >= pageCount-1}    className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'>Next ›</button>
+              <button type='button' onClick={() => setPage(pageCount - 1)}                    disabled={safePage >= pageCount-1}    className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'>Last »</button>
+            </div>
+          </div>
+        )}
       </div>
 
       {filtered.length > 0 && (

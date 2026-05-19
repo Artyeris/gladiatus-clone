@@ -3,6 +3,7 @@ import Image from 'next/image';
 import StatBar from '@/components/shared/StatBar';
 import CombatRows from '@/components/overview/CombatRows';
 import HealthTooltip from '@/components/shared/HealthTooltip';
+import { combatBreakdown } from '@/lib/utils/combatBreakdown';
 import { stats } from '@/constants';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { calculateNextLevelExperience } from '@/lib/utils';
@@ -26,7 +27,11 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
   const gender = user.gender || 'male';
   const avatarUrl = `/characters/${gender}/character-lvl-${avatarLevelBucket(level)}.jpg`;
 
-  const maxHealth = (user.endurance || 5) * 10 + level * 5;
+  // Use the same HP formula combat itself uses: calculateHP() folds
+  // effective endurance (base + item bonuses) and the level multiplier,
+  // and combatBreakdown adds +HP affixes from weapons / armour. The
+  // HealthTooltip below explains where the number comes from.
+  const maxHealth = combatBreakdown(user).maxHP;
   const currentHealth = (user as any).health || maxHealth;
   const healthPercent = Math.min((currentHealth / maxHealth) * 100, 100);
 

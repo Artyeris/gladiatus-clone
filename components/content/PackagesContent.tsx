@@ -1,11 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import ItemImage from '@/components/shared/ItemImage';
 import ItemTooltip from '@/components/overview/ItemTooltip';
+import ItemTypeDropdown from '@/components/shared/ItemTypeDropdown';
+import {
+  countByType,
+  matchesType,
+  type ItemTypeFilterValue,
+} from '@/components/shared/ItemTypeFilter';
 import {
   claimPackage,
   discardPackage,
@@ -39,10 +45,24 @@ const SOURCE_COLOR: Record<NonNullable<PackageView['source']>, string> = {
   other: '#888',
 };
 
+const PAGE_SIZE = 12;
+
 const PackagesContent = ({ initialPackages }: Props) => {
   const router = useRouter();
   const [packages, setPackages] = useState(initialPackages);
   const [busy, setBusy] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
+  const [page, setPage] = useState(0);
+
+  const filtered = packages.filter((p) => matchesType(p.item, typeFilter));
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pageItems = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+
+  // Reset page when the filter shrinks the list past the current page.
+  useEffect(() => {
+    if (page > pageCount - 1) setPage(0);
+  }, [pageCount, page]);
 
   const onClaim = async (id: string) => {
     setBusy(true);
@@ -80,8 +100,17 @@ const PackagesContent = ({ initialPackages }: Props) => {
       </Section>
 
       <Section title='Contents'>
-        {packages.length === 0 ? (
-          <div className='px-3 py-3 italic opacity-80 text-sm'>No packages waiting.</div>
+        <div className='flex flex-wrap items-center gap-4 px-3 py-2 border-b-[2px] border-cream2 bg-cream2/40'>
+          <ItemTypeDropdown
+            value={typeFilter}
+            onChange={setTypeFilter}
+            counts={countByType(packages.map((p) => p.item))}
+          />
+        </div>
+        {filtered.length === 0 ? (
+          <div className='px-3 py-3 italic opacity-80 text-sm'>
+            {packages.length === 0 ? 'No packages waiting.' : 'No packages match the filter.'}
+          </div>
         ) : (
           <div
             style={{
@@ -91,7 +120,7 @@ const PackagesContent = ({ initialPackages }: Props) => {
               padding: '10px',
             }}
           >
-            {packages.map((p) => (
+            {pageItems.map((p) => (
               <PackageTile
                 key={p._id}
                 pkg={p}
@@ -100,6 +129,20 @@ const PackagesContent = ({ initialPackages }: Props) => {
                 onDiscard={() => onDiscard(p._id)}
               />
             ))}
+          </div>
+        )}
+        {pageCount > 1 && (
+          <div className='flex items-center justify-between gap-2 px-3 py-2 border-t-[2px] border-cream2 text-xs'>
+            <span className='opacity-80'>
+              Page <strong>{safePage + 1}</strong> of <strong>{pageCount}</strong>
+              {' '}&middot; {filtered.length} packages
+            </span>
+            <div className='flex gap-1'>
+              <PageButton onClick={() => setPage(0)}                       disabled={safePage === 0}>« First</PageButton>
+              <PageButton onClick={() => setPage((p) => Math.max(0, p-1))} disabled={safePage === 0}>‹ Prev</PageButton>
+              <PageButton onClick={() => setPage((p) => Math.min(pageCount-1, p+1))} disabled={safePage >= pageCount-1}>Next ›</PageButton>
+              <PageButton onClick={() => setPage(pageCount - 1)}            disabled={safePage >= pageCount-1}>Last »</PageButton>
+            </div>
           </div>
         )}
       </Section>
@@ -115,6 +158,25 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <div className='red-card text-cream2 font-semibold text-sm px-3 py-1'>{title}</div>
       <div className='flex flex-col'>{children}</div>
     </div>
+  );
+}
+
+function PageButton({
+  onClick, disabled, children,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type='button'
+      onClick={onClick}
+      disabled={disabled}
+      className='general-button px-2 py-[2px] rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-40'
+    >
+      {children}
+    </button>
   );
 }
 
