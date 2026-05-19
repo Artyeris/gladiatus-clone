@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import StatBar from '@/components/shared/StatBar';
 import CombatRows from '@/components/overview/CombatRows';
+import HealthTooltip from '@/components/shared/HealthTooltip';
 import { stats } from '@/constants';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { calculateNextLevelExperience } from '@/lib/utils';
@@ -55,18 +56,20 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
         <span className='text-red3'>{level}</span>
       </div>
 
-      <div className='w-full'>
-        <div className='flex justify-between text-xs font-semibold mb-1'>
-          <span>Health</span>
-          <span>{currentHealth} / {maxHealth}</span>
+      <HealthTooltip character={user}>
+        <div className='w-full cursor-help'>
+          <div className='flex justify-between text-xs font-semibold mb-1'>
+            <span>Health</span>
+            <span>{currentHealth} / {maxHealth}</span>
+          </div>
+          <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
+            <div
+              className='absolute top-0 left-0 h-full'
+              style={{ width: `${healthPercent}%`, backgroundColor: '#a32626' }}
+            />
+          </div>
         </div>
-        <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
-          <div
-            className='absolute top-0 left-0 h-full'
-            style={{ width: `${healthPercent}%`, backgroundColor: '#a32626' }}
-          />
-        </div>
-      </div>
+      </HealthTooltip>
 
       <div className='w-full'>
         <div className='flex justify-between text-xs font-semibold mb-1'>

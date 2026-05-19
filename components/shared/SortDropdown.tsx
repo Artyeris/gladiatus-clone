@@ -25,7 +25,7 @@ const SortDropdown = ({ value, onChange, allow }: Props) => {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as SortMode)}
-        className='border border-brown2 px-2 py-[2px] rounded-sm bg-cream-card font-semibold'
+        className='fancy-select text-xs'
       >
         {options.map((opt) => (
           <option key={opt} value={opt}>{LABELS[opt]}</option>

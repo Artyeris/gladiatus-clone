@@ -218,6 +218,36 @@ body::-webkit-scrollbar {
  * script, so a refresh doesn't flash the default skin.
  */
 
+/* Fancier filter dropdowns used by Auction / Market filter bars.
+ * Custom chevron, gilded border and a Cinzel-flavoured font keep the
+ * selects in line with the rest of the Gladiatus chrome. */
+.fancy-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-family: var(--font-cinzel), 'Cinzel', 'Trajan Pro', serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 28px 4px 10px;
+  border-radius: 3px;
+  background-color: #eedfb8;
+  background-image: linear-gradient(to bottom, #eedfb8 0%, #d4bf85 100%),
+                    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3 L5 7 L9 3 Z' fill='%23974342'/></svg>");
+  background-repeat: no-repeat;
+  background-position: left, right 8px center;
+  background-size: 100% 100%, 10px 10px;
+  border: 1px solid #8b5a2b;
+  outline: 1px solid #eed7a1;
+  color: #5c2625;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+.fancy-select:hover { filter: brightness(1.05); }
+.fancy-select:focus {
+  outline: 2px solid #e6b749;
+  outline-offset: 0;
+}
+
 html[data-theme="dark"] body {
   filter: brightness(0.78) saturate(0.82);
 }

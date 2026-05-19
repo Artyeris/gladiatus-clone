@@ -43,9 +43,9 @@ const EnemyCard = ({ enemy, expedition, canFight }: EnemyCardProps) => {
               />
             </HoverCardTrigger>
             <HoverCardContent
-              side='right'
-              align='start'
-              sideOffset={6}
+              side='top'
+              align='center'
+              sideOffset={8}
               className='z-[9999] w-auto p-0 border-none shadow-md'
             >
               <div className='red-card flex flex-col min-w-[210px] px-3 py-2 text-cream2 text-xs gap-[3px]'>

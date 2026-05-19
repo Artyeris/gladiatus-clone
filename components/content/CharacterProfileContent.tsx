@@ -21,6 +21,7 @@ import {
 import CombatRows from '@/components/overview/CombatRows';
 import StatBar from '@/components/shared/StatBar';
 import PowerTooltip from '@/components/shared/PowerTooltip';
+import HealthTooltip from '@/components/shared/HealthTooltip';
 
 interface Props {
   character: CharacterInterface;
@@ -96,15 +97,17 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
             <span className='text-red3'>{level}</span>
           </div>
 
-          <div className='w-full'>
-            <div className='flex justify-between text-xs font-semibold mb-1'>
-              <span>Health</span>
-              <span>{maxHp} / {maxHp}</span>
+          <HealthTooltip character={character}>
+            <div className='w-full cursor-help'>
+              <div className='flex justify-between text-xs font-semibold mb-1'>
+                <span>Health</span>
+                <span>{maxHp} / {maxHp}</span>
+              </div>
+              <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
+                <div className='absolute top-0 left-0 h-full w-full' style={{ backgroundColor: '#a32626' }} />
+              </div>
             </div>
-            <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
-              <div className='absolute top-0 left-0 h-full w-full' style={{ backgroundColor: '#a32626' }} />
-            </div>
-          </div>
+          </HealthTooltip>
 
           <div className='w-full'>
             <div className='flex justify-between text-xs font-semibold mb-1'>
@@ -143,14 +146,6 @@ const CharacterProfileContent = ({ character, isMine }: Props) => {
 
           <div className='w-full'>
             <CombatRows user={character} />
-          </div>
-
-          <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
-            <PowerTooltip character={character}>
-              <div className='cursor-help'>
-                <Row label='Power' value={String(calculatePower(character))} last />
-              </div>
-            </PowerTooltip>
           </div>
         </div>
 

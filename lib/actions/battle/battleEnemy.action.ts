@@ -57,6 +57,12 @@ export async function battleEnemy({ expeditionName, enemyName }: BattleEnemyPara
 
     if (!canFight({ time: user.character.expeditionLastBattle, fight: 'expedition' })) return { error: { message: `Expedition cooldown didn't finished` } }
 
+    // You can't expedition while a shift is in progress -- finish or
+    // cancel the job at the workplaces first.
+    if ((user.character as any).currentWork) {
+      return { error: { message: 'You are at work right now. Claim or cancel your shift first.' } };
+    }
+
     const character = user.character;
 
     const journal = character.journal;

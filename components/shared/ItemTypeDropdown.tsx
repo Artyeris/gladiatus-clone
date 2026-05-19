@@ -37,7 +37,7 @@ const ItemTypeDropdown = ({ value, onChange, counts }: Props) => {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as ItemTypeFilterValue)}
-        className='border border-brown2 px-2 py-[2px] rounded-sm bg-cream-card font-semibold'
+        className='fancy-select text-xs'
       >
         {TYPE_ORDER.map((opt) => {
           const count = opt === 'all'

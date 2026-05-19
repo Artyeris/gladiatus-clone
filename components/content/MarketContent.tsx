@@ -203,9 +203,10 @@ function Board({ character, listings }: Props) {
 
       <Section title='Sell'>
         {/* Sell panel (drop slot + price + Confirm) sits on the left;
-            inventory grid sits on the right. Both stretch to fill the
-            available row, with a generous gap between them. */}
-        <div className='flex gap-6 px-4 py-4 text-sm items-start justify-between'>
+            inventory grid sits on the right. Bottom padding is tight
+            so the section ends right at the bottom of the inventory
+            grid -- no dead brown strip below. */}
+        <div className='flex gap-6 px-4 pt-3 pb-2 text-sm items-start justify-between'>
           <SellPanel
             picked={pickedItem}
             price={price}

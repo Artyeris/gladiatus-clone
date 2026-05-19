@@ -54,8 +54,8 @@ const ShopContent = ({ shop, character, title, tagline, refreshCost }: Props) =>
   };
 
   const onRefresh = async () => {
-    if ((character.crowns ?? 0) < refreshCost) return toast.error(`Need ${refreshCost} gold`);
-    if (!confirm(`Restock for ${refreshCost} gold now?`)) return;
+    if (((character as any).diamonds ?? 0) < refreshCost) return toast.error(`Need ${refreshCost} diamond`);
+    if (!confirm(`Restock for ${refreshCost} diamond now?`)) return;
     setBusy(true);
     const res = await forceRefreshShop(shop.shopType);
     setBusy(false);
@@ -91,7 +91,7 @@ const ShopContent = ({ shop, character, title, tagline, refreshCost }: Props) =>
             disabled={busy}
             className='general-button px-3 py-1 rounded-sm text-xs font-semibold w-fit hover:brightness-110 disabled:opacity-50 mt-1'
           >
-            Restock now ({refreshCost} gold)
+            Restock now ({refreshCost} ◆)
           </button>
         </div>
       </div>

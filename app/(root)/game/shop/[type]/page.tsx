@@ -4,7 +4,7 @@ import ShopContent from '@/components/content/ShopContent';
 import { getShop } from '@/lib/actions/shop/shop.action';
 import { getUser } from '@/lib/actions/user/getUser.action';
 import {
-  SHOP_FORCE_REFRESH_COST,
+  SHOP_FORCE_REFRESH_COST_DIAMONDS,
   SHOP_LABELS,
   SHOP_TAGLINES,
   isShopType,
@@ -37,7 +37,7 @@ const Page = async ({ params }: Props) => {
       character={user.character}
       title={SHOP_LABELS[params.type]}
       tagline={SHOP_TAGLINES[params.type]}
-      refreshCost={SHOP_FORCE_REFRESH_COST}
+      refreshCost={SHOP_FORCE_REFRESH_COST_DIAMONDS}
     />
   );
 };

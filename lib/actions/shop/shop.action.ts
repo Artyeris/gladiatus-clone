@@ -16,7 +16,7 @@ import type { ShopSlotView, ShopView } from '@/lib/types/shop';
 import {
   BUY_PRICE_MULTIPLIER,
   SHOP_CATEGORIES,
-  SHOP_FORCE_REFRESH_COST,
+  SHOP_FORCE_REFRESH_COST_DIAMONDS,
   SHOP_REFRESH_INTERVAL_MS,
   SHOP_SLOTS,
   ShopType,
@@ -200,15 +200,15 @@ export async function buyFromShop({
   }
 }
 
-// Force-refresh a shop. Costs SHOP_FORCE_REFRESH_COST crowns --
-// matches Gladiatus's "new goods" button.
+// Force-refresh a shop. Costs SHOP_FORCE_REFRESH_COST_DIAMONDS
+// premium currency -- the original game's "new goods" button.
 export async function forceRefreshShop(shopType: string) {
   if (!isShopType(shopType)) return { error: { message: 'Unknown shop' } };
   const character = await getMyCharacter();
   if (!character) return { error: { message: 'Not authenticated' } };
 
-  if ((character.crowns ?? 0) < SHOP_FORCE_REFRESH_COST) {
-    return { error: { message: `Refreshing costs ${SHOP_FORCE_REFRESH_COST} crowns` } };
+  if ((character.diamonds ?? 0) < SHOP_FORCE_REFRESH_COST_DIAMONDS) {
+    return { error: { message: `Refreshing costs ${SHOP_FORCE_REFRESH_COST_DIAMONDS} diamond` } };
   }
 
   try {
@@ -216,7 +216,7 @@ export async function forceRefreshShop(shopType: string) {
     let shop = await Shop.findOne({ shopType });
     if (!shop) shop = await Shop.create({ shopType, slots: [], lastRefreshAt: new Date(0) });
     await regenerateSlots(shop, character.level ?? 1);
-    character.crowns = (character.crowns ?? 0) - SHOP_FORCE_REFRESH_COST;
+    character.diamonds = (character.diamonds ?? 0) - SHOP_FORCE_REFRESH_COST_DIAMONDS;
     await character.save();
     revalidatePath(`/game/shop/${shopType}`);
     return { ok: true };

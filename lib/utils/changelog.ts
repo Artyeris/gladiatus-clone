@@ -10,6 +10,23 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.9',
+    date: '2026-05-19',
+    changes: [
+      'Market Sell row trimmed (px-4 / pt-3 / pb-2) so the section ends right at the bottom of the inventory grid -- no empty brown strip below.',
+      'Health bar hover now opens a tooltip with the full breakdown: base endurance x 10, item endurance x 10, level x 5, and any +HP affixes from weapon / armour.',
+      'Training toasts coalesce rapid clicks into one fancy red-card toast with an "x N" streak counter (resets after ~1.8s of idle).',
+      'Other-player profile no longer shows Power twice; the standalone Power row was a duplicate of CombatRows\\\' built-in Power.',
+      'Auction / Market filter dropdowns restyled with a gilded fancy-select skin (Cinzel font, custom red chevron, gold focus ring).',
+      'Restock-shop now costs 1 Diamond instead of gold (SHOP_FORCE_REFRESH_COST_DIAMONDS).',
+      'Expedition enemy tooltip anchored above the card (side=top) so it no longer collides with the next enemy on the row.',
+      'GameHeaderStats reshaped to a 2-column grid: Gold over Honor on the left, Diamonds over Power on the right; Level rides the XP bar on row 3.',
+      'Cannot expedition or arena while a work shift is in progress -- claim or cancel the job first.',
+      'Arena gold threshold tightened to atk - def < 6 so attacking exactly 5 levels below still pays out (matches the stated "5 levels lower => no gold" rule).',
+      '"crowns" labels swapped to "gold" in remaining quest claim / auction outbid / buyout error messages.',
+    ],
+  },
+  {
     version: '0.19.8',
     date: '2026-05-19',
     changes: [

@@ -188,7 +188,7 @@ export async function placeAuctionBid({
           String(previous._id),
           'auction',
           'Your bid was raised.',
-          `Someone outbid you on an auction. Your previous bid of ${auction.currentBid} crowns has been refunded.`,
+          `Someone outbid you on an auction. Your previous bid of ${auction.currentBid} gold has been refunded.`,
         );
       }
     } else if (auction.highestBidder && String(auction.highestBidder) === String(bidder._id)) {
@@ -228,7 +228,7 @@ export async function buyoutAuctionAction({ auctionId }: { auctionId: string }) 
       return { error: { message: 'Auction already ended' } };
     }
     if ((buyer.crowns ?? 0) < auction.buyoutPrice) {
-      return { error: { message: 'Not enough crowns to buy out' } };
+      return { error: { message: 'Not enough gold to buy out' } };
     }
 
     const item = await Item.findById(auction.item);

@@ -42,7 +42,7 @@ const QualityDropdown = ({ value, onChange, counts }: Props) => {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as QualityFilterValue)}
-        className='border border-brown2 px-2 py-[2px] rounded-sm bg-cream-card font-semibold'
+        className='fancy-select text-xs'
         style={{ color }}
       >
         {ORDER.map((opt) => {

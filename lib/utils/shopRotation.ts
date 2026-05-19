@@ -34,7 +34,8 @@ export const SHOP_SLOTS = 12;
 // Buy price is sellPrice * 3 (Gladiatus markup roughly matches).
 export const BUY_PRICE_MULTIPLIER = 3;
 // Re-stock NOW button costs this many crowns each time.
-export const SHOP_FORCE_REFRESH_COST = 100;
+// Restock now is a premium-currency action: 1 diamond per refresh.
+export const SHOP_FORCE_REFRESH_COST_DIAMONDS = 1;
 
 export function isShopType(value: unknown): value is ShopType {
   return typeof value === 'string' && (SHOP_TYPES as string[]).includes(value);

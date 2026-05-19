@@ -180,7 +180,7 @@ export async function claimQuest({ id }: { id: string }) {
         String(character._id),
         'system',
         `Quest reward: ${quest.title}`,
-        `You claimed +${gold} crowns and +${exp} XP for completing "${quest.title}".`
+        `You claimed +${gold} gold and +${exp} XP for completing "${quest.title}".`
           + (leveledUp ? `\n\nYou levelled up to ${character.level}!` : ''),
       );
     } catch {}

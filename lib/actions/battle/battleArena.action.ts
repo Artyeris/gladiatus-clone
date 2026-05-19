@@ -41,6 +41,11 @@ export async function battleArena(defenderId: string) {
 
     if (!canFight({ time: user.character.arenaLastBattle, fight: 'arena' })) return { error: { message: `Arena cooldown didn't finished` } }
 
+    // No arena fights during a work shift.
+    if ((user.character as any).currentWork) {
+      return { error: { message: 'You are at work right now. Claim or cancel your shift first.' } };
+    }
+
     const attacker = user.character;
 
     if (attacker._id == defenderId) throw new Error(`Can't fight the same character`);
@@ -121,18 +126,20 @@ export async function battleArena(defenderId: string) {
 
       // Arena gold reward. Roughly 20 * defender_level + 50 to keep
       // it modest compared to expedition gold. Under level 100 we
-      // suppress the reward when the attacker is at least 5 levels
-      // above the defender so farming weaker rivals stops paying;
-      // at 100+ the cap no longer applies.
+      // suppress the reward when the defender is more than 5 levels
+      // below the attacker (i.e. atk - def >= 6 -- attacking someone
+      // 5 levels below still pays out, 6+ does not). At level 100+
+      // the cap no longer applies.
       const atkLvl = attacker.level ?? 1;
       const defLvl = defender.level ?? 1;
-      const eligibleForGold = atkLvl >= 100 || (atkLvl - defLvl) < 5;
+      const eligibleForGold = atkLvl >= 100 || (atkLvl - defLvl) < 6;
+      // Initialise the field so a subsequent UI check on
+      // crownsDrop never trips on undefined.
+      (battleReport.result as any).crownsDrop = 0;
       if (eligibleForGold) {
         const gold = Math.max(1, 20 * defLvl + 50);
         attacker.crowns = (attacker.crowns ?? 0) + gold;
         (battleReport.result as any).crownsDrop = gold;
-      } else {
-        (battleReport.result as any).crownsDrop = 0;
       }
 
       // Rank takeover: if the attacker ranked below the defender on the
