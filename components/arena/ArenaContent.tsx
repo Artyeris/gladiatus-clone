@@ -146,7 +146,7 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaConten
                     {rival.isBot && <span className='ml-1 text-[10px] opacity-70 italic'>NPC</span>}
                   </div>
                   <div className='w-[70px] flex justify-center'>
-                    {!isMe ? (
+                    {!isMe && (
                       <Image
                         src={`/images/fight.png`}
                         width={62}
@@ -156,8 +156,6 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaConten
                         onClick={canCharacterFight ? () => handleClick(rival._id) : () => {}}
                         className={canCharacterFight ? 'hover:brightness-110' : 'grayscale'}
                       />
-                    ) : (
-                      <span className='text-xs opacity-60 italic'>you</span>
                     )}
                   </div>
                 </div>

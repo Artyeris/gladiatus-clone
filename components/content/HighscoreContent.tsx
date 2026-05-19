@@ -55,16 +55,30 @@ const HighscoreContent = ({ highscore, currentCharacterId }: Props) => {
           <TableRow>
             <TableHead className='text-brown2 font-semibold'>Rank</TableHead>
             <TableHead className='text-brown2 font-semibold'>Name</TableHead>
-            <TableHead className='text-brown2 font-semibold'>Level</TableHead>
-            <TableHead className='text-brown2 font-semibold'>Honor</TableHead>
-            {showWeeklyColumn && (
-              <TableHead className='text-brown2 font-semibold'>Wins (7d)</TableHead>
+            {showWeeklyColumn ? (
+              <>
+                <TableHead className='text-brown2 font-semibold'>Levels gained</TableHead>
+                <TableHead className='text-brown2 font-semibold'>Honor gained</TableHead>
+                <TableHead className='text-brown2 font-semibold'>Wins (7d)</TableHead>
+              </>
+            ) : (
+              <>
+                <TableHead className='text-brown2 font-semibold'>Level</TableHead>
+                <TableHead className='text-brown2 font-semibold'>Honor</TableHead>
+              </>
             )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {(characters as CharacterInterface[]).map((character, index) => {
             const isMe = myId !== '' && String(character._id) === myId;
+            const c = character as any;
+            const levelDelta = showWeeklyColumn
+              ? Math.max(0, (c.level ?? 1) - (c.weekStartLevel ?? c.level ?? 1))
+              : 0;
+            const honorDelta = showWeeklyColumn
+              ? (c.honor ?? 0) - (c.weekStartHonor ?? c.honor ?? 0)
+              : 0;
             return (
             <TableRow
               key={character._id}
@@ -82,12 +96,23 @@ const HighscoreContent = ({ highscore, currentCharacterId }: Props) => {
                   <span className='ml-1 text-[10px] opacity-70 italic text-brown2'>NPC</span>
                 )}
               </TableCell>
-              <TableCell className='py-2 text-brown2 font-medium'>{character.level}</TableCell>
-              <TableCell className='py-2 text-brown2 font-medium'>{character.honor}</TableCell>
-              {showWeeklyColumn && (
-                <TableCell className='py-2 text-brown2 font-medium'>
-                  {(character as any).weeklyWins ?? 0}
-                </TableCell>
+              {showWeeklyColumn ? (
+                <>
+                  <TableCell className='py-2 text-brown2 font-medium tabular-nums'>
+                    {levelDelta > 0 ? `+${levelDelta}` : '0'}
+                  </TableCell>
+                  <TableCell className='py-2 text-brown2 font-medium tabular-nums'>
+                    {honorDelta > 0 ? `+${honorDelta}` : honorDelta < 0 ? String(honorDelta) : '0'}
+                  </TableCell>
+                  <TableCell className='py-2 text-brown2 font-medium tabular-nums'>
+                    {c.weeklyWins ?? 0}
+                  </TableCell>
+                </>
+              ) : (
+                <>
+                  <TableCell className='py-2 text-brown2 font-medium'>{character.level}</TableCell>
+                  <TableCell className='py-2 text-brown2 font-medium'>{character.honor}</TableCell>
+                </>
               )}
             </TableRow>
             );

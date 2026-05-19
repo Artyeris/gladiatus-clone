@@ -100,6 +100,11 @@ const characterSchema = new mongoose.Schema({
   // the first win after `weekStartedAt + 7 days` lands.
   weeklyWins: { type: Number, default: 0 },
   weekStartedAt: { type: Date, default: () => new Date() },
+  // Snapshots captured at the start of each weekly window so the
+  // 7-day highscore can show "level gained" and "honor gained"
+  // instead of raw values.
+  weekStartLevel: { type: Number, default: 1 },
+  weekStartHonor: { type: Number, default: 1000 },
 
   // Lifetime activity counters used by the Victories tab.
   workCount:  { type: Number, default: 0 },
@@ -110,6 +115,10 @@ const characterSchema = new mongoose.Schema({
   marketSells:   { type: Number, default: 0 },
   marketBuys:    { type: Number, default: 0 },
   auctionsWon:   { type: Number, default: 0 },
+  // Cooldown anchor for accepting a new quest. Set to "now" each
+  // time acceptRandomQuest succeeds; the next accept is gated by
+  // QUEST_TAKE_COOLDOWN_MS.
+  lastQuestTakenAt: { type: Date, default: null },
   // Per-stat train counters powering the Victories "Train X" tiers.
   trainCount: {
     strength:     { type: Number, default: 0 },

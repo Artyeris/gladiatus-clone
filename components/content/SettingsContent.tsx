@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import { updateLanguage } from '@/lib/actions/user/updateSettings.action';
 import {
+  devGrantDiamonds,
   devGrantGold,
   devResetTimers,
   devToggleGodMode,
@@ -98,12 +99,21 @@ const SettingsContent = ({ currentLanguage, godMode }: Props) => {
     router.refresh();
   };
 
+  const onGrantDiamonds = async (amount: number) => {
+    setDevBusy(true);
+    const res = await devGrantDiamonds({ amount });
+    setDevBusy(false);
+    if (res?.error) return toast.error(res.error.message);
+    toast.success(`+${amount} diamonds (now ${res.diamonds})`);
+    router.refresh();
+  };
+
   const onResetTimers = async () => {
     setDevBusy(true);
     const res = await devResetTimers();
     setDevBusy(false);
     if (res?.error) return toast.error(res.error.message);
-    toast.success('Expedition & arena timers reset');
+    toast.success('Expedition, arena & quest timers reset');
     router.refresh();
   };
 
@@ -221,9 +231,34 @@ const SettingsContent = ({ currentLanguage, godMode }: Props) => {
 
           <div className='flex items-center justify-between gap-2'>
             <div>
+              <div className='font-semibold'>Diamonds</div>
+              <div className='text-xs opacity-80'>Instantly credit premium diamonds.</div>
+            </div>
+            <div className='flex gap-1'>
+              <button
+                type='button'
+                onClick={() => onGrantDiamonds(10)}
+                disabled={devBusy}
+                className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+              >
+                Add 10
+              </button>
+              <button
+                type='button'
+                onClick={() => onGrantDiamonds(100)}
+                disabled={devBusy}
+                className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+              >
+                Add 100
+              </button>
+            </div>
+          </div>
+
+          <div className='flex items-center justify-between gap-2'>
+            <div>
               <div className='font-semibold'>Reset Timers</div>
               <div className='text-xs opacity-80'>
-                Skip expedition and arena cooldowns - fight immediately.
+                Skip expedition / arena / new-quest cooldowns.
               </div>
             </div>
             <button

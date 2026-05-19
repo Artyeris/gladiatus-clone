@@ -46,6 +46,15 @@ export async function devGrantGold({ amount = 100_000 }: { amount?: number } = {
   return { ok: true, crowns: character.crowns };
 }
 
+export async function devGrantDiamonds({ amount = 10 }: { amount?: number } = {}) {
+  const character = await getMyCharacter();
+  if (!character) return { error: { message: 'Not authenticated' } };
+  character.diamonds = (character.diamonds ?? 0) + Math.max(0, Math.floor(amount));
+  await character.save();
+  revalidatePath('/');
+  return { ok: true, diamonds: character.diamonds };
+}
+
 export async function devResetTimers() {
   const character = await getMyCharacter();
   if (!character) return { error: { message: 'Not authenticated' } };
@@ -53,6 +62,9 @@ export async function devResetTimers() {
   const longAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   character.expeditionLastBattle = longAgo;
   character.arenaLastBattle = longAgo;
+  // Also clear the new-quest cooldown so the player can grab another
+  // quest immediately when testing the cooldown flow.
+  character.lastQuestTakenAt = null;
   await character.save();
   revalidatePath('/');
   return { ok: true };

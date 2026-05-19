@@ -10,6 +10,23 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.6',
+    date: '2026-05-19',
+    changes: [
+      'Landing page rebuilt: fancy Cinzel "Gladiatus" logo, refreshed welcome copy, new tech-stack card (Next.js / React / TypeScript / MongoDB / Tailwind / Radix / shadcn / react-dnd / Lucide / Cinzel).',
+      'GitHub icon removed from the landing navbar.',
+      'Change log paginated -- 15 entries per page with First / Prev / Next / Last links.',
+      'Auction: level-range filter (min / max) below the type / quality / sort strips.',
+      'Arena ranking no longer prints "you" beside the current player\'s row.',
+      'Work shift footer drops the "~ N real min" hint now that the server runs at 1x.',
+      'New-quest cooldown: 10 minutes between accepting random quests.',
+      'Settings dev options gain "Add 10" / "Add 100" diamond buttons.',
+      'Dev Reset Timers also clears the new-quest cooldown.',
+      '7-day highscore now shows Levels gained / Honor gained alongside Wins; weekly snapshots captured at the start of each week.',
+      'Market Sell row centred and shrunk: 140x140 drop slot with 140px price/Confirm column, drop-here panel sits beside the inventory grid in a balanced layout.',
+    ],
+  },
+  {
     version: '0.19.5',
     date: '2026-05-18',
     changes: [

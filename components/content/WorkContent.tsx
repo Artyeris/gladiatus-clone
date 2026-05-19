@@ -287,7 +287,6 @@ function StartShiftFooter({
           {totalGold}
           <Image src='/images/crowns.png' width={12} height={12} alt='' />
         </div>
-        <div className='opacity-70'>~ {Math.round(realMins)} real min</div>
       </div>
       <button
         onClick={onStart}

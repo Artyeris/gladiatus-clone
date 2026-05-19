@@ -112,6 +112,10 @@ export async function battleArena(defenderId: string) {
       if (since >= WEEK_MS) {
         attacker.weekStartedAt = new Date();
         attacker.weeklyWins = 0;
+        // Snapshot the current level / honor so the 7-day highscore
+        // can render the delta accumulated during this new window.
+        attacker.weekStartLevel = attacker.level ?? 1;
+        attacker.weekStartHonor = attacker.honor ?? 0;
       }
       attacker.weeklyWins = (attacker.weeklyWins ?? 0) + 1;
 

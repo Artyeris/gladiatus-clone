@@ -75,9 +75,21 @@ const AuctionContent = ({ character, auctions }: Props) => {
   const [typeFilter, setTypeFilter] = useState<ItemTypeFilterValue>('all');
   const [qualityFilter, setQualityFilter] = useState<QualityFilterValue>('all');
   const [sortBy, setSortBy] = useState<SortMode>('default');
+  const [minLvl, setMinLvl] = useState<string>('');
+  const [maxLvl, setMaxLvl] = useState<string>('');
+
+  const minLvlNum = minLvl === '' ? null : Number(minLvl);
+  const maxLvlNum = maxLvl === '' ? null : Number(maxLvl);
 
   const filteredAuctions = auctions
-    .filter((a) => matchesType(a.item, typeFilter) && matchesQuality(a.item, qualityFilter))
+    .filter((a) => {
+      if (!matchesType(a.item, typeFilter)) return false;
+      if (!matchesQuality(a.item, qualityFilter)) return false;
+      const lvl = a.item?.level ?? 0;
+      if (minLvlNum != null && Number.isFinite(minLvlNum) && lvl < minLvlNum) return false;
+      if (maxLvlNum != null && Number.isFinite(maxLvlNum) && lvl > maxLvlNum) return false;
+      return true;
+    })
     .slice()
     .sort((a, b) => {
       if (sortBy === 'levelAsc')  return (a.item?.level ?? 0) - (b.item?.level ?? 0);
@@ -144,6 +156,35 @@ const AuctionContent = ({ character, auctions }: Props) => {
           counts={countByQuality(auctions.map((a) => a.item))}
         />
         <SortStrip value={sortBy} onChange={setSortBy} />
+        <div className='flex flex-wrap items-center gap-2 px-2 py-2 border-b-[2px] border-cream2 bg-cream2/40 text-xs'>
+          <span className='font-semibold opacity-80'>Level range:</span>
+          <input
+            type='number'
+            min={1}
+            value={minLvl}
+            onChange={(e) => setMinLvl(e.target.value)}
+            placeholder='min'
+            className='border border-brown2 px-2 py-[2px] rounded-sm w-16 bg-cream-card tabular-nums'
+          />
+          <span className='opacity-60'>to</span>
+          <input
+            type='number'
+            min={1}
+            value={maxLvl}
+            onChange={(e) => setMaxLvl(e.target.value)}
+            placeholder='max'
+            className='border border-brown2 px-2 py-[2px] rounded-sm w-16 bg-cream-card tabular-nums'
+          />
+          {(minLvl !== '' || maxLvl !== '') && (
+            <button
+              type='button'
+              onClick={() => { setMinLvl(''); setMaxLvl(''); }}
+              className='ml-1 text-xs font-semibold underline text-red3'
+            >
+              clear
+            </button>
+          )}
+        </div>
         {filteredAuctions.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
             {auctions.length === 0

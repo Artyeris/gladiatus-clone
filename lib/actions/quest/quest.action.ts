@@ -72,6 +72,10 @@ export async function listMyQuests(): Promise<{
 // Accept a random quest the character doesn't already have. Mirrors
 // the "New quest" button on the Gladiatus quests panel -- the player
 // can't cherry-pick which one drops.
+// Cooldown between accepting quests. Prevents spam-claim of the
+// best-reward templates back-to-back.
+export const QUEST_TAKE_COOLDOWN_MS = 10 * 60 * 1000;
+
 export async function acceptRandomQuest() {
   const character = await getMyCharacter();
   if (!character) return { error: { message: 'Not authenticated' } };
@@ -80,6 +84,16 @@ export async function acceptRandomQuest() {
   const activeCount = await Quest.countDocuments({ owner: character._id });
   if (activeCount >= MAX_ACTIVE_QUESTS) {
     return { error: { message: `Already at the ${MAX_ACTIVE_QUESTS}-quest limit` } };
+  }
+
+  // Cooldown check.
+  const last = (character as any).lastQuestTakenAt
+    ? new Date((character as any).lastQuestTakenAt).getTime()
+    : 0;
+  const remainingMs = Math.max(0, QUEST_TAKE_COOLDOWN_MS - (Date.now() - last));
+  if (remainingMs > 0) {
+    const mins = Math.ceil(remainingMs / 60_000);
+    return { error: { message: `Next quest available in ${mins} min` } };
   }
 
   const activeDocs = await Quest.find({ owner: character._id }, { templateId: 1 }).lean();
@@ -101,6 +115,8 @@ export async function acceptRandomQuest() {
       rewardGold: pick.rewardGold,
       rewardExp: pick.rewardExp,
     });
+    (character as any).lastQuestTakenAt = new Date();
+    await character.save();
     revalidatePath('/game/quests');
     return { ok: true, accepted: pick.title };
   } catch (err: any) {

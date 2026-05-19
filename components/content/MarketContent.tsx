@@ -186,11 +186,11 @@ function Board({ character, listings }: Props) {
       </Section>
 
       <Section title='Sell'>
-        {/* SellPanel is vertically aligned to the bottom of the row so
-            the price input and Confirm button sit lower (closer to the
-            inventory's last row), and the inventory is nudged right with
-            a wider left gap. */}
-        <div className='flex gap-6 px-4 py-3 text-sm items-end justify-between'>
+        {/* Sell panel sits to the left, drop-slot centred within its
+            column. Inventory grid sits next to it; the row is
+            justify-center so the whole pair is balanced inside the
+            slightly-narrower Sell box. */}
+        <div className='flex gap-4 px-3 py-3 text-sm items-center justify-center'>
           <SellPanel
             picked={pickedItem}
             price={price}
@@ -199,9 +199,7 @@ function Board({ character, listings }: Props) {
             onClear={() => setPickedItem(null)}
             busy={busy}
           />
-          <div className='ml-6'>
-            <InventoryView entries={entries} pickedItemId={pickedItem?._id} onPick={onItemDropped} />
-          </div>
+          <InventoryView entries={entries} pickedItemId={pickedItem?._id} onPick={onItemDropped} />
         </div>
       </Section>
 
@@ -323,15 +321,15 @@ function SellPanel({
   return (
     <div
       className='flex flex-col gap-2 shrink-0 items-center'
-      style={{ width: '210px' }}
+      style={{ width: '170px' }}
     >
       <div
         ref={(node) => {
           drop(node);
         }}
         style={{
-          width: '160px',
-          height: '160px',
+          width: '140px',
+          height: '140px',
           background: slotBg,
           border: '2px solid #5c3a21',
           borderRadius: '4px',
@@ -352,7 +350,7 @@ function SellPanel({
                 imageId={picked.image}
                 alt={picked.name}
                 fill
-                sizes='160px'
+                sizes='140px'
                 style={{ objectFit: 'contain', padding: '8px' }}
               />
             </div>
@@ -364,8 +362,8 @@ function SellPanel({
         )}
       </div>
 
-      <label className='text-xs font-semibold mt-1 self-start ml-[25px]'>Market price</label>
-      <div className='flex items-center gap-1 w-[160px]'>
+      <label className='text-xs font-semibold mt-1 self-start ml-[15px]'>Market price</label>
+      <div className='flex items-center gap-1 w-[140px]'>
         <input
           type='number'
           min={1}
@@ -380,7 +378,7 @@ function SellPanel({
       <button
         onClick={onPlace}
         disabled={busy || !picked}
-        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-[160px]'
+        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-[140px]'
       >
         Confirm
       </button>
