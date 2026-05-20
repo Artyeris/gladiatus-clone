@@ -267,6 +267,18 @@ body::-webkit-scrollbar {
   outline: 2px solid #e6b749;
   outline-offset: 0;
 }
+/* Hide the browser-native up/down arrows on number inputs so the
+ * fancy filter fields read as a clean text box (the range is short
+ * enough that typing is faster than clicking). */
+.fancy-input[type='number']::-webkit-inner-spin-button,
+.fancy-input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.fancy-input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
 
 html[data-theme="dark"] body {
   filter: brightness(0.78) saturate(0.82);
