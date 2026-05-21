@@ -91,6 +91,15 @@ export async function getArenaRivals() {
         championName: pot.championName ?? null,
         growthPerHour: potGrowthPerHour(tier),
         salaryPerHour: championHourlyGold(tier),
+        // When does the next whole-hour salary become claimable?
+        // lastSalaryAt + 1 real hour. Falls back to championBecameAt
+        // for the very first claim. Used by the client to disable
+        // the Claim button until accrued.
+        nextSalaryAt: (() => {
+          const base = pot.lastSalaryAt ?? pot.championBecameAt;
+          if (!base) return null;
+          return new Date(new Date(base).getTime() + 60 * 60 * 1000).toISOString();
+        })(),
       },
     }));
   } catch (error) {

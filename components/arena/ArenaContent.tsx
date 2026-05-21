@@ -23,6 +23,7 @@ interface ArenaPotInfo {
   championName: string | null;
   growthPerHour: number;
   salaryPerHour: number;
+  nextSalaryAt: string | null;
 }
 
 interface ArenaContentProps {
@@ -41,12 +42,35 @@ interface ArenaContentProps {
   pot?: ArenaPotInfo;
 }
 
+// "MM:SS" countdown to the next whole-hour salary. Drops the hours
+// segment under an hour so the button text stays compact.
+function formatSalaryLeft(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaContentProps) => {
   const [canCharacterFight, setCanCharacterFight] = useState(canFight({ time: new Date(character.arenaLastBattle).getTime(), fight: 'arena' }));
   const router = useRouter();
 
   const isMyChampion = pot?.championId === String(character._id);
   const [claiming, setClaiming] = useState(false);
+
+  // Live countdown until the next whole-hour salary is claimable. The
+  // server passes nextSalaryAt; we tick locally so the button can show
+  // "Claim in M:SS" and stay disabled until the timer hits zero.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!isMyChampion || !pot?.nextSalaryAt) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [isMyChampion, pot?.nextSalaryAt]);
+
+  const salaryReadyAt = pot?.nextSalaryAt ? new Date(pot.nextSalaryAt).getTime() : 0;
+  const salaryMsLeft = Math.max(0, salaryReadyAt - now);
+  const salaryReady = salaryMsLeft <= 0;
 
   const onClaimSalary = async () => {
     setClaiming(true);
@@ -113,18 +137,26 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaConten
               <button
                 type='button'
                 onClick={onClaimSalary}
-                disabled={claiming}
+                disabled={claiming || !salaryReady}
                 className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50 mt-2 w-fit inline-flex items-center gap-1'
-                title='Claim accrued champion salary'
+                title={salaryReady
+                  ? 'Claim accrued champion salary'
+                  : `Next salary in ${formatSalaryLeft(salaryMsLeft)}`}
               >
-                <span>Claim salary</span>
-                <Image
-                  src='/images/crowns.png'
-                  width={12}
-                  height={12}
-                  alt='gold'
-                  style={{ width: 'auto', height: 'auto' }}
-                />
+                <span>
+                  {salaryReady
+                    ? 'Claim salary'
+                    : `Claim in ${formatSalaryLeft(salaryMsLeft)}`}
+                </span>
+                {salaryReady && (
+                  <Image
+                    src='/images/crowns.png'
+                    width={12}
+                    height={12}
+                    alt='gold'
+                    style={{ width: 'auto', height: 'auto' }}
+                  />
+                )}
               </button>
             )}
           </div>
