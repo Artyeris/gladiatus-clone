@@ -10,6 +10,15 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.9b',
+    date: '2026-05-19',
+    changes: [
+      'Landing page: top navbar removed; Log in / Sign Up now live as two CTAs at the bottom of the welcome card.',
+      'Navigation uses prefetched <Link>s instead of router.push, so clicking either button no longer waits for a fresh chunk fetch.',
+      'Landing page rendered as a pure server component (no useRouter / use client) so the initial HTML ships faster.',
+    ],
+  },
+  {
     version: '0.19.9a',
     date: '2026-05-19',
     changes: [

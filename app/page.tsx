@@ -1,17 +1,14 @@
-'use client'
-
 import DescriptionCard from '@/components/cards/DescriptionCard';
-import LandingNavbar from '@/components/shared/LandingNavbar';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+
+// Landing page is a pure server component now. The navbar has been
+// removed; Sign In / Sign Up live inside the cream card as two big
+// CTAs at the bottom, and the routes are <Link>s so Next prefetches
+// the auth pages -- no wait when the user actually clicks.
 
 export default function Home() {
-  const router = useRouter();
-
   return (
     <main>
-      <LandingNavbar />
       <div
         className='w-full flex justify-center min-h-screen bg-cover'
         style={{ backgroundImage: 'url("/images/landing-page-image.webp")' }}
@@ -92,13 +89,21 @@ export default function Home() {
               </div>
             </DescriptionCard>
 
-            <div>
-              <Button
-                onClick={() => router.push('/sign-in')}
-                className='general-button font-semibold hover:brightness-110 hover:bg-brown text-brown2 w-40'
+            <div className='flex flex-row gap-3 mt-2'>
+              <Link
+                href='/sign-in'
+                prefetch
+                className='general-button rounded-sm font-semibold hover:brightness-110 text-brown2 w-40 h-10 flex items-center justify-center'
               >
-                Play Now
-              </Button>
+                Log in
+              </Link>
+              <Link
+                href='/sign-up'
+                prefetch
+                className='general-button rounded-sm font-semibold hover:brightness-110 text-brown2 w-40 h-10 flex items-center justify-center'
+              >
+                Sign Up
+              </Link>
             </div>
           </div>
           <div className='footer w-full h-[50px] orange-gradient' />
