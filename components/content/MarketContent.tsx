@@ -493,7 +493,7 @@ function InventoryView({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 52px)`,
+          gridTemplateColumns: `repeat(${INVENTORY_COLS}, 44px)`,
           gap: '5px',
         }}
       >
@@ -505,8 +505,8 @@ function InventoryView({
                 key={`${x}-${y}`}
                 style={{
                   position: 'relative',
-                  width: '52px',
-                  height: '52px',
+                  width: '44px',
+                  height: '44px',
                   background: '#3e2714',
                   border: '1px solid #8b5a2b',
                   borderRadius: '2px',
@@ -605,7 +605,7 @@ function DraggableInventoryItem({
           imageId={item.image}
           alt={item.name}
           fill
-          sizes='48px'
+          sizes='44px'
           style={{ objectFit: 'contain', padding: '2px' }}
         />
       </div>
