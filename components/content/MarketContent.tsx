@@ -201,23 +201,28 @@ function Board({ character, listings }: Props) {
         </div>
       </Section>
 
-      <Section title='Sell'>
-        {/* Sell panel (drop slot + price + Confirm) sits on the left;
-            inventory grid sits on the right. Bottom padding is tight
-            so the section ends right at the bottom of the inventory
-            grid -- no dead brown strip below. */}
-        <div className='flex gap-6 px-4 pt-3 pb-2 text-sm items-start justify-between'>
-          <SellPanel
-            picked={pickedItem}
-            price={price}
-            setPrice={setPrice}
-            onPlace={onPlace}
-            onClear={() => setPickedItem(null)}
-            busy={busy}
-          />
-          <InventoryView entries={entries} pickedItemId={pickedItem?._id} onPick={onItemDropped} />
-        </div>
-      </Section>
+      <div className='self-center w-fit max-w-full'>
+        <Section title='Sell'>
+          {/* Sell panel (drop slot + price + Confirm) sits on the left;
+              inventory grid sits on the right. Bottom padding is tight
+              so the section ends right at the bottom of the inventory
+              grid -- no dead brown strip below. The wrapper above sets
+              w-fit so the brown card is only as wide as the panel +
+              inventory pair instead of spanning the whole content
+              column. */}
+          <div className='flex gap-6 px-4 pt-3 pb-2 text-sm items-start'>
+            <SellPanel
+              picked={pickedItem}
+              price={price}
+              setPrice={setPrice}
+              onPlace={onPlace}
+              onClear={() => setPickedItem(null)}
+              busy={busy}
+            />
+            <InventoryView entries={entries} pickedItemId={pickedItem?._id} onPick={onItemDropped} />
+          </div>
+        </Section>
+      </div>
 
       <Section title='Listings'>
         <div className='flex flex-wrap items-center gap-4 px-3 py-2 border-b-[2px] border-cream2 bg-cream2/40'>
@@ -238,6 +243,14 @@ function Board({ character, listings }: Props) {
             onMinChange={setMinLvl}
             onMaxChange={setMaxLvl}
           />
+          <button
+            type='button'
+            onClick={() => router.refresh()}
+            className='general-button px-3 py-[3px] rounded-sm text-xs font-semibold hover:brightness-110 ml-auto'
+            title='Refresh listings'
+          >
+            ↻ Refresh
+          </button>
         </div>
         {filteredListings.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
@@ -391,25 +404,37 @@ function SellPanel({
       </div>
 
       <label className='text-xs font-semibold self-start'>Market price</label>
-      <div className='flex items-center gap-1 w-full'>
-        <input
-          type='number'
-          min={1}
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          className='fancy-input w-full text-sm tabular-nums'
-          placeholder='0'
-        />
-        <Image src='/images/crowns.png' width={14} height={14} alt='crowns' />
-      </div>
-
-      <button
-        onClick={onPlace}
-        disabled={busy || !picked}
-        className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-full'
+      {/* Wrap input + Confirm in a form so pressing Enter inside the
+          price field triggers the listing, matching native form
+          submission semantics. */}
+      <form
+        className='flex flex-col gap-2 w-full'
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!busy && picked) onPlace();
+        }}
       >
-        Confirm
-      </button>
+        <div className='flex items-center gap-1 w-full'>
+          <input
+            type='number'
+            min={1}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className='fancy-input w-full text-sm tabular-nums'
+            placeholder='0'
+            autoFocus={!!picked}
+          />
+          <Image src='/images/crowns.png' width={14} height={14} alt='crowns' />
+        </div>
+
+        <button
+          type='submit'
+          disabled={busy || !picked}
+          className='general-button px-3 py-1 rounded-sm font-semibold hover:brightness-110 disabled:opacity-50 w-full'
+        >
+          Confirm
+        </button>
+      </form>
     </div>
   );
 }
@@ -567,12 +592,14 @@ function DraggableInventoryItem({
         ref={(node) => {
           drag(node);
         }}
+        onDoubleClick={() => onPick(item)}
         style={{
           position: 'absolute',
           inset: 0,
           cursor: 'grab',
           opacity: isDragging ? 0.4 : 1,
         }}
+        title='Double-click to drop into the sell slot'
       >
         <ItemImage
           imageId={item.image}

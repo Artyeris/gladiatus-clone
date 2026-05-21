@@ -16,10 +16,39 @@ export default async function GameLayout({ children }: { children: React.ReactNo
   return (
     <div className='w-full flex justify-center min-h-screen bg-fixed bg-cover bg-center' style={{ backgroundImage: 'url("/images/game-image.webp")' }}>
       <Toaster
+        position='top-center'
         toastOptions={{
-          className: '',
+          // Match the in-game red-card chrome (gilded border, cream
+          // type) so toasts stop looking like a generic toast lib and
+          // feel like part of the Gladiatus UI.
+          duration: 2500,
           style: {
-            background: '#eed7a1',
+            background: '#974342',
+            color: '#f4eac8',
+            border: '2px solid #eed7a1',
+            outline: '2px solid #974342',
+            borderRadius: '3px',
+            fontFamily: "var(--font-cinzel), 'Cinzel', serif",
+            letterSpacing: '0.04em',
+            padding: '10px 14px',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.45)',
+          },
+          success: {
+            iconTheme: { primary: '#e6b749', secondary: '#3e2714' },
+          },
+          error: {
+            iconTheme: { primary: '#ffd4d4', secondary: '#5c2625' },
+            style: {
+              background: '#5c2625',
+              color: '#f4eac8',
+              border: '2px solid #eed7a1',
+              outline: '2px solid #5c2625',
+              borderRadius: '3px',
+              fontFamily: "var(--font-cinzel), 'Cinzel', serif",
+              letterSpacing: '0.04em',
+              padding: '10px 14px',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.45)',
+            },
           },
         }}
       />
@@ -42,7 +71,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 hover:text-gold drop-shadow-md z-[999]'
         title='Open change log'
       >
-        v0.19.9a
+        v0.19.9b
       </Link>
     </div>
   );

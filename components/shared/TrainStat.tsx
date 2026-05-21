@@ -12,7 +12,9 @@ interface TrainStatProps {
   characterCrowns: number;
   crownsValue: number;
   breakdown: StatBreakdown;
-  handleClick: () => void;
+  // Receives a "count" so the parent can promote a Shift-click into a
+  // bulk +5 train. Falls back to count=1 on plain click.
+  handleClick: (count?: number) => void;
   disabled?: boolean;
   isPending?: boolean;
 }
@@ -56,9 +58,10 @@ const TrainStat = ({
         <button
           type='button'
           className={`${canTrain ? 'cursor-pointer hover:brightness-110' : 'cursor-not-allowed'} relative ml-2`}
-          onClick={handleClick}
+          onClick={(e) => handleClick(e.shiftKey ? 5 : 1)}
           disabled={!canTrain}
           aria-label={`Train ${statName}`}
+          title={`Train ${statName} (hold Shift to train +5)`}
         >
           <Image
             src='/images/train-stat.jpg'

@@ -11,11 +11,19 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
   {
     version: '0.19.9b',
-    date: '2026-05-19',
+    date: '2026-05-21',
     changes: [
-      'Landing page: top navbar removed; Log in / Sign Up now live as two CTAs at the bottom of the welcome card.',
-      'Navigation uses prefetched <Link>s instead of router.push, so clicking either button no longer waits for a fresh chunk fetch.',
-      'Landing page rendered as a pure server component (no useRouter / use client) so the initial HTML ships faster.',
+      'Auth pages drop the navbar -- only the Cinzel Gladiatus title floats top-left as a link back to the landing.',
+      'Market Sell card is now sized to fit (w-fit), so the brown frame ends right around the drop slot + inventory grid instead of spanning the whole content column.',
+      'Market price input wrapped in a form: pressing Enter inside the price field submits the listing.',
+      'Market inventory tiles accept double-click to drop into the sell slot (drag still works).',
+      'Auction filter row gained a Price-tier dropdown (Grey / Green / Yellow / Orange / Red) that matches the existing % colour bands.',
+      'Toast styling: in-game toasts now use the red-card chrome (gilded border, Cinzel font); errors use a darker red-card variant.',
+      'Training: holding Shift while clicking the train icon now trains +5 (the server processes the bulk purchase in a single call, partial buys allowed). Tooltip and toast streak counter cover the burst.',
+      'FighterCard adds a red Health bar mirroring the stat-bar look (filled to 100% since combatants start at full HP on the report).',
+      'Market and Auction filter bars gained a "↻ Refresh" button that calls router.refresh() to re-pull the latest listings.',
+      'Sidebar links and the top-left shortcut icons render with prefetch enabled, so Next preloads the destination page bundles for snappier section switching.',
+      'Landing page (previous v0.19.9b note) -- top navbar removed; Log in / Sign Up CTAs in the welcome card, prefetched.',
     ],
   },
   {

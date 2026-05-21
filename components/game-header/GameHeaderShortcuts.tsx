@@ -45,6 +45,7 @@ function Shortcut({
   return (
     <Link
       href={href}
+      prefetch
       title={label}
       aria-label={label}
       className='relative w-9 h-9 flex items-center justify-center rounded-sm border-[2px] border-cream2 text-cream2 bg-red/40 hover:bg-red/70 transition'

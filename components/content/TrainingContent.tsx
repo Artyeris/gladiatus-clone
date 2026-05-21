@@ -65,13 +65,13 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
     );
   };
 
-  const handleClick = async (stat: string) => {
+  const handleClick = async (stat: string, count: number = 1) => {
     if (pendingStat) return;
 
     setPendingStat(stat);
 
     try {
-      const response = await trainCharacter(stat);
+      const response = await trainCharacter(stat, count);
 
       if (response?.error) {
         toast.error(response.error.message);
@@ -80,18 +80,11 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
 
       if (response?.character) {
         setCurrentCharacter(response.character);
-      } else {
-        const statValue = currentCharacter[stat] as number;
-        const cost = calculateStatCost(statValue);
-
-        setCurrentCharacter((prev) => ({
-          ...prev,
-          [stat]: statValue + 1,
-          crowns: prev.crowns - cost,
-        }));
       }
 
-      showTrainToast(stat);
+      // Stack the toast streak by the actual number of trains the
+      // server granted (1 for plain click, up to N for shift-click).
+      for (let i = 0; i < (response?.purchased ?? 1); i++) showTrainToast(stat);
       router.refresh();
     } catch {
       toast.error('Training failed');
@@ -139,7 +132,7 @@ const TrainingContent = ({ character }: { character: CharacterInterface }) => {
               statName={stat.name}
               statValue={statValue}
               breakdown={breakdown}
-              handleClick={() => handleClick(stat.id)}
+              handleClick={(count) => handleClick(stat.id, count ?? 1)}
               crownsValue={calculateStatCost(statValue)}
               characterCrowns={currentCharacter.crowns}
               disabled={Boolean(pendingStat)}

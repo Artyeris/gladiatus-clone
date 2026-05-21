@@ -48,7 +48,15 @@ const FighterCard = ({ name, image, expedition, power, profile, isEnemy = false 
       />
       <div className='brown-card w-full drop-shadow-xl rounded-sm text-brown2 text-xs'>
         <Row label='Level' value={String(profile.level)} />
-        <Row label='Health' value={`${profile.maxHP}`} />
+        {/* Health row shows the same green-on-brown bar shape as the
+            stat rows, filled to 100% (both fighters start at full HP
+            on the report). Red fill keeps it visually distinct from
+            the stat bars. */}
+        <Row
+          label='Health'
+          value={`${profile.maxHP}`}
+          bar={{ value: profile.maxHP, max: profile.maxHP, color: '#a32626' }}
+        />
 
         {stats.map((stat) => (
           <Row
@@ -90,7 +98,7 @@ function Row({
   label: string;
   value: string;
   last?: boolean;
-  bar?: { value: number; max: number };
+  bar?: { value: number; max: number; color?: string };
 }) {
   // Stat rows (with bar) use a tighter value column so the bar has
   // visible room. Non-stat rows (e.g. "245 - 349") get a wider one.
@@ -108,7 +116,7 @@ function Row({
               className='h-full'
               style={{
                 width: `${Math.min(100, (bar.value / Math.max(1, bar.max)) * 100)}%`,
-                backgroundColor: '#6b8e23',
+                backgroundColor: bar.color ?? '#6b8e23',
               }}
             />
           )}

@@ -133,6 +133,7 @@ function NavLink({
   return (
     <Link
       href={href}
+      prefetch
       className={`relative h-9 w-full flex items-center justify-center rounded-sm text-cream2 font-semibold text-sm tracking-wide drop-shadow hover:text-gold transition ${
         active ? '' : 'red-card hover:border-gold'
       }`}

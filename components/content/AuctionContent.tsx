@@ -56,6 +56,25 @@ interface Props {
 //   141-160 yellow
 //   161-180 orange
 //   180+    red
+type PriceTier = 'all' | 'grey' | 'green' | 'yellow' | 'orange' | 'red';
+
+const PRICE_TIER_LABEL: Record<PriceTier, string> = {
+  all: 'All',
+  grey: 'Grey (≤120%)',
+  green: 'Green (121-140%)',
+  yellow: 'Yellow (141-160%)',
+  orange: 'Orange (161-180%)',
+  red: 'Red (>180%)',
+};
+
+function tierOfPercent(pct: number): Exclude<PriceTier, 'all'> {
+  if (pct <= 120) return 'grey';
+  if (pct <= 140) return 'green';
+  if (pct <= 160) return 'yellow';
+  if (pct <= 180) return 'orange';
+  return 'red';
+}
+
 function percentColor(pct: number): string {
   if (pct <= 120) return '#7c7060';
   if (pct <= 140) return '#3ca33c';
@@ -81,6 +100,7 @@ const AuctionContent = ({ character, auctions }: Props) => {
   const [sortBy, setSortBy] = useState<SortMode>('default');
   const [minLvl, setMinLvl] = useState<string>('');
   const [maxLvl, setMaxLvl] = useState<string>('');
+  const [priceTier, setPriceTier] = useState<PriceTier>('all');
 
   const minLvlNum = minLvl === '' ? null : Number(minLvl);
   const maxLvlNum = maxLvl === '' ? null : Number(maxLvl);
@@ -92,6 +112,11 @@ const AuctionContent = ({ character, auctions }: Props) => {
       const lvl = a.item?.level ?? 0;
       if (minLvlNum != null && Number.isFinite(minLvlNum) && lvl < minLvlNum) return false;
       if (maxLvlNum != null && Number.isFinite(maxLvlNum) && lvl > maxLvlNum) return false;
+      if (priceTier !== 'all') {
+        const baseValue = a.item?.sellPrice ?? a.startingPrice;
+        const pct = baseValue > 0 ? Math.round((a.startingPrice / baseValue) * 100) : 100;
+        if (tierOfPercent(pct) !== priceTier) return false;
+      }
       return true;
     })
     .slice()
@@ -169,6 +194,50 @@ const AuctionContent = ({ character, auctions }: Props) => {
             onMinChange={setMinLvl}
             onMaxChange={setMaxLvl}
           />
+          <label className='flex items-center gap-2 text-xs'>
+            <span className='font-semibold opacity-80'>Price:</span>
+            <select
+              value={priceTier}
+              onChange={(e) => setPriceTier(e.target.value as PriceTier)}
+              className='fancy-select text-xs'
+              style={{
+                color: priceTier === 'all' ? '#5c3a21' : percentColor(
+                  priceTier === 'grey' ? 100 :
+                  priceTier === 'green' ? 130 :
+                  priceTier === 'yellow' ? 150 :
+                  priceTier === 'orange' ? 170 : 200,
+                ),
+                fontWeight: 700,
+              }}
+            >
+              {(['all', 'grey', 'green', 'yellow', 'orange', 'red'] as PriceTier[]).map((t) => (
+                <option
+                  key={t}
+                  value={t}
+                  style={{
+                    color: t === 'all' ? '#5c3a21' : percentColor(
+                      t === 'grey' ? 100 :
+                      t === 'green' ? 130 :
+                      t === 'yellow' ? 150 :
+                      t === 'orange' ? 170 : 200,
+                    ),
+                    background: '#fbf2d6',
+                    fontWeight: 700,
+                  }}
+                >
+                  {PRICE_TIER_LABEL[t]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type='button'
+            onClick={() => router.refresh()}
+            className='general-button px-3 py-[3px] rounded-sm text-xs font-semibold hover:brightness-110 ml-auto'
+            title='Refresh listings'
+          >
+            ↻ Refresh
+          </button>
         </div>
         {filteredAuctions.length === 0 ? (
           <div className='px-3 py-3 italic opacity-80 text-sm'>
