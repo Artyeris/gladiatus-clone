@@ -10,6 +10,15 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.9c',
+    date: '2026-05-21',
+    changes: [
+      'Arena champion-salary is now claimed manually. The pot panel shows a "Claim salary" button while you hold the champion seat -- pressing it credits any whole-hour gold accrued and refreshes the page.',
+      'Removed the auto-credit on every page load so the salary feels like a deliberate collect rather than a silent drip.',
+      'Market inventory grid cells shrunk to 44px (matches the Overview look more closely).',
+    ],
+  },
+  {
     version: '0.19.9b',
     date: '2026-05-21',
     changes: [

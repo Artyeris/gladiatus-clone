@@ -2,6 +2,7 @@
 
 import DescriptionCard from '@/components/cards/DescriptionCard';
 import { battleArena } from '@/lib/actions/battle/battleArena.action';
+import { claimMyChampionSalary } from '@/lib/actions/arena/arenaPot.action';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import { canFight } from '@/lib/utils';
 import Image from 'next/image';
@@ -45,6 +46,16 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaConten
   const router = useRouter();
 
   const isMyChampion = pot?.championId === String(character._id);
+  const [claiming, setClaiming] = useState(false);
+
+  const onClaimSalary = async () => {
+    setClaiming(true);
+    const res = await claimMyChampionSalary();
+    setClaiming(false);
+    if (res?.error) return toast.error(res.error.message);
+    toast.success(`+${res.awarded} gold salary`);
+    router.refresh();
+  };
 
   const handleClick = async (rivalId: string) => {
     const response = await battleArena(rivalId);
@@ -97,8 +108,25 @@ const ArenaContent = ({ arenaRivals, character, tier, myRank, pot }: ArenaConten
             <div className='text-xs opacity-80'>
               Pot grows by <strong>{pot.growthPerHour}</strong>/h &middot; champion earns{' '}
               <strong>{pot.salaryPerHour}</strong> gold/h
-              {isMyChampion && <span className='italic ml-1'>(paid on each visit)</span>}
             </div>
+            {isMyChampion && (
+              <button
+                type='button'
+                onClick={onClaimSalary}
+                disabled={claiming}
+                className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50 mt-2 w-fit inline-flex items-center gap-1'
+                title='Claim accrued champion salary'
+              >
+                <span>Claim salary</span>
+                <Image
+                  src='/images/crowns.png'
+                  width={12}
+                  height={12}
+                  alt='gold'
+                  style={{ width: 'auto', height: 'auto' }}
+                />
+              </button>
+            )}
           </div>
           <div className='text-right shrink-0'>
             <div className='text-xs opacity-80'>Arena pot</div>

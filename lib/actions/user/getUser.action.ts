@@ -8,7 +8,9 @@ import Journal from '@/lib/models/journal.model';
 import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import { migrateLegacyInventory } from '@/lib/utils/inventory/grid';
-import { tickChampionSalary } from '@/lib/actions/arena/arenaPot.action';
+// tickChampionSalary import dropped: salary is now claimed
+// explicitly via the Arena pot panel rather than auto-paid on every
+// page load.
 import { cookies } from 'next/headers';
 
 const EQUIPMENT_SLOT_NAMES = [
@@ -123,21 +125,11 @@ export async function getUser(getInventory = false) {
       }
     }
 
-    // Background champion-salary tick. Runs on every page load so the
-    // gold/exp accrues without the player needing to visit /game/arena.
-    // tickChampionSalary mutates the doc in-place when there's a real
-    // payment to apply; everything else is a cheap no-op.
-    let salaryDirty = false;
-    try {
-      const paid = await tickChampionSalary(character);
-      if (paid && (paid.gold > 0 || paid.exp > 0)) {
-        salaryDirty = true;
-      }
-    } catch (err) {
-      console.log(`${new Date()} - champion salary tick failed - ${err}`);
-    }
+    // Champion-salary accrual is no longer auto-paid here: players
+    // press the explicit "Claim salary" button in the Arena pot
+    // panel. The pot keeps growing on the server regardless.
 
-    if ((dirty || salaryDirty) && character) {
+    if (dirty && character) {
       if (dirty) {
         character.markModified('inventory');
         character.markModified('equipment');

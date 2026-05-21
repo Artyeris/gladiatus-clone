@@ -1,10 +1,16 @@
 'use server'
 
+import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
+
+import { COOKIE_NAME } from '@/constants';
 import Character from '@/lib/models/character.model';
 import ArenaPot from '@/lib/models/arenaPot.model';
+import User from '@/lib/models/user.model';
 import { connectToDB } from '@/lib/mongoose';
+import { extractUserId } from '@/lib/utils/jwtUtils';
 import { ArenaTier, getArenaTier, tierLevelRange } from '@/lib/utils/arena';
-import { growPot, claimChampionSalary } from '@/lib/utils/arenaPot';
+import { championHourlyGold, gameHoursSince, growPot, claimChampionSalary } from '@/lib/utils/arenaPot';
 import { sendMessageToCharacter } from '@/lib/actions/message/message.action';
 
 // Returns the current top character in a tier (highest honor in the
@@ -74,6 +80,54 @@ export async function claimSalaryFor(characterId: any, tier: ArenaTier) {
   const delta = claimChampionSalary(pot, tier);
   await pot.save();
   return delta;
+}
+
+// Player-facing salary claim. Looks up the caller's character, checks
+// they hold the champion seat for their bracket, pays out any
+// accrued whole-hour salary and returns the awarded amount so the UI
+// can show it. No-ops gracefully when they're not the champion or
+// haven't accrued a full hour yet.
+export async function claimMyChampionSalary(): Promise<{
+  ok?: boolean;
+  awarded?: number;
+  pending?: number;
+  error?: { message: string };
+}> {
+  const token = cookies().get(COOKIE_NAME);
+  if (!token?.value) return { error: { message: 'Not authenticated' } };
+
+  try {
+    const userId = extractUserId(token.value);
+    await connectToDB();
+    const user = await User.findById(userId).populate({ path: 'character', model: Character });
+    const character: any = user?.character;
+    if (!character?._id) return { error: { message: 'Character not found' } };
+
+    const tier = getArenaTier(character.level ?? 1);
+    const pot = await ArenaPot.findOne({ tierId: tier.id });
+    if (!pot || !pot.championId || String(pot.championId) !== String(character._id)) {
+      return { error: { message: 'You do not hold the champion seat' } };
+    }
+
+    const delta = claimChampionSalary(pot, tier);
+    if (delta.gold === 0) {
+      const hours = gameHoursSince(pot.lastSalaryAt ?? pot.championBecameAt);
+      const minsToNext = Math.max(1, Math.ceil((1 - (hours % 1)) * 60));
+      if (pot.isModified()) await pot.save();
+      return { error: { message: `Next salary in ~${minsToNext} min` } };
+    }
+
+    character.crowns = (character.crowns ?? 0) + delta.gold;
+    await character.save();
+    await pot.save();
+
+    revalidatePath('/game/arena');
+    revalidatePath('/');
+    return { ok: true, awarded: delta.gold };
+  } catch (err: any) {
+    console.log(`${new Date()} - claimMyChampionSalary failed - ${err}`);
+    return { error: { message: err?.message || 'Claim failed' } };
+  }
 }
 
 // Background tick: awarded silently to a champion's character on any
