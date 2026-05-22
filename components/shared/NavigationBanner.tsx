@@ -5,20 +5,29 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { expeditionRoutes, generalRoutes, villageRoutes } from '@/constants/routes';
-import { expeditions } from '@/constants/expeditions';
+import { generalRoutes, villageRoutes } from '@/constants/routes';
+import {
+  COUNTRIES,
+  Country,
+  expeditionsForCountry,
+} from '@/constants/expeditions';
 
 type Tab = 'town' | 'expedition';
 
 interface Props {
   characterLevel?: number;
+  currentCountry?: Country;
   // Server-rendered horizontal shortcut row (Messages / Reports /
   // Packages) injected by the layout. Kept as a generic ReactNode so
   // this banner stays a pure client component.
   shortcuts?: React.ReactNode;
 }
 
-const NavigationBanner = ({ characterLevel = 1, shortcuts }: Props) => {
+const NavigationBanner = ({
+  characterLevel = 1,
+  currentCountry = 'italy',
+  shortcuts,
+}: Props) => {
   const pathname = usePathname();
   const isOnboarding = pathname === '/onboarding';
 
@@ -27,6 +36,12 @@ const NavigationBanner = ({ characterLevel = 1, shortcuts }: Props) => {
 
   const isRouteActive = (link: string) =>
     (pathname.includes(link) && link.length > 1) || pathname === link;
+
+  // Travel is offered once the player can reach any non-Italy country
+  // (Africa unlocks at level 20). Below that, Italy is the only
+  // option so a Travel link would be useless clutter.
+  const showTravel = characterLevel >= COUNTRIES.africa.entryLevel;
+  const countryExpeditions = expeditionsForCountry(currentCountry);
 
   return (
     <div
@@ -78,23 +93,35 @@ const NavigationBanner = ({ characterLevel = 1, shortcuts }: Props) => {
             />
           ))}
 
-        {tab === 'expedition' &&
-          expeditionRoutes.map((route) => {
-            const slug = route.link.replace(/^\//, '');
-            const info = expeditions[slug];
-            const required = info?.entryLevel ?? 1;
-            const locked = characterLevel < required;
-            return (
+        {tab === 'expedition' && (
+          <>
+            <div className='text-center text-cream2 text-[10px] font-semibold uppercase tracking-wider opacity-90 mt-1'>
+              {COUNTRIES[currentCountry].name}
+            </div>
+            {countryExpeditions.map((info) => {
+              const required = info.entryLevel ?? 1;
+              const locked = characterLevel < required;
+              const link = `/${info.id}`;
+              return (
+                <NavLink
+                  key={info.id}
+                  href={`/game/expeditions${link}`}
+                  label={info.name}
+                  active={isRouteActive(link)}
+                  locked={locked}
+                  requirement={locked ? `from level ${required}` : undefined}
+                />
+              );
+            })}
+            {showTravel && (
               <NavLink
-                key={route.name}
-                href={`/game/expeditions${route.link}`}
-                label={route.name}
-                active={isRouteActive(route.link)}
-                locked={locked}
-                requirement={locked ? `from level ${required}` : undefined}
+                href='/game/expeditions/travel'
+                label='Travel'
+                active={isRouteActive('/travel')}
               />
-            );
-          })}
+            )}
+          </>
+        )}
       </div>
     </div>
   );

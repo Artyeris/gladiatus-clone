@@ -56,6 +56,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
       <div className='w-full min-h-screen flex flex-row justify-center gap-6 pt-0 items-stretch'>
         <NavigationBanner
           characterLevel={user.character?.level ?? 1}
+          currentCountry={user.character?.currentCountry ?? 'italy'}
           shortcuts={user.character ? ((await GameHeaderShortcuts()) as any) : null}
         />
         <div className='flex flex-col items-center h-min-full w-[820px]'>
@@ -71,7 +72,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 hover:text-gold drop-shadow-md z-[999]'
         title='Open change log'
       >
-        v0.19.9c
+        v0.19.10
       </Link>
     </div>
   );

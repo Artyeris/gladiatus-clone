@@ -98,6 +98,19 @@ const characterSchema = new mongoose.Schema({
   // Weekly arena counters powering the "7-day best" highscore tab.
   // weeklyWins is bumped on every arena win; the window resets when
   // the first win after `weekStartedAt + 7 days` lands.
+  // Active expedition country. Limits which expeditions show in the
+  // sidebar / are reachable from the expeditions route. The list of
+  // countries the player has paid the entry fee for is kept in
+  // `unlockedCountries`; Italy is always unlocked.
+  currentCountry: {
+    type: String,
+    enum: ['italy', 'africa', 'germania', 'britannia'],
+    default: 'italy',
+  },
+  unlockedCountries: {
+    type: [{ type: String, enum: ['italy', 'africa', 'germania', 'britannia'] }],
+    default: ['italy'],
+  },
   weeklyWins: { type: Number, default: 0 },
   weekStartedAt: { type: Date, default: () => new Date() },
   // Snapshots captured at the start of each weekly window so the

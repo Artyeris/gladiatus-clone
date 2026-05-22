@@ -56,33 +56,6 @@ export const villageRoutes = [
   },
 ]
 
-export const expeditionRoutes = [
-  {
-    name: 'Grimwood',
-    link: '/grimwood',
-  },
-  {
-    name: 'Pirate Harbour',
-    link: '/pirateharbour',
-  },
-  {
-    name: 'Misty Mountains',
-    link: '/mistymountains',
-  },
-  {
-    name: 'Wolf Cave',
-    link: '/wolfcave',
-  },
-  {
-    name: 'Ancient Temple',
-    link: '/ancienttemple',
-  },
-  {
-    name: 'Barbarian Village',
-    link: '/barbarianvillage',
-  },
-  {
-    name: 'Bandit Camp',
-    link: '/banditcamp',
-  },
-]
+// Expedition routes used to live here as a hand-maintained list. The
+// sidebar now reads expeditions per country from constants/expeditions
+// directly so adding a new zone there is enough.

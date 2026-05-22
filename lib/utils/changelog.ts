@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.10',
+    date: '2026-05-22',
+    changes: [
+      'World expanded with three new countries: Africa (entry level 20, 1250 gold), Germania (level 40, 4250 gold) and Britannia (level 120, 6750 gold).',
+      '26 new expeditions added across the new continents -- Voodoo Temple, Bridge, Blood Cave, Lost Harbour, Umpokta Tribe, Caravan, Mesoai Oasis, Cliff Jumper (Africa); Cave Temple, Green Forest, Cursed Village, Death Hill, Vandal Village, Mine, Teuton Camp, Koman Mountain, Dragon Remains (Germania); Bank of Thames, Forest Fortress, The Moor, Camp Cassivellaunus, Kent, The Ford, Camulodunum, Cambria, Mona Isle (Britannia).',
+      'Each new zone seeds four enemies (easy / medium / hard / boss) auto-scaled from the zone\'s entry level. Bosses get a 1.4x stat multiplier.',
+      'Sidebar expedition list now filters to the country the gladiator is currently standing in. Switching countries is done from the new Travel page.',
+      'New "Travel" sidebar entry appears under the Expedition tab from level 20+ -- click it to pick the country to sail to. First visit charges the travel fee; returning to a previously unlocked country is free.',
+      'Character now stores currentCountry / unlockedCountries (Italy is always unlocked).',
+    ],
+  },
+  {
     version: '0.19.9c',
     date: '2026-05-21',
     changes: [

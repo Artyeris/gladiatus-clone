@@ -476,3 +476,117 @@ export const expeditionEnemies: ExpeditionEnemies = {
     },
   },
 };
+
+// ---------------------------------------------------------------------------
+// Generated expedition enemies for the Africa / Germania / Britannia zones.
+// Stat blocks are derived from the zone's entry level so each new expedition
+// has 4 enemies (easy / medium / hard / boss) with sensible scaling.
+// ---------------------------------------------------------------------------
+
+interface ZoneSeed {
+  slug: string;
+  baseLevel: number;
+  enemies: [string, string, string, string]; // [easy, medium, hard, boss]
+}
+
+const NEW_ZONES: ZoneSeed[] = [
+  // Africa
+  { slug: 'voodootemple',  baseLevel: 20, enemies: ['Tribal Initiate', 'Bone Witch', 'Voodoo Priest', 'High Shaman'] },
+  { slug: 'bridge',        baseLevel: 25, enemies: ['Bridge Watcher', 'Painted Warrior', 'Chief\'s Guard', 'Bridge Chieftain'] },
+  { slug: 'bloodcave',     baseLevel: 30, enemies: ['Cave Bat', 'Blood Spider', 'Venom Lurker', 'Cave Matriarch'] },
+  { slug: 'lostharbour',   baseLevel: 35, enemies: ['Smuggler', 'Wharf Brawler', 'Captain\'s Mate', 'Harbour Captain'] },
+  { slug: 'umpoktatribe',  baseLevel: 75, enemies: ['Umpokta Scout', 'Umpokta Warrior', 'Umpokta Veteran', 'Umpokta Warchief'] },
+  { slug: 'caravan',       baseLevel: 80, enemies: ['Caravan Guard', 'Caravan Marksman', 'Caravan Captain', 'Caravan Master'] },
+  { slug: 'mesoaoasis',    baseLevel: 85, enemies: ['Oasis Jackal', 'Sand Crocodile', 'Desert Lion', 'Sphinx'] },
+  { slug: 'cliffjumper',   baseLevel: 90, enemies: ['Cliff Hyena', 'Wing Raptor', 'Cliff Stalker', 'Cliff Roc'] },
+
+  // Germania
+  { slug: 'cavetemple',     baseLevel: 40,  enemies: ['Cave Acolyte', 'Cave Cultist', 'Cave Inquisitor', 'Cave Highpriest'] },
+  { slug: 'greenforest',    baseLevel: 45,  enemies: ['Forest Wolf', 'Boar Brute', 'Forest Bear', 'Forest Wendigo'] },
+  { slug: 'cursedvillage',  baseLevel: 50,  enemies: ['Cursed Villager', 'Cursed Smith', 'Cursed Elder', 'Cursed Reeve'] },
+  { slug: 'deathhill',      baseLevel: 55,  enemies: ['Risen Footman', 'Carrion Hound', 'Risen Knight', 'Barrow King'] },
+  { slug: 'vandalvillage',  baseLevel: 95,  enemies: ['Vandal Raider', 'Vandal Berserker', 'Vandal Champion', 'Vandal Warlord'] },
+  { slug: 'mine',           baseLevel: 100, enemies: ['Mine Overseer', 'Pit Mastiff', 'Tunnel Wolf', 'Mine Foreman'] },
+  { slug: 'teutoncamp',     baseLevel: 104, enemies: ['Teuton Brawler', 'Teuton Skirmisher', 'Teuton Captain', 'Teuton Warlord'] },
+  { slug: 'komanmountain',  baseLevel: 108, enemies: ['Mountain Wolf', 'Mountain Troll', 'Stone Giant', 'Koman Wyvern'] },
+  { slug: 'dragonremains',  baseLevel: 112, enemies: ['Bone Scavenger', 'Drake Hatchling', 'Bone Wyrm', 'Skeletal Dragon'] },
+
+  // Britannia
+  { slug: 'bankofthames',       baseLevel: 120, enemies: ['Briton Levy', 'Briton Skirmisher', 'Briton Centurion', 'River Warlord'] },
+  { slug: 'forestfortress',     baseLevel: 130, enemies: ['Fortress Sentry', 'Fortress Archer', 'Fortress Captain', 'Forest Chieftain'] },
+  { slug: 'themoor',            baseLevel: 140, enemies: ['Mire Wraith', 'Moor Hound', 'Bog Stalker', 'Moor Hag'] },
+  { slug: 'campcassivellaunus', baseLevel: 150, enemies: ['Camp Conscript', 'Camp Veteran', 'Camp Champion', 'Cassivellaunus'] },
+  { slug: 'kent',               baseLevel: 160, enemies: ['Kent Raider', 'Kent Pikeman', 'Kent Marauder', 'Kent Warlord'] },
+  { slug: 'theford',            baseLevel: 170, enemies: ['Ford Ambusher', 'Ford Champion', 'Ford Slayer', 'Ford King'] },
+  { slug: 'camulodunum',        baseLevel: 180, enemies: ['Ruin Scavenger', 'Ruin Berserker', 'Ruin Praetorian', 'Ruin Tyrant'] },
+  { slug: 'cambria',            baseLevel: 190, enemies: ['Cambrian Wolf', 'Cambrian Troll', 'Cambrian Giant', 'Cambrian Lord'] },
+  { slug: 'monaisle',           baseLevel: 200, enemies: ['Druid Initiate', 'Druid Warden', 'Arch-Druid', 'Mona Hierophant'] },
+];
+
+const ROLE_OFFSETS = [4, 8, 12, 16] as const; // easy / medium / hard / boss
+const ROLE_KEYS    = ['easy', 'medium', 'hard', 'boss'] as const;
+
+function statRange(centre: number, swing = 0.12): [number, number] {
+  const lo = Math.max(1, Math.round(centre * (1 - swing)));
+  const hi = Math.max(lo, Math.round(centre * (1 + swing)));
+  return [lo, hi];
+}
+function levelArray(lvl: number): number[] {
+  return [Math.max(1, lvl - 1), lvl, lvl + 1];
+}
+
+let nextEnemyId = 1000;
+function buildEnemy(level: number, name: string, isBoss: boolean): EnemyStatsInterface {
+  // Bosses get a 1.4x stat multiplier on top of role scaling.
+  const m = isBoss ? 1.4 : 1.0;
+  const baseStat = (factor: number) => Math.round(level * factor * m);
+  const [strLo, strHi] = statRange(baseStat(2.0));
+  const [endLo, endHi] = statRange(baseStat(2.0));
+  const [dexLo, dexHi] = statRange(baseStat(5.0));
+  const [agiLo, agiHi] = statRange(baseStat(5.0));
+  const [intLo, intHi] = statRange(baseStat(1.5));
+  const [chaLo, chaHi] = statRange(baseStat(2.0));
+  const expLo = Math.max(1, Math.floor(level * 0.3));
+  const expHi = Math.max(expLo, Math.floor(level * 0.5 * (isBoss ? 2 : 1)));
+  const gpLo = Math.max(10, Math.floor(level * 12 * (isBoss ? 2 : 1)));
+  const gpHi = Math.max(gpLo, Math.floor(level * 28 * (isBoss ? 2 : 1)));
+  const arLo = Math.max(10, Math.floor(level * 15 * m));
+  const arHi = Math.max(arLo, Math.floor(level * 30 * m));
+  const dmLo = Math.max(1,  Math.floor(level * 2 * m));
+  const dmHi = Math.max(dmLo, Math.floor(level * 4 * m));
+
+  const id = nextEnemyId++;
+  const imageSlug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  return {
+    name,
+    image: imageSlug,
+    level: levelArray(level),
+    strength:     [strLo, strHi],
+    endurance:    [endLo, endHi],
+    dexterity:    [dexLo, dexHi],
+    agility:      [agiLo, agiHi],
+    intelligence: [intLo, intHi],
+    charisma:     [chaLo, chaHi],
+    experience:   [expLo, expHi],
+    crowns:       [gpLo, gpHi],
+    armor:        [arLo, arHi],
+    damage:       [dmLo, dmHi],
+    boss: isBoss || undefined,
+    id,
+  };
+}
+
+for (const zone of NEW_ZONES) {
+  const group: Record<string, EnemyStatsInterface> = {};
+  for (let i = 0; i < 4; i++) {
+    const role = ROLE_KEYS[i];
+    const level = zone.baseLevel + ROLE_OFFSETS[i];
+    group[role] = buildEnemy(level, zone.enemies[i], i === 3);
+  }
+  expeditionEnemies[zone.slug] = group;
+}
+
