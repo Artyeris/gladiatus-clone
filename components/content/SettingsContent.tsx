@@ -8,6 +8,7 @@ import { updateLanguage } from '@/lib/actions/user/updateSettings.action';
 import {
   devGrantDiamonds,
   devGrantGold,
+  devGrantLevels,
   devResetTimers,
   devToggleGodMode,
 } from '@/lib/actions/dev/dev.action';
@@ -105,6 +106,15 @@ const SettingsContent = ({ currentLanguage, godMode }: Props) => {
     setDevBusy(false);
     if (res?.error) return toast.error(res.error.message);
     toast.success(`+${amount} diamonds (now ${res.diamonds})`);
+    router.refresh();
+  };
+
+  const onGrantLevels = async (amount: number) => {
+    setDevBusy(true);
+    const res = await devGrantLevels({ amount });
+    setDevBusy(false);
+    if (res?.error) return toast.error(res.error.message);
+    toast.success(`+${amount} level${amount === 1 ? '' : 's'} (now ${res.level})`);
     router.refresh();
   };
 
@@ -250,6 +260,41 @@ const SettingsContent = ({ currentLanguage, godMode }: Props) => {
                 className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
               >
                 Add 100
+              </button>
+            </div>
+          </div>
+
+          <div className='flex items-center justify-between gap-2'>
+            <div>
+              <div className='font-semibold'>Level</div>
+              <div className='text-xs opacity-80'>
+                Instantly bump the character level. Resets partial XP.
+              </div>
+            </div>
+            <div className='flex gap-1'>
+              <button
+                type='button'
+                onClick={() => onGrantLevels(1)}
+                disabled={devBusy}
+                className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+              >
+                +1
+              </button>
+              <button
+                type='button'
+                onClick={() => onGrantLevels(10)}
+                disabled={devBusy}
+                className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+              >
+                +10
+              </button>
+              <button
+                type='button'
+                onClick={() => onGrantLevels(100)}
+                disabled={devBusy}
+                className='general-button px-3 py-1 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+              >
+                +100
               </button>
             </div>
           </div>

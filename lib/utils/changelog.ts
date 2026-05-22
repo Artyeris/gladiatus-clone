@@ -10,24 +10,16 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.19.10a',
-    date: '2026-05-22',
-    changes: [
-      'Travel link renamed to "Traveler" and now always shows in the Expedition sidebar (no level gate). The page itself still gates each destination by the destination\'s minimum level.',
-      'Traveler page redesigned to match the original Gladiatus Hermit: title bar, "Description" lore card with portrait + flavour text, and "Travel to another country" radio list that hides the current location. Each row shows "(Minimum level: X, Costs: Y gold)" inline with an italic one-liner pitch underneath.',
-      'Travel button centred under the radio list.',
-    ],
-  },
-  {
-    version: '0.19.10',
+    version: '0.20',
     date: '2026-05-22',
     changes: [
       'World expanded with three new countries: Africa (entry level 20, 1250 gold), Germania (level 40, 4250 gold) and Britannia (level 120, 6750 gold).',
       '26 new expeditions added across the new continents -- Voodoo Temple, Bridge, Blood Cave, Lost Harbour, Umpokta Tribe, Caravan, Mesoai Oasis, Cliff Jumper (Africa); Cave Temple, Green Forest, Cursed Village, Death Hill, Vandal Village, Mine, Teuton Camp, Koman Mountain, Dragon Remains (Germania); Bank of Thames, Forest Fortress, The Moor, Camp Cassivellaunus, Kent, The Ford, Camulodunum, Cambria, Mona Isle (Britannia).',
       'Each new zone seeds four enemies (easy / medium / hard / boss) auto-scaled from the zone\'s entry level. Bosses get a 1.4x stat multiplier.',
-      'Sidebar expedition list now filters to the country the gladiator is currently standing in. Switching countries is done from the new Travel page.',
-      'New "Travel" sidebar entry appears under the Expedition tab from level 20+ -- click it to pick the country to sail to. First visit charges the travel fee; returning to a previously unlocked country is free.',
+      'Sidebar expedition list now filters to the country the gladiator is currently standing in. The "Traveler" entry in the Expedition tab is always visible and opens the Hermit-style travel page.',
+      'Traveler page redesigned to match the original Gladiatus Hermit: title bar, "Description" lore card with portrait + flavour text, and "Travel to another country" radio list that hides the current location. Each row shows "(Minimum level: X, Costs: Y gold)" inline with an italic pitch underneath.',
       'Character now stores currentCountry / unlockedCountries (Italy is always unlocked).',
+      'Settings: Developer Options gained "Level +1 / +10 / +100" buttons to fast-forward the character through level gates while testing.',
     ],
   },
   {

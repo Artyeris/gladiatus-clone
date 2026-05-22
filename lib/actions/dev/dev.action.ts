@@ -55,6 +55,18 @@ export async function devGrantDiamonds({ amount = 10 }: { amount?: number } = {}
   return { ok: true, diamonds: character.diamonds };
 }
 
+export async function devGrantLevels({ amount = 1 }: { amount?: number } = {}) {
+  const character = await getMyCharacter();
+  if (!character) return { error: { message: 'Not authenticated' } };
+  const inc = Math.max(0, Math.floor(amount));
+  character.level = (character.level ?? 1) + inc;
+  // Reset partial XP so the next-level bar starts clean.
+  character.experience = 0;
+  await character.save();
+  revalidatePath('/');
+  return { ok: true, level: character.level };
+}
+
 export async function devResetTimers() {
   const character = await getMyCharacter();
   if (!character) return { error: { message: 'Not authenticated' } };
