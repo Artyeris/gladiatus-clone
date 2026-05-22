@@ -10,6 +10,15 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.19.10a',
+    date: '2026-05-22',
+    changes: [
+      'Travel link renamed to "Traveler" and now always shows in the Expedition sidebar (no level gate). The page itself still gates each destination by the destination\'s minimum level.',
+      'Traveler page redesigned to match the original Gladiatus Hermit: title bar, "Description" lore card with portrait + flavour text, and "Travel to another country" radio list that hides the current location. Each row shows "(Minimum level: X, Costs: Y gold)" inline with an italic one-liner pitch underneath.',
+      'Travel button centred under the radio list.',
+    ],
+  },
+  {
     version: '0.19.10',
     date: '2026-05-22',
     changes: [

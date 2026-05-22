@@ -15,18 +15,33 @@ interface Props {
   characterGold: number;
 }
 
+// Short pitch line shown under each destination row. Mirrors the
+// Hermit's flavour text from the original game.
+const PITCH: Record<Country, string> = {
+  italy: 'Return home to the wilderness around Rome.',
+  africa: "Be one of the first gladiators and bring glory to Rome.",
+  germania: 'Prove yourself against the fierce tribes of Germania.',
+  britannia: 'Conquer the barbarians of Britannia for the Empire.',
+};
+
 const TravelContent = ({
   characterLevel, currentCountry, unlockedCountries, characterGold,
 }: Props) => {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [picked, setPicked] = useState<Country>(currentCountry);
+
+  // Destinations exclude the country the player is currently standing
+  // in (re-travelling to "here" would be a no-op).
+  const destinations = COUNTRY_ORDER.filter((c) => c !== currentCountry);
+
+  // Pre-select the first reachable destination so the Travel button
+  // isn't disabled out of the gate.
+  const firstReachable = destinations.find(
+    (id) => characterLevel >= COUNTRIES[id].entryLevel,
+  );
+  const [picked, setPicked] = useState<Country>(firstReachable ?? destinations[0]);
 
   const onTravel = async () => {
-    if (picked === currentCountry) {
-      toast(`Already in ${COUNTRIES[picked].name}`);
-      return;
-    }
     setBusy(true);
     const res = await travelTo({ country: picked });
     setBusy(false);
@@ -38,11 +53,15 @@ const TravelContent = ({
 
   return (
     <div className='px-6 flex flex-col gap-4 text-brown2'>
-      <Section title='Forgotten Return'>
-        <div className='flex gap-3 px-3 py-2 text-sm'>
+      <h1 className='text-xl font-bold border-b-[3px] border-brown2 text-center text-brown2'>
+        Traveler
+      </h1>
+
+      <Section title='Description'>
+        <div className='flex gap-3 px-3 py-3 text-sm'>
           <Image
             src='/images/auction.webp'
-            alt='guide'
+            alt='Traveler'
             width={140}
             height={140}
             className='rounded-sm shrink-0 object-contain'
@@ -50,60 +69,79 @@ const TravelContent = ({
           />
           <div className='flex flex-col gap-1'>
             <p>
-              The world is bigger than Italy. Pick a country and sail
-              out; expeditions only show in the sidebar for whichever
-              land your gladiator currently stands in. Returning to a
-              country you have already unlocked is free; the first
-              visit charges a one-time travel fee.
+              Where else could a respected gladiator like yourself prove
+              themselves? Germania&apos;s tribes have crushed us in many
+              great battles -- there you will surely find glory. Africa
+              remains unexplored, where you could carry Rome&apos;s
+              honour and the Empire&apos;s might to its shores. Make
+              your own choice, and I will mark out the easiest route for
+              you.
             </p>
             <div className='font-semibold mt-1'>
-              Your balance: {characterGold} gold
+              Currently in {COUNTRIES[currentCountry].name} &middot; Gold: {characterGold.toLocaleString()}
             </div>
           </div>
         </div>
       </Section>
 
       <Section title='Travel to another country'>
-        <div className='flex flex-col gap-2 px-3 py-3 text-sm'>
-          {COUNTRY_ORDER.map((id) => {
+        <div className='flex flex-col gap-1 px-3 py-3 text-sm'>
+          {destinations.map((id) => {
             const info = COUNTRIES[id];
-            const isCurrent = id === currentCountry;
             const isUnlocked = unlockedCountries.includes(id) || id === 'italy';
             const meetsLevel = characterLevel >= info.entryLevel;
             const cost = isUnlocked ? 0 : info.travelCost;
             const canAfford = characterGold >= cost;
-            const enabled = !isCurrent && meetsLevel && canAfford;
+            const enabled = meetsLevel && canAfford;
             return (
               <label
                 key={id}
-                className={`flex items-center gap-3 rounded-sm px-3 py-2 border-[2px] ${
-                  picked === id ? 'border-red3' : 'border-cream2'
-                } ${enabled ? 'cursor-pointer hover:bg-cream2/40' : 'opacity-60 cursor-not-allowed'}`}
+                className={`flex flex-col gap-0.5 rounded-sm px-2 py-1.5 ${
+                  enabled ? 'cursor-pointer hover:bg-cream2/40' : 'opacity-60 cursor-not-allowed'
+                }`}
               >
-                <input
-                  type='radio'
-                  name='country'
-                  value={id}
-                  checked={picked === id}
-                  onChange={() => enabled && setPicked(id)}
-                  disabled={!enabled}
-                />
-                <div className='flex flex-col flex-1 min-w-0'>
-                  <span className='font-semibold'>
-                    {info.name}
-                    {isCurrent && <span className='ml-2 text-xs opacity-80'>(here)</span>}
-                    {!meetsLevel && <span className='ml-2 text-xs text-red3'>requires level {info.entryLevel}</span>}
+                <div className='flex items-center flex-wrap gap-x-2'>
+                  <input
+                    type='radio'
+                    name='country'
+                    value={id}
+                    checked={picked === id}
+                    onChange={() => enabled && setPicked(id)}
+                    disabled={!enabled}
+                  />
+                  <span className='font-semibold'>{info.name}</span>
+                  <span className='opacity-90 inline-flex items-center gap-1'>
+                    (Minimum level: {info.entryLevel}, Costs:&nbsp;
+                    {cost === 0 ? (
+                      <span>Free</span>
+                    ) : (
+                      <span className='inline-flex items-center gap-1'>
+                        {cost.toLocaleString()}
+                        <Image
+                          src='/images/crowns.png'
+                          width={12}
+                          height={12}
+                          alt='gold'
+                          style={{ width: '12px', height: '12px' }}
+                        />
+                      </span>
+                    )}
+                    )
                   </span>
-                  <span className='text-xs opacity-80'>{info.blurb}</span>
+                  {!meetsLevel && (
+                    <span className='text-xs text-red3 italic'>
+                      requires level {info.entryLevel}
+                    </span>
+                  )}
+                  {meetsLevel && !canAfford && (
+                    <span className='text-xs text-red3 italic'>
+                      not enough gold
+                    </span>
+                  )}
                 </div>
-                <span className='text-xs font-semibold shrink-0 text-right'>
-                  {cost === 0
-                    ? <span className='opacity-80'>Free</span>
-                    : <span className='inline-flex items-center gap-1'>
-                        {cost}
-                        <Image src='/images/crowns.png' width={12} height={12} alt='gold' style={{ width: 'auto', height: 'auto' }} />
-                      </span>}
-                </span>
+                <div className='text-xs italic opacity-80 pl-6'>
+                  {PITCH[id]}
+                </div>
               </label>
             );
           })}
@@ -111,10 +149,10 @@ const TravelContent = ({
           <button
             type='button'
             onClick={onTravel}
-            disabled={busy || picked === currentCountry}
-            className='general-button px-4 py-2 rounded-sm text-sm font-semibold hover:brightness-110 disabled:opacity-50 w-fit self-end mt-1'
+            disabled={busy || !picked}
+            className='general-button px-6 py-1.5 rounded-sm text-sm font-semibold hover:brightness-110 disabled:opacity-50 self-center mt-2'
           >
-            Travel
+            travel
           </button>
         </div>
       </Section>

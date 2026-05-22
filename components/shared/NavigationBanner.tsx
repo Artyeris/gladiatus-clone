@@ -37,10 +37,6 @@ const NavigationBanner = ({
   const isRouteActive = (link: string) =>
     (pathname.includes(link) && link.length > 1) || pathname === link;
 
-  // Travel is offered once the player can reach any non-Italy country
-  // (Africa unlocks at level 20). Below that, Italy is the only
-  // option so a Travel link would be useless clutter.
-  const showTravel = characterLevel >= COUNTRIES.africa.entryLevel;
   const countryExpeditions = expeditionsForCountry(currentCountry);
 
   return (
@@ -113,13 +109,11 @@ const NavigationBanner = ({
                 />
               );
             })}
-            {showTravel && (
-              <NavLink
-                href='/game/expeditions/travel'
-                label='Travel'
-                active={isRouteActive('/travel')}
-              />
-            )}
+            <NavLink
+              href='/game/expeditions/travel'
+              label='Traveler'
+              active={isRouteActive('/travel')}
+            />
           </>
         )}
       </div>
