@@ -483,6 +483,306 @@ export const expeditionEnemies: ExpeditionEnemies = {
 // has 4 enemies (easy / medium / hard / boss) with sensible scaling.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Africa expedition enemies. Stat blocks transcribed from the
+// gladiatus-bg fansite tables -- damage uses the first of the two
+// reported damage ranges. Life / Crit / Block / Avoid Crit columns are
+// dropped because the current combat engine derives HP from endurance
+// and doesn't read crit/block fields off the enemy yet.
+// ---------------------------------------------------------------------------
+const AFRICA_ENEMIES: ExpeditionEnemies = {
+  voodootemple: {
+    cobra: {
+      name: 'Cobra', image: 'cobra',
+      level: [30, 31], crowns: [892, 1385], experience: [3, 4],
+      strength: [30, 31], dexterity: [97, 100], agility: [115, 119],
+      endurance: [54, 55], charisma: [73, 75], intelligence: [36, 37],
+      armor: [1782, 1973], damage: [50, 62],
+      id: 2000,
+    },
+    giant_scorpion: {
+      name: 'Giant Scorpion', image: 'giant_scorpion',
+      level: [32, 33], crowns: [1025, 1485], experience: [3, 4],
+      strength: [70, 72], dexterity: [96, 99], agility: [156, 161],
+      endurance: [51, 52], charisma: [56, 57], intelligence: [19, 19],
+      armor: [3855, 4580], damage: [54, 66],
+      id: 2001,
+    },
+    awakened_mummy: {
+      name: 'Awakened Mummy', image: 'awakened_mummy',
+      level: [33, 37], crowns: [1016, 1676], experience: [3, 4],
+      strength: [99, 111], dexterity: [57, 64], agility: [57, 64],
+      endurance: [165, 185], charisma: [92, 103], intelligence: [26, 29],
+      armor: [3030, 3664], damage: [71, 87],
+      id: 2002,
+    },
+    seth_priest: {
+      name: 'Seth Priest', image: 'seth_priest',
+      level: [36, 38], crowns: [1319, 2013], experience: [5, 5],
+      strength: [43, 45], dexterity: [162, 171], agility: [239, 252],
+      endurance: [64, 68], charisma: [302, 319], intelligence: [158, 167],
+      armor: [1164, 1250], damage: [99, 122],
+      boss: true, id: 2003,
+    },
+  },
+
+  bridge: {
+    tax_collector: {
+      name: 'Tax Collector', image: 'tax_collector',
+      level: [35, 36], crowns: [1049, 1728], experience: [3, 4],
+      strength: [49, 50], dexterity: [70, 72], agility: [98, 100],
+      endurance: [70, 72], charisma: [183, 189], intelligence: [70, 72],
+      armor: [1279, 1408], damage: [37, 46],
+      id: 2010,
+    },
+    man_eater: {
+      name: 'Man Eater', image: 'man_eater',
+      level: [37, 39], crowns: [1102, 1799], experience: [3, 4],
+      strength: [103, 109], dexterity: [55, 58], agility: [77, 81],
+      endurance: [111, 117], charisma: [129, 136], intelligence: [15, 15],
+      armor: [3215, 3690], damage: [85, 104],
+      id: 2011,
+    },
+    tribal_warrior: {
+      name: 'Tribal Warrior', image: 'tribal_warrior',
+      level: [38, 41], crowns: [1218, 1846], experience: [3, 4],
+      strength: [98, 106], dexterity: [161, 174], agility: [239, 258],
+      endurance: [83, 90], charisma: [93, 100], intelligence: [68, 73],
+      armor: [1741, 1986], damage: [52, 64],
+      id: 2012,
+    },
+    bone_shaman: {
+      name: 'Bone Shaman', image: 'bone_shaman',
+      level: [41, 43], crowns: [1613, 2490], experience: [5, 6],
+      strength: [32, 34], dexterity: [231, 236], agility: [344, 361],
+      endurance: [57, 60], charisma: [258, 270], intelligence: [172, 180],
+      armor: [2080, 2115], damage: [113, 139],
+      boss: true, id: 2013,
+    },
+  },
+
+  bloodcave: {
+    blood_wolf: {
+      name: 'Blood Wolf', image: 'blood_wolf',
+      level: [40, 41], crowns: [1237, 2012], experience: [4, 4],
+      strength: [72, 73], dexterity: [110, 112], agility: [126, 129],
+      endurance: [80, 82], charisma: [112, 114], intelligence: [56, 57],
+      armor: [1437, 1617], damage: [67, 83],
+      id: 2020,
+    },
+    giant_beetle: {
+      name: 'Giant Beetle', image: 'giant_beetle',
+      level: [41, 44], crowns: [1253, 1780], experience: [4, 5],
+      strength: [139, 149], dexterity: [51, 55], agility: [43, 44],
+      endurance: [106, 114], charisma: [114, 123], intelligence: [24, 26],
+      armor: [5200, 6132], damage: [88, 108],
+      id: 2021,
+    },
+    fire_dancer: {
+      name: 'Fire Dancer', image: 'fire_dancer',
+      level: [43, 47], crowns: [1402, 2419], experience: [4, 5],
+      strength: [25, 28], dexterity: [193, 211], agility: [184, 197],
+      endurance: [70, 75], charisma: [195, 213], intelligence: [154, 169],
+      armor: [1234, 1614], damage: [94, 116],
+      id: 2022,
+    },
+    fire_demon: {
+      name: 'Fire Demon', image: 'fire_demon',
+      level: [46, 48], crowns: [1720, 2772], experience: [5, 5],
+      strength: [82, 84], dexterity: [184, 192], agility: [289, 302],
+      endurance: [119, 124], charisma: [354, 369], intelligence: [248, 259],
+      armor: [1667, 1920], damage: [70, 86],
+      boss: true, id: 2023,
+    },
+  },
+
+  lostharbour: {
+    crocodile: {
+      name: 'Crocodile', image: 'crocodile',
+      level: [45, 46], crowns: [1585, 2690], experience: [4, 5],
+      strength: [99, 101], dexterity: [90, 92], agility: [110, 112],
+      endurance: [90, 92], charisma: [78, 80], intelligence: [27, 27],
+      armor: [4145, 5034], damage: [90, 110],
+      id: 2030,
+    },
+    undead_holder: {
+      name: 'Undead Holder', image: 'undead_holder',
+      level: [46, 49], crowns: [1548, 2418], experience: [4, 5],
+      strength: [184, 196], dexterity: [46, 49], agility: [48, 51],
+      endurance: [165, 176], charisma: [64, 68], intelligence: [27, 29],
+      armor: [4919, 6134], damage: [92, 113],
+      id: 2031,
+    },
+    giant_water_snake: {
+      name: 'Giant Water Snake', image: 'giant_water_snake',
+      level: [48, 52], crowns: [1632, 2750], experience: [4, 5],
+      strength: [172, 187], dexterity: [144, 156], agility: [100, 109],
+      endurance: [144, 156], charisma: [84, 91], intelligence: [76, 83],
+      armor: [4765, 5685], damage: [88, 108],
+      id: 2032,
+    },
+    mokele_mbembe: {
+      name: 'Mokele Mbembe', image: 'mokele_mbembe',
+      level: [48, 53], crowns: [2139, 3276], experience: [6, 7],
+      strength: [163, 169], dexterity: [178, 185], agility: [196, 204],
+      endurance: [183, 190], charisma: [232, 241], intelligence: [112, 116],
+      armor: [7774, 9525], damage: [125, 154],
+      boss: true, id: 2033,
+    },
+  },
+
+  umpoktatribe: {
+    umpokta_tribal_warrior: {
+      name: 'Tribal Warrior', image: 'umpokta_tribal_warrior',
+      level: [85, 86], crowns: [3476, 5459], experience: [7, 9],
+      strength: [170, 172], dexterity: [191, 193], agility: [267, 271],
+      endurance: [187, 189], charisma: [178, 180], intelligence: [102, 103],
+      armor: [4353, 4794], damage: [157, 192],
+      id: 2040,
+    },
+    tribal_magician: {
+      name: 'Tribal Magician', image: 'tribal_magician',
+      level: [86, 89], crowns: [3645, 5598], experience: [8, 9],
+      strength: [120, 123], dexterity: [258, 267], agility: [423, 436],
+      endurance: [103, 105], charisma: [421, 436], intelligence: [292, 302],
+      armor: [1901, 2229], damage: [91, 113],
+      id: 2041,
+    },
+    spirit_warrior: {
+      name: 'Spirit Warrior', image: 'spirit_warrior',
+      level: [89, 92], crowns: [3963, 5967], experience: [8, 10],
+      strength: [160, 165], dexterity: [155, 161], agility: [125, 128],
+      endurance: [356, 368], charisma: [249, 257], intelligence: [69, 73],
+      armor: [20243, 23274], damage: [109, 134],
+      id: 2042,
+    },
+    seth_high_priest: {
+      name: 'Seth High Priest', image: 'seth_high_priest',
+      level: [91, 93], crowns: [4650, 7326], experience: [10, 12],
+      strength: [54, 55], dexterity: [318, 325], agility: [509, 520],
+      endurance: [163, 167], charisma: [859, 878], intelligence: [418, 427],
+      armor: [5127, 6049], damage: [208, 343],
+      boss: true, id: 2043,
+    },
+  },
+
+  caravan: {
+    spy: {
+      name: 'Spy', image: 'spy',
+      level: [90, 91], crowns: [4376, 6152], experience: [9, 10],
+      strength: [125, 127], dexterity: [292, 295], agility: [346, 350],
+      endurance: [180, 182], charisma: [220, 222], intelligence: [144, 145],
+      armor: [1898, 2355], damage: [152, 187],
+      id: 2050,
+    },
+    caravan_guard: {
+      name: 'Caravan Guard', image: 'caravan_guard',
+      level: [91, 94], crowns: [3889, 6300], experience: [8, 10],
+      strength: [236, 244], dexterity: [250, 258], agility: [382, 394],
+      endurance: [218, 225], charisma: [286, 296], intelligence: [145, 150],
+      armor: [4586, 5532], damage: [112, 137],
+      id: 2051,
+    },
+    elite_guard: {
+      name: 'Elite Guard', image: 'elite_guard',
+      level: [93, 97], crowns: [3898, 6285], experience: [8, 10],
+      strength: [204, 213], dexterity: [418, 436], agility: [651, 679],
+      endurance: [223, 232], charisma: [195, 203], intelligence: [130, 135],
+      armor: [2724, 3276], damage: [171, 210],
+      id: 2052,
+    },
+    slave_merchant: {
+      name: 'Slave Merchant', image: 'slave_merchant',
+      level: [95, 97], crowns: [5388, 7796], experience: [10, 13],
+      strength: [266, 271], dexterity: [403, 412], agility: [598, 611],
+      endurance: [304, 310], charisma: [665, 679], intelligence: [301, 310],
+      armor: [5443, 6649], damage: [160, 197],
+      boss: true, id: 2053,
+    },
+  },
+
+  mesoaoasis: {
+    elephant: {
+      name: 'Elephant', image: 'elephant',
+      level: [95, 96], crowns: [4185, 6660], experience: [8, 11],
+      strength: [228, 230], dexterity: [142, 144], agility: [166, 168],
+      endurance: [171, 172], charisma: [232, 235], intelligence: [152, 153],
+      armor: [7478, 8987], damage: [175, 215],
+      id: 2060,
+    },
+    cheetah: {
+      name: 'Cheetah', image: 'cheetah',
+      level: [96, 99], crowns: [4172, 6745], experience: [9, 11],
+      strength: [172, 178], dexterity: [408, 420], agility: [537, 554],
+      endurance: [153, 158], charisma: [268, 277], intelligence: [134, 138],
+      armor: [4120, 5026], damage: [133, 163],
+      id: 2061,
+    },
+    demon_lion: {
+      name: 'Demon Lion', image: 'demon_lion',
+      level: [98, 102], crowns: [4623, 7085], experience: [9, 11],
+      strength: [235, 244], dexterity: [367, 382], agility: [548, 571],
+      endurance: [196, 204], charisma: [445, 464], intelligence: [156, 163],
+      armor: [8591, 10116], damage: [211, 259],
+      id: 2062,
+    },
+    demon_elephant: {
+      name: 'Demon Elephant', image: 'demon_elephant',
+      level: [100, 102], crowns: [5622, 7836], experience: [12, 13],
+      strength: [480, 489], dexterity: [225, 229], agility: [489, 499],
+      endurance: [400, 408], charisma: [489, 499], intelligence: [240, 244],
+      armor: [13283, 15422], damage: [292, 359],
+      boss: true, id: 2063,
+    },
+  },
+
+  cliffjumper: {
+    cursed_antelope: {
+      name: 'Cursed Antelope', image: 'cursed_antelope',
+      level: [100, 101], crowns: [4865, 6888], experience: [9, 11],
+      strength: [140, 141], dexterity: [350, 353], agility: [489, 494],
+      endurance: [180, 181], charisma: [315, 318], intelligence: [140, 141],
+      armor: [5814, 6695], damage: [184, 226],
+      id: 2070,
+    },
+    giant_spider: {
+      name: 'Giant Spider', image: 'giant_spider',
+      level: [101, 104], crowns: [4645, 7022], experience: [9, 11],
+      strength: [222, 228], dexterity: [378, 390], agility: [459, 473],
+      endurance: [202, 208], charisma: [353, 364], intelligence: [161, 166],
+      armor: [8096, 9814], damage: [186, 229],
+      id: 2071,
+    },
+    shaman: {
+      name: 'Shaman', image: 'shaman',
+      level: [103, 107], crowns: [4528, 7633], experience: [9, 11],
+      strength: [103, 107], dexterity: [360, 374], agility: [504, 524],
+      endurance: [206, 214], charisma: [504, 524], intelligence: [412, 428],
+      armor: [5944, 7450], damage: [237, 292],
+      id: 2072,
+    },
+    high_shaman: {
+      name: 'High Shaman', image: 'high_shaman',
+      level: [105, 107], crowns: [5603, 9412], experience: [11, 14],
+      strength: [105, 107], dexterity: [577, 588], agility: [882, 898],
+      endurance: [210, 214], charisma: [698, 711], intelligence: [482, 492],
+      armor: [4541, 5478], damage: [339, 416],
+      boss: true, id: 2073,
+    },
+  },
+};
+
+for (const [slug, group] of Object.entries(AFRICA_ENEMIES)) {
+  expeditionEnemies[slug] = group;
+}
+
+// ---------------------------------------------------------------------------
+// Germania / Britannia placeholder enemies. Stat blocks for these
+// continents still rely on the scaled generator below until real
+// fansite values land. Africa is curated above and is excluded from
+// the auto-gen pool.
+// ---------------------------------------------------------------------------
+
 interface ZoneSeed {
   slug: string;
   baseLevel: number;
@@ -490,16 +790,6 @@ interface ZoneSeed {
 }
 
 const NEW_ZONES: ZoneSeed[] = [
-  // Africa
-  { slug: 'voodootemple',  baseLevel: 20, enemies: ['Tribal Initiate', 'Bone Witch', 'Voodoo Priest', 'High Shaman'] },
-  { slug: 'bridge',        baseLevel: 25, enemies: ['Bridge Watcher', 'Painted Warrior', 'Chief\'s Guard', 'Bridge Chieftain'] },
-  { slug: 'bloodcave',     baseLevel: 30, enemies: ['Cave Bat', 'Blood Spider', 'Venom Lurker', 'Cave Matriarch'] },
-  { slug: 'lostharbour',   baseLevel: 35, enemies: ['Smuggler', 'Wharf Brawler', 'Captain\'s Mate', 'Harbour Captain'] },
-  { slug: 'umpoktatribe',  baseLevel: 75, enemies: ['Umpokta Scout', 'Umpokta Warrior', 'Umpokta Veteran', 'Umpokta Warchief'] },
-  { slug: 'caravan',       baseLevel: 80, enemies: ['Caravan Guard', 'Caravan Marksman', 'Caravan Captain', 'Caravan Master'] },
-  { slug: 'mesoaoasis',    baseLevel: 85, enemies: ['Oasis Jackal', 'Sand Crocodile', 'Desert Lion', 'Sphinx'] },
-  { slug: 'cliffjumper',   baseLevel: 90, enemies: ['Cliff Hyena', 'Wing Raptor', 'Cliff Stalker', 'Cliff Roc'] },
-
   // Germania
   { slug: 'cavetemple',     baseLevel: 40,  enemies: ['Cave Acolyte', 'Cave Cultist', 'Cave Inquisitor', 'Cave Highpriest'] },
   { slug: 'greenforest',    baseLevel: 45,  enemies: ['Forest Wolf', 'Boar Brute', 'Forest Bear', 'Forest Wendigo'] },

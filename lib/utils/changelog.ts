@@ -10,6 +10,16 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.20.1',
+    date: '2026-05-22',
+    changes: [
+      'Africa expedition enemies now use hand-curated stat blocks sourced from the gladiatus-bg fansite tables (32 enemies across Voodoo Temple, Bridge, Blood Cave, Lost Harbour, Umpokta Tribe, Caravan, Mesoai Oasis and Cliff Jumper).',
+      'Each Africa enemy now carries real level, gold, XP, STR / DEX / AGI / CON / CHA / INT, armour and damage ranges -- bosses (Seth Priest, Bone Shaman, Fire Demon, Mokele Mbembe, Seth High Priest, Slave Merchant, Demon Elephant, High Shaman) keep their boss flag.',
+      'Africa zone descriptions updated with the fansite\'s strategy hints (Giant Beetle armour spike, Mokele Mbembe armour brutality, Tax Collector farm target, etc.).',
+      'Germania and Britannia still ride the scaled placeholder generator until real stat tables land for those continents.',
+    ],
+  },
+  {
     version: '0.20',
     date: '2026-05-22',
     changes: [
