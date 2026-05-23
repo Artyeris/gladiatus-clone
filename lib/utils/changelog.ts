@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.22.3',
+    date: '2026-05-23',
+    changes: [
+      'Header XP bar root cause fixed: ProgressBar was hard-coded to w-36 (144px) so it never filled its flex-1 slot, leaving empty space between the bar and the percent label and making the row look "off-centre". Switched to w-full + rounded-sm + a clamped progress value.',
+      'XP row labels balanced: left "Lvl N" chip and right "N%" label both sit on w-14 (56px), so the bar now centres cleanly between them and stretches the whole middle column.',
+    ],
+  },
+  {
     version: '0.22.2',
     date: '2026-05-23',
     changes: [

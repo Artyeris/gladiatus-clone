@@ -27,15 +27,22 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
         <Stat power                                value={calculatePower(character)} />
       </div>
       <div className='border-b-cream2 border-b-[3px] w-full' />
-      <div className='flex flex-row gap-2 items-center w-full px-2 py-[2px] font-semibold text-[11px] text-red3'>
-        <div className='w-12 shrink-0'>
-          <Stat src='/images/level.png' alt='level' value={character.level} />
+      <div className='flex flex-row gap-2 items-center w-full px-2 py-1 font-semibold text-[11px] text-red3'>
+        <div className='flex items-center gap-1 w-14 shrink-0' title='level'>
+          <Image
+            src='/images/level.png'
+            width={11}
+            height={11}
+            alt='level'
+            style={{ width: 'auto', height: 'auto' }}
+          />
+          <span className='tabular-nums'>Lvl {character.level}</span>
         </div>
-        <div className='flex-1'>
+        <div className='flex-1 min-w-0'>
           <ProgressBar progress={levelProgress} />
         </div>
         <span
-          className='text-[10px] tabular-nums w-12 text-right shrink-0'
+          className='text-[10px] tabular-nums w-14 text-right shrink-0'
           title={`${character.experience.toLocaleString()} / ${calculateNextLevelExperience(character.level).toLocaleString()} XP`}
         >
           {Math.round(levelProgress)}%

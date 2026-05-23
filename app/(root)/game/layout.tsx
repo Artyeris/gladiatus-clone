@@ -72,7 +72,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
         className='fixed bottom-2 right-3 text-xs font-semibold text-cream2/80 hover:text-gold drop-shadow-md z-[999]'
         title='Open change log'
       >
-        v0.22.2
+        v0.22.3
       </Link>
     </div>
   );
