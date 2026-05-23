@@ -4,16 +4,20 @@ export const generalRoutes = [
     link: '/overview',
   },
   {
-    name: 'Highscore',
-    link: '/highscore',
+    name: 'Guild',
+    link: '/guild',
+  },
+  {
+    name: 'Quests',
+    link: '/quests',
   },
   {
     name: 'Rewards',
     link: '/rewards',
   },
   {
-    name: 'Quests',
-    link: '/quests',
+    name: 'Highscore',
+    link: '/highscore',
   },
 ]
 

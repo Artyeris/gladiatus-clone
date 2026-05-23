@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.22',
+    date: '2026-05-23',
+    changes: [
+      'New Guild sidebar entry sits right after Overview and opens a placeholder "Coming Soon" page -- guild halls, ledgers and shared raids will land there once the multiplayer backend is ready.',
+      'Sidebar general routes reordered: Overview, Guild, Quests, Rewards, Highscore. Quests now sits above Rewards, Highscore moves to the bottom of the block.',
+    ],
+  },
+  {
     version: '0.21.1',
     date: '2026-05-22',
     changes: [
