@@ -10,6 +10,16 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.20.3',
+    date: '2026-05-22',
+    changes: [
+      'Britannia expedition enemies now use hand-curated stat blocks sourced from the gladiatus-bg fansite tables (36 enemies across Bank of Thames, Forest Fortress, The Moor, Camp Cassivellaunus, Kent, The Ford, Camulodunum, Cambria and Mona Isle).',
+      'Bosses Cassi, Callirius, Nodens, Cassivellaunus, Taximagulus, Togodumnus, Caratacus (Camulodunum), Ordovices and Antenociticus keep their boss flag. Caratacus appears in three zones (The Ford, Camulodunum, Cambria) with distinct stats per zone.',
+      'Britannia zone descriptions name-check the actual fansite enemies and pin the realLevel to "entry + 5" -- enemy ranges tightened to match the source tables.',
+      'Placeholder enemy generator retired -- Africa, Germania and Britannia are all hand-curated now, so the scaled buildEnemy / NEW_ZONES code paths are gone.',
+    ],
+  },
+  {
     version: '0.20.2',
     date: '2026-05-22',
     changes: [

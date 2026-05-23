@@ -1104,94 +1104,332 @@ for (const [slug, group] of Object.entries(GERMANIA_ENEMIES)) {
 }
 
 // ---------------------------------------------------------------------------
-// Britannia placeholder enemies. Stat blocks still ride the scaled
-// generator below until real fansite values land. Africa and Germania
-// are curated above and are excluded from the auto-gen pool.
+// Britannia expedition enemies. Same source / same rules as Africa and
+// Germania -- damage uses the first reported range, single-value stats
+// are stored as [N, N], and Life / Crit / Block / Avoid Crit columns
+// are dropped because the combat engine doesn't read them yet.
 // ---------------------------------------------------------------------------
+const BRITANNIA_ENEMIES: ExpeditionEnemies = {
+  bankofthames: {
+    bibroci: {
+      name: 'Bibroci', image: 'bibroci',
+      level: [134, 134], crowns: [6720, 6720], experience: [19, 19],
+      strength: [402, 402], dexterity: [770, 770], agility: [984, 984],
+      endurance: [616, 616], charisma: [703, 703], intelligence: [455, 455],
+      armor: [20736, 20736], damage: [412, 506],
+      id: 2200,
+    },
+    ancalite: {
+      name: 'Ancalite', image: 'ancalite',
+      level: [136, 136], crowns: [7440, 7440], experience: [22, 22],
+      strength: [761, 761], dexterity: [272, 272], agility: [476, 476],
+      endurance: [680, 680], charisma: [1094, 1094], intelligence: [108, 108],
+      armor: [29728, 29728], damage: [670, 822],
+      id: 2201,
+    },
+    cenimagni: {
+      name: 'Cenimagni', image: 'cenimagni',
+      level: [137, 137], crowns: [11680, 11680], experience: [21, 21],
+      strength: [274, 274], dexterity: [1027, 1027], agility: [1198, 1198],
+      endurance: [493, 493], charisma: [1102, 1102], intelligence: [1013, 1013],
+      armor: [9740, 9740], damage: [548, 673],
+      id: 2202,
+    },
+    cassi: {
+      name: 'Cassi', image: 'cassi',
+      level: [137, 137], crowns: [14560, 14560], experience: [21, 21],
+      strength: [794, 794], dexterity: [616, 616], agility: [1006, 1006],
+      endurance: [794, 794], charisma: [1102, 1102], intelligence: [493, 493],
+      armor: [30209, 30209], damage: [443, 543],
+      boss: true, id: 2203,
+    },
+  },
 
-interface ZoneSeed {
-  slug: string;
-  baseLevel: number;
-  enemies: [string, string, string, string]; // [easy, medium, hard, boss]
+  forestfortress: {
+    forest_elf: {
+      name: 'Forest Elf', image: 'forest_elf',
+      level: [140, 140], crowns: [9887, 9887], experience: [14, 14],
+      strength: [756, 756], dexterity: [1050, 1050], agility: [1323, 1323],
+      endurance: [840, 840], charisma: [1078, 1078], intelligence: [448, 448],
+      armor: [12604, 12604], damage: [517, 635],
+      id: 2210,
+    },
+    dwarf: {
+      name: 'Dwarf', image: 'dwarf',
+      level: [146, 146], crowns: [11304, 11304], experience: [17, 17],
+      strength: [1314, 1314], dexterity: [328, 328], agility: [204, 204],
+      endurance: [1372, 1372], charisma: [459, 459], intelligence: [262, 262],
+      armor: [16506, 16506], damage: [686, 842],
+      id: 2211,
+    },
+    british_chariot: {
+      name: 'British Chariot', image: 'british_chariot',
+      level: [144, 144], crowns: [8248, 8248], experience: [14, 14],
+      strength: [748, 748], dexterity: [792, 792], agility: [1260, 1260],
+      endurance: [777, 777], charisma: [1108, 1108], intelligence: [518, 518],
+      armor: [46430, 46430], damage: [554, 680],
+      id: 2212,
+    },
+    callirius: {
+      name: 'Callirius', image: 'callirius',
+      level: [146, 146], crowns: [8492, 8492], experience: [19, 19],
+      strength: [876, 876], dexterity: [912, 912], agility: [1686, 1686],
+      endurance: [671, 671], charisma: [511, 511], intelligence: [963, 963],
+      armor: [30473, 30473], damage: [786, 965],
+      boss: true, id: 2213,
+    },
+  },
+
+  themoor: {
+    lindow_man: {
+      name: 'Lindow Man', image: 'lindow_man',
+      level: [147, 147], crowns: [11928, 11928], experience: [17, 17],
+      strength: [708, 708], dexterity: [885, 885], agility: [1401, 1401],
+      endurance: [985, 985], charisma: [1024, 1024], intelligence: [585, 585],
+      armor: [50769, 50769], damage: [687, 844],
+      id: 2220,
+    },
+    lindow_woman: {
+      name: 'Lindow Woman', image: 'lindow_woman',
+      level: [152, 152], crowns: [10997, 10997], experience: [14, 14],
+      strength: [1216, 1216], dexterity: [873, 873], agility: [904, 904],
+      endurance: [881, 881], charisma: [1542, 1542], intelligence: [608, 608],
+      armor: [44143, 44143], damage: [678, 833],
+      id: 2221,
+    },
+    bandit: {
+      name: 'Bandit', image: 'bandit',
+      level: [157, 157], crowns: [12596, 12596], experience: [18, 18],
+      strength: [1350, 1350], dexterity: [667, 667], agility: [934, 934],
+      endurance: [910, 910], charisma: [2088, 2088], intelligence: [628, 628],
+      armor: [38410, 38410], damage: [967, 1186],
+      id: 2222,
+    },
+    nodens: {
+      name: 'Nodens', image: 'nodens',
+      level: [158, 158], crowns: [11646, 11646], experience: [18, 18],
+      strength: [474, 474], dexterity: [1185, 1185], agility: [1603, 1603],
+      endurance: [347, 347], charisma: [1880, 1880], intelligence: [1896, 1896],
+      armor: [44965, 44965], damage: [729, 895],
+      boss: true, id: 2223,
+    },
+  },
+
+  campcassivellaunus: {
+    chariot_rider: {
+      name: 'Chariot Rider', image: 'chariot_rider',
+      level: [163, 163], crowns: [12663, 12663], experience: [16, 16],
+      strength: [1010, 1010], dexterity: [1222, 1222], agility: [2339, 2339],
+      endurance: [1075, 1075], charisma: [1711, 1711], intelligence: [978, 978],
+      armor: [25444, 25444], damage: [652, 800],
+      id: 2230,
+    },
+    mercenary: {
+      name: 'Mercenary', image: 'mercenary',
+      level: [163, 163], crowns: [11191, 11191], experience: [17, 17],
+      strength: [1271, 1271], dexterity: [1344, 1344], agility: [2282, 2282],
+      endurance: [1075, 1075], charisma: [1483, 1483], intelligence: [423, 423],
+      armor: [38098, 38098], damage: [978, 1201],
+      id: 2231,
+    },
+    fflur: {
+      name: 'Fflur', image: 'fflur',
+      level: [165, 165], crowns: [12602, 12602], experience: [17, 17],
+      strength: [1682, 1682], dexterity: [1320, 1320], agility: [750, 750],
+      endurance: [1650, 1650], charisma: [2367, 2367], intelligence: [429, 429],
+      armor: [23291, 23291], damage: [990, 1216],
+      id: 2232,
+    },
+    cassivellaunus: {
+      name: 'Cassivellaunus', image: 'cassivellaunus',
+      level: [167, 167], crowns: [13084, 13084], experience: [21, 21],
+      strength: [1536, 1536], dexterity: [1544, 1544], agility: [1753, 1753],
+      endurance: [1703, 1703], charisma: [1636, 1636], intelligence: [1002, 1002],
+      armor: [30589, 30589], damage: [822, 1010],
+      boss: true, id: 2233,
+    },
+  },
+
+  kent: {
+    cingetorix: {
+      name: 'Cingetorix', image: 'cingetorix',
+      level: [171, 171], crowns: [11458, 11458], experience: [17, 17],
+      strength: [1128, 1128], dexterity: [1539, 1539], agility: [1376, 1376],
+      endurance: [1231, 1231], charisma: [957, 957], intelligence: [786, 786],
+      armor: [45303, 45303], damage: [921, 1131],
+      id: 2240,
+    },
+    segovax: {
+      name: 'Segovax', image: 'segovax',
+      level: [174, 174], crowns: [10509, 10509], experience: [20, 20],
+      strength: [1670, 1670], dexterity: [1435, 1435], agility: [1522, 1522],
+      endurance: [1995, 1995], charisma: [2192, 2192], intelligence: [1009, 1009],
+      armor: [33221, 33221], damage: [1018, 1249],
+      id: 2241,
+    },
+    carvilius: {
+      name: 'Carvilius', image: 'carvilius',
+      level: [178, 178], crowns: [9900, 9900], experience: [20, 20],
+      strength: [854, 854], dexterity: [1691, 1691], agility: [1744, 1744],
+      endurance: [890, 890], charisma: [1246, 1246], intelligence: [1139, 1139],
+      armor: [42402, 42402], damage: [1069, 1312],
+      id: 2242,
+    },
+    taximagulus: {
+      name: 'Taximagulus', image: 'taximagulus',
+      level: [178, 178], crowns: [16532, 16532], experience: [23, 23],
+      strength: [356, 356], dexterity: [1557, 1557], agility: [1993, 1993],
+      endurance: [1139, 1139], charisma: [2492, 2492], intelligence: [1495, 1495],
+      armor: [30070, 30070], damage: [1096, 1345],
+      boss: true, id: 2243,
+    },
+  },
+
+  theford: {
+    bloodleech: {
+      name: 'Bloodleech', image: 'bloodleech',
+      level: [180, 180], crowns: [13036, 13036], experience: [22, 22],
+      strength: [1332, 1332], dexterity: [1800, 1800], agility: [1638, 1638],
+      endurance: [1440, 1440], charisma: [1134, 1134], intelligence: [936, 936],
+      armor: [52445, 52445], damage: [970, 1190],
+      id: 2250,
+    },
+    water_spider: {
+      name: 'Water Spider', image: 'water_spider',
+      level: [186, 186], crowns: [10943, 10943], experience: [20, 20],
+      strength: [1971, 1971], dexterity: [1720, 1720], agility: [1822, 1822],
+      endurance: [2232, 2232], charisma: [2604, 2604], intelligence: [1190, 1190],
+      armor: [40161, 40161], damage: [1002, 1230],
+      id: 2251,
+    },
+    // Caratacus shows up as a non-boss in The Ford, again as a boss
+    // in Camulodunum, and yet again as a regular enemy in Cambria.
+    // Stats and level differ in each zone, so each appearance is a
+    // distinct entry under its zone's key.
+    caratacus: {
+      name: 'Caratacus', image: 'caratacus',
+      level: [187, 187], crowns: [11237, 11237], experience: [20, 20],
+      strength: [1009, 1009], dexterity: [1963, 1963], agility: [2028, 2028],
+      endurance: [1047, 1047], charisma: [1439, 1439], intelligence: [1346, 1346],
+      armor: [48640, 48640], damage: [1151, 1413],
+      id: 2252,
+    },
+    togodumnus: {
+      name: 'Togodumnus', image: 'togodumnus',
+      level: [190, 190], crowns: [16158, 16158], experience: [25, 25],
+      strength: [418, 418], dexterity: [1900, 1900], agility: [2394, 2394],
+      endurance: [1368, 1368], charisma: [2660, 2660], intelligence: [1786, 1786],
+      armor: [33576, 33576], damage: [1316, 1615],
+      boss: true, id: 2253,
+    },
+  },
+
+  camulodunum: {
+    town_guard: {
+      name: 'Town Guard', image: 'town_guard',
+      level: [191, 191], crowns: [14428, 14428], experience: [23, 23],
+      strength: [1566, 1590], dexterity: [1862, 2134], agility: [1938, 1969],
+      endurance: [1680, 1707], charisma: [1337, 1358], intelligence: [1107, 1125],
+      armor: [56654, 60171], damage: [1088, 1284],
+      id: 2260,
+    },
+    trinovantes_settler: {
+      name: 'Trinovantes Settler', image: 'trinovantes_settler',
+      level: [193, 195], crowns: [16496, 16496], experience: [24, 24],
+      strength: [2007, 2652], dexterity: [1978, 1998], agility: [2094, 2115],
+      endurance: [2238, 2769], charisma: [2972, 3003], intelligence: [1389, 1404],
+      armor: [43412, 46620], damage: [1188, 1188],
+      id: 2261,
+    },
+    trinovantes_warrior: {
+      name: 'Trinovantes Warrior', image: 'trinovantes_warrior',
+      level: [195, 195], crowns: [18347, 18347], experience: [23, 23],
+      strength: [1170, 1170], dexterity: [2291, 2314], agility: [2388, 2388],
+      endurance: [1209, 1209], charisma: [1709, 1709], intelligence: [1560, 1576],
+      armor: [56898, 56898], damage: [1231, 1456],
+      id: 2262,
+    },
+    caratacus: {
+      name: 'Caratacus', image: 'caratacus',
+      level: [197, 197], crowns: [22120, 22120], experience: [26, 26],
+      strength: [512, 512], dexterity: [2019, 2019], agility: [2758, 2758],
+      endurance: [1576, 1576], charisma: [3378, 3378], intelligence: [2048, 2048],
+      armor: [38791, 38791], damage: [1274, 1563],
+      boss: true, id: 2263,
+    },
+  },
+
+  cambria: {
+    deceangli: {
+      name: 'Deceangli', image: 'deceangli',
+      level: [200, 200], crowns: [17522, 17522], experience: [23, 23],
+      strength: [1400, 1400], dexterity: [2450, 2450], agility: [2240, 2240],
+      endurance: [1760, 1760], charisma: [1540, 1540], intelligence: [1280, 1280],
+      armor: [66490, 66490], damage: [1478, 1814],
+      id: 2270,
+    },
+    caratacus: {
+      name: 'Caratacus', image: 'caratacus',
+      level: [199, 199], crowns: [21073, 21073], experience: [24, 24],
+      strength: [517, 517], dexterity: [2039, 2039], agility: [2786, 2786],
+      endurance: [1592, 1592], charisma: [3412, 3412], intelligence: [2069, 2069],
+      armor: [43661, 43661], damage: [1287, 1579],
+      id: 2271,
+    },
+    silures: {
+      name: 'Silures', image: 'silures',
+      level: [206, 206], crowns: [15505, 15505], experience: [26, 26],
+      strength: [1359, 1359], dexterity: [2678, 2678], agility: [2811, 2811],
+      endurance: [1442, 1442], charisma: [2018, 2018], intelligence: [1812, 1812],
+      armor: [60172, 60172], damage: [1332, 1635],
+      id: 2272,
+    },
+    ordovices: {
+      name: 'Ordovices', image: 'ordovices',
+      level: [209, 209], crowns: [20627, 20627], experience: [33, 33],
+      strength: [627, 627], dexterity: [2403, 2821], agility: [2852, 3218],
+      endurance: [1839, 1839], charisma: [3950, 3950], intelligence: [2424, 2424],
+      armor: [49630, 51463], damage: [1416, 1866],
+      boss: true, id: 2273,
+    },
+  },
+
+  monaisle: {
+    bard: {
+      name: 'Bard', image: 'bard',
+      level: [211, 211], crowns: [20922, 20922], experience: [24, 24],
+      strength: [2152, 2152], dexterity: [2848, 2848], agility: [2658, 2658],
+      endurance: [2278, 2278], charisma: [1846, 1846], intelligence: [1519, 1519],
+      armor: [51876, 51876], damage: [1527, 1874],
+      id: 2280,
+    },
+    seer: {
+      name: 'Seer', image: 'seer',
+      level: [214, 214], crowns: [13291, 13291], experience: [29, 29],
+      strength: [2073, 2073], dexterity: [2754, 2754], agility: [2948, 2948],
+      endurance: [2160, 2160], charisma: [4082, 4082], intelligence: [1900, 1900],
+      armor: [56335, 56335], damage: [1330, 1632],
+      id: 2281,
+    },
+    druid: {
+      name: 'Druid', image: 'druid',
+      level: [216, 216], crowns: [17306, 17306], experience: [26, 26],
+      strength: [1583, 1583], dexterity: [2728, 2728], agility: [3220, 3220],
+      endurance: [1669, 1669], charisma: [2321, 2321], intelligence: [2097, 2097],
+      armor: [76957, 76957], damage: [1384, 1698],
+      id: 2282,
+    },
+    antenociticus: {
+      name: 'Antenociticus', image: 'antenociticus',
+      level: [216, 216], crowns: [19110, 19110], experience: [30, 30],
+      strength: [734, 734], dexterity: [2268, 3240], agility: [2494, 3704],
+      endurance: [2116, 2116], charisma: [3405, 4536], intelligence: [2592, 2764],
+      armor: [55114, 62361], damage: [1596, 1959],
+      boss: true, id: 2283,
+    },
+  },
+};
+
+for (const [slug, group] of Object.entries(BRITANNIA_ENEMIES)) {
+  expeditionEnemies[slug] = group;
 }
-
-const NEW_ZONES: ZoneSeed[] = [
-  // Britannia
-  { slug: 'bankofthames',       baseLevel: 120, enemies: ['Briton Levy', 'Briton Skirmisher', 'Briton Centurion', 'River Warlord'] },
-  { slug: 'forestfortress',     baseLevel: 130, enemies: ['Fortress Sentry', 'Fortress Archer', 'Fortress Captain', 'Forest Chieftain'] },
-  { slug: 'themoor',            baseLevel: 140, enemies: ['Mire Wraith', 'Moor Hound', 'Bog Stalker', 'Moor Hag'] },
-  { slug: 'campcassivellaunus', baseLevel: 150, enemies: ['Camp Conscript', 'Camp Veteran', 'Camp Champion', 'Cassivellaunus'] },
-  { slug: 'kent',               baseLevel: 160, enemies: ['Kent Raider', 'Kent Pikeman', 'Kent Marauder', 'Kent Warlord'] },
-  { slug: 'theford',            baseLevel: 170, enemies: ['Ford Ambusher', 'Ford Champion', 'Ford Slayer', 'Ford King'] },
-  { slug: 'camulodunum',        baseLevel: 180, enemies: ['Ruin Scavenger', 'Ruin Berserker', 'Ruin Praetorian', 'Ruin Tyrant'] },
-  { slug: 'cambria',            baseLevel: 190, enemies: ['Cambrian Wolf', 'Cambrian Troll', 'Cambrian Giant', 'Cambrian Lord'] },
-  { slug: 'monaisle',           baseLevel: 200, enemies: ['Druid Initiate', 'Druid Warden', 'Arch-Druid', 'Mona Hierophant'] },
-];
-
-const ROLE_OFFSETS = [4, 8, 12, 16] as const; // easy / medium / hard / boss
-const ROLE_KEYS    = ['easy', 'medium', 'hard', 'boss'] as const;
-
-function statRange(centre: number, swing = 0.12): [number, number] {
-  const lo = Math.max(1, Math.round(centre * (1 - swing)));
-  const hi = Math.max(lo, Math.round(centre * (1 + swing)));
-  return [lo, hi];
-}
-function levelArray(lvl: number): number[] {
-  return [Math.max(1, lvl - 1), lvl, lvl + 1];
-}
-
-let nextEnemyId = 1000;
-function buildEnemy(level: number, name: string, isBoss: boolean): EnemyStatsInterface {
-  // Bosses get a 1.4x stat multiplier on top of role scaling.
-  const m = isBoss ? 1.4 : 1.0;
-  const baseStat = (factor: number) => Math.round(level * factor * m);
-  const [strLo, strHi] = statRange(baseStat(2.0));
-  const [endLo, endHi] = statRange(baseStat(2.0));
-  const [dexLo, dexHi] = statRange(baseStat(5.0));
-  const [agiLo, agiHi] = statRange(baseStat(5.0));
-  const [intLo, intHi] = statRange(baseStat(1.5));
-  const [chaLo, chaHi] = statRange(baseStat(2.0));
-  const expLo = Math.max(1, Math.floor(level * 0.3));
-  const expHi = Math.max(expLo, Math.floor(level * 0.5 * (isBoss ? 2 : 1)));
-  const gpLo = Math.max(10, Math.floor(level * 12 * (isBoss ? 2 : 1)));
-  const gpHi = Math.max(gpLo, Math.floor(level * 28 * (isBoss ? 2 : 1)));
-  const arLo = Math.max(10, Math.floor(level * 15 * m));
-  const arHi = Math.max(arLo, Math.floor(level * 30 * m));
-  const dmLo = Math.max(1,  Math.floor(level * 2 * m));
-  const dmHi = Math.max(dmLo, Math.floor(level * 4 * m));
-
-  const id = nextEnemyId++;
-  const imageSlug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
-  return {
-    name,
-    image: imageSlug,
-    level: levelArray(level),
-    strength:     [strLo, strHi],
-    endurance:    [endLo, endHi],
-    dexterity:    [dexLo, dexHi],
-    agility:      [agiLo, agiHi],
-    intelligence: [intLo, intHi],
-    charisma:     [chaLo, chaHi],
-    experience:   [expLo, expHi],
-    crowns:       [gpLo, gpHi],
-    armor:        [arLo, arHi],
-    damage:       [dmLo, dmHi],
-    boss: isBoss || undefined,
-    id,
-  };
-}
-
-for (const zone of NEW_ZONES) {
-  const group: Record<string, EnemyStatsInterface> = {};
-  for (let i = 0; i < 4; i++) {
-    const role = ROLE_KEYS[i];
-    const level = zone.baseLevel + ROLE_OFFSETS[i];
-    group[role] = buildEnemy(level, zone.enemies[i], i === 3);
-  }
-  expeditionEnemies[zone.slug] = group;
-}
-
