@@ -88,9 +88,12 @@ const TravelContent = ({
         <div className='flex flex-col gap-1 px-3 py-3 text-sm'>
           {destinations.map((id) => {
             const info = COUNTRIES[id];
-            const isUnlocked = unlockedCountries.includes(id) || id === 'italy';
             const meetsLevel = characterLevel >= info.entryLevel;
-            const cost = isUnlocked ? 0 : info.travelCost;
+            // Every destination charges its fare every trip (Italy is
+            // the only zero-cost row because COUNTRIES.italy.travelCost
+            // is 0). unlockedCountries is still tracked for stats but
+            // no longer grants a discount.
+            const cost = info.travelCost;
             const canAfford = characterGold >= cost;
             const enabled = meetsLevel && canAfford;
             return (

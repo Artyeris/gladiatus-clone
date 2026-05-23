@@ -44,11 +44,12 @@ export async function travelTo({ country }: { country: Country }) {
     return { error: { message: `You are already in ${info.name}` } };
   }
 
-  // Italy travel is always free; new countries charge the entry fee
-  // only the first time the player visits them.
+  // Every trip pays the destination's fare -- there is no first-visit
+  // discount any more. Italy alone is free to return to (travelCost
+  // = 0 in COUNTRIES) because it's the home country.
+  const cost = info.travelCost;
   const unlocked: Country[] = ((character.unlockedCountries as Country[]) ?? ['italy']);
   const alreadyUnlocked = unlocked.includes(country) || country === 'italy';
-  const cost = alreadyUnlocked ? 0 : info.travelCost;
 
   if ((character.crowns ?? 0) < cost) {
     return { error: { message: `Need ${cost} gold to travel to ${info.name}` } };

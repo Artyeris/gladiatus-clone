@@ -10,6 +10,15 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.21.1',
+    date: '2026-05-22',
+    changes: [
+      'Travel now charges its full fare on every trip -- the first-visit-only discount is gone. Africa always costs 1,250 gold, Germania 3,000, Britannia 5,500. Italy is the only free destination (returning home).',
+      'Traveler page rows show the destination\'s gold cost every time (no more "Free" after a previous visit).',
+      'unlockedCountries is still tracked for stats but no longer grants a price discount.',
+    ],
+  },
+  {
     version: '0.21',
     date: '2026-05-22',
     changes: [
