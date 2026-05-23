@@ -10,6 +10,13 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.22.4',
+    date: '2026-05-23',
+    changes: [
+      'Header card grown from h-[75px] to h-[85px] so the XP row no longer clips at the bottom -- the "Lvl N" label was being half-cut by the brown card\'s overflow-hidden. The two sibling timer cards (expedition / arena) bumped to the same height to keep the row visually balanced.',
+    ],
+  },
+  {
     version: '0.22.3',
     date: '2026-05-23',
     changes: [

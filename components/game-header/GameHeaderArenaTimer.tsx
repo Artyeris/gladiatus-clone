@@ -39,7 +39,7 @@ const GameHeaderArenaTimer = ({ character }: { character: CharacterInterface }) 
   let progressPercentage = Math.round(((ARENA_COOLDOWN - timeRemaining) / ARENA_COOLDOWN) * 100)
 
   return (
-    <div className='flex flex-col w-full brown-card h-[75px] drop-shadow-2xl items-center justify-center gap-2 text-xs rounded-sm'>
+    <div className='flex flex-col w-full brown-card h-[85px] drop-shadow-2xl items-center justify-center gap-2 text-xs rounded-sm'>
         <CooldownTimer 
           name='arena'
           message='Go to arena'

@@ -19,7 +19,7 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
   // share the same fixed width so the progress bar visually centres
   // on the row's midline.
   return (
-    <div className='flex flex-col brown-card w-full h-[75px] drop-shadow-2xl rounded-sm overflow-hidden'>
+    <div className='flex flex-col brown-card w-full h-[85px] drop-shadow-2xl rounded-sm overflow-hidden'>
       <div className='grid grid-cols-2 px-2 py-[2px] text-[11px] font-semibold text-red3 gap-x-3 gap-y-[2px]'>
         <Stat src='/images/crowns.png' alt='gold'  value={character.crowns} />
         <Stat diamond                              value={(character as any).diamonds ?? 0} />
@@ -27,7 +27,7 @@ const GameHeaderStats = ({ character }: { character: CharacterInterface }) => {
         <Stat power                                value={calculatePower(character)} />
       </div>
       <div className='border-b-cream2 border-b-[3px] w-full' />
-      <div className='flex flex-row gap-2 items-center w-full px-2 py-1 font-semibold text-[11px] text-red3'>
+      <div className='flex flex-row gap-2 items-center w-full px-2 py-[3px] font-semibold text-[11px] text-red3'>
         <div className='flex items-center gap-1 w-14 shrink-0' title='level'>
           <Image
             src='/images/level.png'
