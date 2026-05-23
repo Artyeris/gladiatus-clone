@@ -138,12 +138,12 @@ function NavLink({
   if (locked) {
     return (
       <div
-        className='relative h-9 w-full flex flex-col items-center justify-center rounded-sm red-card opacity-50 select-none cursor-not-allowed'
+        className='relative min-h-9 w-full flex flex-col items-center justify-center text-center rounded-sm red-card opacity-50 select-none cursor-not-allowed py-1'
         title={requirement ? `Unlocks ${requirement}` : 'Locked'}
       >
-        <span className='text-cream2 font-semibold text-sm tracking-wide line-through'>{label}</span>
+        <span className='text-cream2 font-semibold text-sm tracking-wide line-through leading-tight'>{label}</span>
         {requirement && (
-          <span className='text-cream2 text-[9px] font-normal opacity-90 -mt-1'>
+          <span className='text-cream2 text-[9px] font-normal opacity-90 -mt-0.5'>
             {requirement}
           </span>
         )}
@@ -155,7 +155,7 @@ function NavLink({
     <Link
       href={href}
       prefetch
-      className={`relative h-9 w-full flex items-center justify-center rounded-sm text-cream2 font-semibold text-sm tracking-wide drop-shadow hover:text-gold transition ${
+      className={`relative min-h-9 w-full flex items-center justify-center text-center rounded-sm text-cream2 font-semibold text-sm tracking-wide drop-shadow hover:text-gold transition py-1 ${
         active ? '' : 'red-card hover:border-gold'
       }`}
     >
@@ -171,7 +171,7 @@ function NavLink({
           }}
         />
       )}
-      <span className='relative px-3'>{label}</span>
+      <span className='relative px-3 text-center leading-tight'>{label}</span>
     </Link>
   );
 }

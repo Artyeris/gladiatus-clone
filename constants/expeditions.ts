@@ -30,14 +30,14 @@ export const COUNTRIES: Record<Country, CountryInfo> = {
     id: 'germania',
     name: 'Germania',
     entryLevel: 40,
-    travelCost: 4250,
+    travelCost: 3000,
     blurb: 'Cursed forests, death hills and dragon remains. Dark, advanced expedition territory.',
   },
   britannia: {
     id: 'britannia',
     name: 'Britannia',
     entryLevel: 120,
-    travelCost: 6750,
+    travelCost: 5500,
     blurb: 'Endgame frontier. Forest fortresses, moors and the ritual island of Mona.',
   },
 };

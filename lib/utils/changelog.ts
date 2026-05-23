@@ -10,46 +10,18 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.20.3',
+    version: '0.21',
     date: '2026-05-22',
     changes: [
-      'Britannia expedition enemies now use hand-curated stat blocks sourced from the gladiatus-bg fansite tables (36 enemies across Bank of Thames, Forest Fortress, The Moor, Camp Cassivellaunus, Kent, The Ford, Camulodunum, Cambria and Mona Isle).',
-      'Bosses Cassi, Callirius, Nodens, Cassivellaunus, Taximagulus, Togodumnus, Caratacus (Camulodunum), Ordovices and Antenociticus keep their boss flag. Caratacus appears in three zones (The Ford, Camulodunum, Cambria) with distinct stats per zone.',
-      'Britannia zone descriptions name-check the actual fansite enemies and pin the realLevel to "entry + 5" -- enemy ranges tightened to match the source tables.',
-      'Placeholder enemy generator retired -- Africa, Germania and Britannia are all hand-curated now, so the scaled buildEnemy / NEW_ZONES code paths are gone.',
-    ],
-  },
-  {
-    version: '0.20.2',
-    date: '2026-05-22',
-    changes: [
-      'Germania expedition enemies now use hand-curated stat blocks sourced from the gladiatus-bg fansite tables (36 enemies across Cave Temple, Green Forest, Cursed Village, Death Hill, Vandal Village, Mine, Teuton Camp, Koman Mountain and Dragon Remains).',
-      'Bosses Soulless, Werebear, Abomination, Necromancer Prince, Death Knight, Tatzelwurm, Seidr, Dragon and Dracolich keep their boss flag and the fansite-noted spike stats (e.g. Werebear "divine" damage, Tatzelwurm 19k+ armour, Dragon 1.1k+ charisma).',
-      'Germania zone descriptions updated with the fansite\'s strategy hints (Soulless armour wall, Werebear damage spike, Mine = friendly farm zone, etc.). Enemy level strings tightened to match the actual ranges.',
-      'Britannia still rides the scaled placeholder generator until real stat tables land for that continent.',
-    ],
-  },
-  {
-    version: '0.20.1',
-    date: '2026-05-22',
-    changes: [
-      'Africa expedition enemies now use hand-curated stat blocks sourced from the gladiatus-bg fansite tables (32 enemies across Voodoo Temple, Bridge, Blood Cave, Lost Harbour, Umpokta Tribe, Caravan, Mesoai Oasis and Cliff Jumper).',
-      'Each Africa enemy now carries real level, gold, XP, STR / DEX / AGI / CON / CHA / INT, armour and damage ranges -- bosses (Seth Priest, Bone Shaman, Fire Demon, Mokele Mbembe, Seth High Priest, Slave Merchant, Demon Elephant, High Shaman) keep their boss flag.',
-      'Africa zone descriptions updated with the fansite\'s strategy hints (Giant Beetle armour spike, Mokele Mbembe armour brutality, Tax Collector farm target, etc.).',
-      'Germania and Britannia still ride the scaled placeholder generator until real stat tables land for those continents.',
-    ],
-  },
-  {
-    version: '0.20',
-    date: '2026-05-22',
-    changes: [
-      'World expanded with three new countries: Africa (entry level 20, 1250 gold), Germania (level 40, 4250 gold) and Britannia (level 120, 6750 gold).',
-      '26 new expeditions added across the new continents -- Voodoo Temple, Bridge, Blood Cave, Lost Harbour, Umpokta Tribe, Caravan, Mesoai Oasis, Cliff Jumper (Africa); Cave Temple, Green Forest, Cursed Village, Death Hill, Vandal Village, Mine, Teuton Camp, Koman Mountain, Dragon Remains (Germania); Bank of Thames, Forest Fortress, The Moor, Camp Cassivellaunus, Kent, The Ford, Camulodunum, Cambria, Mona Isle (Britannia).',
-      'Each new zone seeds four enemies (easy / medium / hard / boss) auto-scaled from the zone\'s entry level. Bosses get a 1.4x stat multiplier.',
-      'Sidebar expedition list now filters to the country the gladiator is currently standing in. The "Traveler" entry in the Expedition tab is always visible and opens the Hermit-style travel page.',
-      'Traveler page redesigned to match the original Gladiatus Hermit: title bar, "Description" lore card with portrait + flavour text, and "Travel to another country" radio list that hides the current location. Each row shows "(Minimum level: X, Costs: Y gold)" inline with an italic pitch underneath.',
-      'Character now stores currentCountry / unlockedCountries (Italy is always unlocked).',
-      'Settings: Developer Options gained "Level +1 / +10 / +100" buttons to fast-forward the character through level gates while testing.',
+      'New continents: Africa (entry level 20, 1,250 gold), Germania (level 40, 3,000 gold) and Britannia (level 120, 5,500 gold). Travel costs rebalanced to the original Gladiatus values.',
+      '26 new expedition zones across the three continents -- Voodoo Temple, Bridge, Blood Cave, Lost Harbour, Umpokta Tribe, Caravan, Mesoai Oasis, Cliff Jumper (Africa); Cave Temple, Green Forest, Cursed Village, Death Hill, Vandal Village, Mine, Teuton Camp, Koman Mountain, Dragon Remains (Germania); Bank of Thames, Forest Fortress, The Moor, Camp Cassivellaunus, Kent, The Ford, Camulodunum, Cambria, Mona Isle (Britannia).',
+      '104 new expedition enemies (4 per zone) with hand-curated stat blocks transcribed from the gladiatus-bg fansite tables -- real level, gold, XP, STR / DEX / AGI / CON / CHA / INT, armour and damage ranges per enemy. Bosses keep their boss flag.',
+      'Caratacus appears in three different Britannia zones (The Ford, Camulodunum, Cambria) with distinct stats per zone.',
+      'Sidebar expedition list filters to the country the gladiator is currently standing in. The "Traveler" entry in the Expedition tab is always visible and opens the Hermit-style travel page.',
+      'Traveler page matches the original Gladiatus Hermit: title bar, "Description" lore card with portrait + flavour text, and "Travel to another country" radio list that hides the current location. Each row shows "(Minimum level: X, Costs: Y gold)" inline with an italic pitch underneath.',
+      'Character now stores currentCountry / unlockedCountries (Italy is always unlocked). First visit to a country charges the travel fee; returning is free.',
+      'Sidebar NavLink wraps long names cleanly -- "Camp Cassivellaunus" no longer left-aligns on the second line; min-h replaces the fixed h-9 so two-line entries grow vertically.',
+      'Settings -> Developer Options gained "Level +1 / +10 / +100" buttons to fast-forward through level / country gates while testing.',
     ],
   },
   {
