@@ -10,6 +10,16 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.22.2',
+    date: '2026-05-23',
+    changes: [
+      'Compact number formatter is now tiered: under 1 000 stays raw, then "Nk" (1 000+), "Nmil" (1 000 000+), "Nbil" (1 000 000 000+). Replaces the previous flat "k-only" abbreviation.',
+      'Every compacted number now shows the full integer in a tooltip on hover (e.g. hover "23mil" -> "23,977,977"). Wrapped in a tiny CompactNumber component so the title attribute is always in sync with the displayed value.',
+      'Top XP row is now visually balanced: the level chip on the left and the percent label on the right share the same w-12 fixed width, so the progress bar centres on the row\'s midline instead of being pushed off-centre by the level digits.',
+      'XP percent label gains a tooltip showing the raw experience / next-level XP integers.',
+    ],
+  },
+  {
     version: '0.22.1',
     date: '2026-05-23',
     changes: [

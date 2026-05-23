@@ -37,16 +37,24 @@ export function calculateProgressPercent(first: number, second: number) {
   return (first / second) * 100;
 }
 
-// Compact integer formatter for stat displays. Numbers under 10 000
-// stay as-is; larger values are abbreviated to thousands (23 977 977
-// -> "23977k") so they fit alongside small counters in the same row
-// without breaking the layout. Negative values keep their sign.
+// Tiered compact formatter for stat displays. Falls back to the raw
+// integer under 1 000, then steps through k / mil / bil / tril.
+// Negative values keep their sign. Pair with `CompactNumber` to get a
+// tooltip showing the full value on hover.
+//
+//   999            -> "999"
+//   78 588         -> "78k"
+//   23 977 977     -> "23mil"
+//   1 234 567 890  -> "1bil"
 export function formatCompactNumber(value: number): string {
   if (!Number.isFinite(value)) return '0';
   const abs = Math.abs(value);
-  if (abs < 10_000) return Math.trunc(value).toString();
   const sign = value < 0 ? '-' : '';
-  return `${sign}${Math.floor(abs / 1000)}k`;
+  if (abs < 1_000) return `${sign}${Math.trunc(abs)}`;
+  if (abs < 1_000_000) return `${sign}${Math.floor(abs / 1_000)}k`;
+  if (abs < 1_000_000_000) return `${sign}${Math.floor(abs / 1_000_000)}mil`;
+  if (abs < 1_000_000_000_000) return `${sign}${Math.floor(abs / 1_000_000_000)}bil`;
+  return `${sign}${Math.floor(abs / 1_000_000_000_000)}tril`;
 }
 
 export function canFight({ time, fight }: { time: number, fight: string }) {
