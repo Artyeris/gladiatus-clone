@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.22.1',
+    date: '2026-05-23',
+    changes: [
+      'Large numbers in stat panels are now abbreviated. Anything 10 000+ collapses to "Nk" (e.g. 23 977 977 -> 23977k) so the Experience line on the Overview no longer overflows at high levels.',
+      'Same compact formatter is applied to the header chips (gold / honor / diamonds / power) and the Overview Health line so the numbers stay readable as the character grows.',
+    ],
+  },
+  {
     version: '0.22',
     date: '2026-05-23',
     changes: [

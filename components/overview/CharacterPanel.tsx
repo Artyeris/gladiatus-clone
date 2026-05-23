@@ -6,7 +6,7 @@ import HealthTooltip from '@/components/shared/HealthTooltip';
 import { combatBreakdown } from '@/lib/utils/combatBreakdown';
 import { stats } from '@/constants';
 import { CharacterInterface } from '@/lib/interfaces/character.interface';
-import { calculateNextLevelExperience } from '@/lib/utils';
+import { calculateNextLevelExperience, formatCompactNumber } from '@/lib/utils';
 import {
   calculateStatBreakdown,
   StatBreakdown,
@@ -65,7 +65,7 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
         <div className='w-full cursor-help'>
           <div className='flex justify-between text-xs font-semibold mb-1'>
             <span>Health</span>
-            <span>{currentHealth} / {maxHealth}</span>
+            <span>{formatCompactNumber(currentHealth)} / {formatCompactNumber(maxHealth)}</span>
           </div>
           <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
             <div
@@ -79,7 +79,7 @@ export default function CharacterPanel({ user }: CharacterPanelProps) {
       <div className='w-full'>
         <div className='flex justify-between text-xs font-semibold mb-1'>
           <span>Experience</span>
-          <span>{experience} / {xpForNextLevel} ({xpPercent.toFixed(1)}%)</span>
+          <span>{formatCompactNumber(experience)} / {formatCompactNumber(xpForNextLevel)} ({xpPercent.toFixed(1)}%)</span>
         </div>
         <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
           <div

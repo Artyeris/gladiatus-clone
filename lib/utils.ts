@@ -37,6 +37,18 @@ export function calculateProgressPercent(first: number, second: number) {
   return (first / second) * 100;
 }
 
+// Compact integer formatter for stat displays. Numbers under 10 000
+// stay as-is; larger values are abbreviated to thousands (23 977 977
+// -> "23977k") so they fit alongside small counters in the same row
+// without breaking the layout. Negative values keep their sign.
+export function formatCompactNumber(value: number): string {
+  if (!Number.isFinite(value)) return '0';
+  const abs = Math.abs(value);
+  if (abs < 10_000) return Math.trunc(value).toString();
+  const sign = value < 0 ? '-' : '';
+  return `${sign}${Math.floor(abs / 1000)}k`;
+}
+
 export function canFight({ time, fight }: { time: number, fight: string }) {
   const lastFightTime = new Date(time);
   const currentTime = new Date();
