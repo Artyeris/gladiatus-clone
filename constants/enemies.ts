@@ -777,10 +777,336 @@ for (const [slug, group] of Object.entries(AFRICA_ENEMIES)) {
 }
 
 // ---------------------------------------------------------------------------
-// Germania / Britannia placeholder enemies. Stat blocks for these
-// continents still rely on the scaled generator below until real
-// fansite values land. Africa is curated above and is excluded from
-// the auto-gen pool.
+// Germania expedition enemies. Same source / same rules as Africa --
+// damage uses the first reported range, and Life / Crit / Block /
+// Avoid Crit columns are dropped because the combat engine doesn't
+// read them yet.
+// ---------------------------------------------------------------------------
+const GERMANIA_ENEMIES: ExpeditionEnemies = {
+  cavetemple: {
+    legionnaire: {
+      name: 'Legionnaire', image: 'legionnaire',
+      level: [50, 51], crowns: [1615, 2307], experience: [4, 5],
+      strength: [90, 91], dexterity: [100, 102], agility: [140, 142],
+      endurance: [90, 91], charisma: [140, 142], intelligence: [50, 51],
+      armor: [5136, 6203], damage: [69, 85],
+      id: 2100,
+    },
+    myrmidon: {
+      name: 'Myrmidon', image: 'myrmidon',
+      level: [51, 54], crowns: [1791, 2725], experience: [5, 6],
+      strength: [112, 118], dexterity: [140, 148], agility: [232, 245],
+      endurance: [89, 94], charisma: [89, 94], intelligence: [71, 75],
+      armor: [5673, 6598], damage: [70, 86],
+      id: 2101,
+    },
+    centurion: {
+      name: 'Centurion', image: 'centurion',
+      level: [54, 57], crowns: [1898, 3146], experience: [5, 6],
+      strength: [118, 125], dexterity: [162, 171], agility: [264, 279],
+      endurance: [129, 136], charisma: [151, 159], intelligence: [75, 79],
+      armor: [6448, 8226], damage: [74, 91],
+      id: 2102,
+    },
+    soulless: {
+      name: 'Soulless', image: 'soulless',
+      level: [56, 58], crowns: [2451, 3510], experience: [6, 8],
+      strength: [168, 174], dexterity: [168, 174], agility: [294, 304],
+      endurance: [235, 243], charisma: [274, 284], intelligence: [89, 91],
+      armor: [8002, 9412], damage: [137, 169],
+      boss: true, id: 2103,
+    },
+  },
+
+  greenforest: {
+    giant_wild_boar: {
+      name: 'Giant Wild Boar', image: 'giant_wild_boar',
+      level: [55, 55], crowns: [2091, 2924], experience: [5, 6],
+      strength: [121, 121], dexterity: [96, 96], agility: [134, 134],
+      endurance: [132, 132], charisma: [115, 115], intelligence: [44, 44],
+      armor: [4330, 5183], damage: [101, 124],
+      id: 2110,
+    },
+    swamp_lord: {
+      name: 'Swamp Lord', image: 'swamp_lord',
+      level: [56, 59], crowns: [1911, 3224], experience: [5, 6],
+      strength: [134, 153], dexterity: [112, 118], agility: [98, 103],
+      endurance: [145, 153], charisma: [176, 185], intelligence: [78, 82],
+      armor: [6285, 7186], damage: [86, 105],
+      id: 2111,
+    },
+    swamp_spirit: {
+      name: 'Swamp Spirit', image: 'swamp_spirit',
+      level: [58, 62], crowns: [2049, 3225], experience: [5, 6],
+      strength: [104, 111], dexterity: [188, 201], agility: [365, 390],
+      endurance: [81, 86], charisma: [243, 260], intelligence: [139, 148],
+      armor: [1714, 1936], damage: [133, 164],
+      id: 2112,
+    },
+    werebear: {
+      name: 'Werebear', image: 'werebear',
+      level: [61, 63], crowns: [2583, 4173], experience: [6, 8],
+      strength: [256, 264], dexterity: [137, 141], agility: [277, 286],
+      endurance: [146, 151], charisma: [106, 110], intelligence: [231, 239],
+      armor: [5834, 7152], damage: [263, 322],
+      boss: true, id: 2113,
+    },
+  },
+
+  cursedvillage: {
+    hun: {
+      name: 'Hun', image: 'hun',
+      level: [60, 61], crowns: [2073, 3063], experience: [5, 7],
+      strength: [108, 109], dexterity: [165, 167], agility: [231, 234],
+      endurance: [108, 109], charisma: [168, 170], intelligence: [96, 97],
+      armor: [3052, 3700], damage: [64, 79],
+      id: 2120,
+    },
+    ancient: {
+      name: 'Ancient', image: 'ancient',
+      level: [61, 64], crowns: [2266, 3246], experience: [5, 8],
+      strength: [158, 166], dexterity: [167, 176], agility: [128, 134],
+      endurance: [97, 102], charisma: [192, 201], intelligence: [97, 102],
+      armor: [5622, 7165], damage: [112, 138],
+      id: 2121,
+    },
+    nachzehrer: {
+      name: 'Nachzehrer', image: 'nachzehrer',
+      level: [63, 67], crowns: [2541, 3940], experience: [6, 8],
+      strength: [189, 201], dexterity: [110, 117], agility: [132, 140],
+      endurance: [163, 174], charisma: [286, 304], intelligence: [75, 80],
+      armor: [5787, 6754], damage: [174, 185],
+      id: 2122,
+    },
+    abomination: {
+      name: 'Abomination', image: 'abomination',
+      level: [66, 68], crowns: [2814, 4632], experience: [7, 9],
+      strength: [158, 163], dexterity: [230, 237], agility: [415, 428],
+      endurance: [198, 204], charisma: [369, 380], intelligence: [198, 204],
+      armor: [7588, 9116], damage: [142, 174],
+      boss: true, id: 2123,
+    },
+  },
+
+  deathhill: {
+    skeleton_warrior: {
+      name: 'Skeleton Warrior', image: 'skeleton_warrior',
+      level: [65, 66], crowns: [2443, 3695], experience: [6, 8],
+      strength: [156, 158], dexterity: [81, 82], agility: [227, 231],
+      endurance: [143, 145], charisma: [182, 184], intelligence: [65, 66],
+      armor: [4135, 5179], damage: [100, 122],
+      id: 2130,
+    },
+    skeleton_berserker: {
+      name: 'Skeleton Berserker', image: 'skeleton_berserker',
+      level: [66, 69], crowns: [2581, 3696], experience: [6, 8],
+      strength: [211, 220], dexterity: [198, 207], agility: [300, 313],
+      endurance: [79, 82], charisma: [161, 169], intelligence: [39, 41],
+      armor: [5182, 6603], damage: [121, 149],
+      id: 2131,
+    },
+    lich: {
+      name: 'Lich', image: 'lich',
+      level: [68, 72], crowns: [2458, 4005], experience: [6, 8],
+      strength: [108, 115], dexterity: [221, 234], agility: [190, 201],
+      endurance: [176, 187], charisma: [380, 403], intelligence: [231, 244],
+      armor: [2391, 3109], damage: [104, 128],
+      id: 2132,
+    },
+    necromancer_prince: {
+      name: 'Necromancer Prince', image: 'necromancer_prince',
+      level: [71, 72], crowns: [3238, 4553], experience: [7, 9],
+      strength: [113, 115], dexterity: [301, 306], agility: [497, 504],
+      endurance: [85, 86], charisma: [497, 504], intelligence: [326, 331],
+      armor: [7057, 8034], damage: [142, 174],
+      boss: true, id: 2133,
+    },
+  },
+
+  vandalvillage: {
+    vandal_warrior: {
+      name: 'Vandal Warrior', image: 'vandal_warrior',
+      level: [104, 105], crowns: [5336, 7408], experience: [10, 13],
+      strength: [249, 252], dexterity: [234, 236], agility: [473, 477],
+      endurance: [208, 210], charisma: [291, 294], intelligence: [124, 126],
+      armor: [7483, 9068], damage: [192, 235],
+      id: 2140,
+    },
+    jarl: {
+      name: 'Jarl', image: 'jarl',
+      level: [105, 107], crowns: [5123, 7679], experience: [9, 13],
+      strength: [252, 256], dexterity: [262, 267], agility: [257, 262],
+      endurance: [252, 256], charisma: [514, 524], intelligence: [252, 256],
+      armor: [6001, 7342], damage: [242, 297],
+      id: 2141,
+    },
+    dark_fighter: {
+      name: 'Dark Fighter', image: 'dark_fighter',
+      level: [106, 109], crowns: [5078, 7963], experience: [10, 13],
+      strength: [424, 436], dexterity: [397, 408], agility: [371, 381],
+      endurance: [212, 218], charisma: [630, 648], intelligence: [148, 152],
+      armor: [13741, 16858], damage: [212, 260],
+      id: 2142,
+    },
+    death_knight: {
+      name: 'Death Knight', image: 'death_knight',
+      level: [108, 110], crowns: [6209, 9584], experience: [12, 14],
+      strength: [432, 440], dexterity: [459, 467], agility: [529, 539],
+      endurance: [453, 462], charisma: [642, 654], intelligence: [280, 286],
+      armor: [16338, 19505], damage: [282, 347],
+      boss: true, id: 2143,
+    },
+  },
+
+  mine: {
+    mine_guard: {
+      name: 'Guard', image: 'mine_guard',
+      level: [108, 109], crowns: [4965, 7865], experience: [10, 13],
+      strength: [216, 218], dexterity: [324, 327], agility: [453, 457],
+      endurance: [302, 305], charisma: [340, 343], intelligence: [172, 174],
+      armor: [7769, 9320], damage: [249, 306],
+      id: 2150,
+    },
+    draug: {
+      name: 'Draug', image: 'draug',
+      level: [109, 112], crowns: [5579, 8268], experience: [10, 13],
+      strength: [283, 291], dexterity: [463, 476], agility: [534, 548],
+      endurance: [196, 201], charisma: [534, 548], intelligence: [174, 179],
+      armor: [7804, 9397], damage: [251, 309],
+      id: 2151,
+    },
+    stone_golem: {
+      name: 'Stone Golem', image: 'stone_golem',
+      level: [110, 113], crowns: [5741, 8161], experience: [10, 13],
+      strength: [396, 406], dexterity: [165, 169], agility: [308, 316],
+      endurance: [660, 678], charisma: [308, 316], intelligence: [44, 45],
+      armor: [19750, 24154], damage: [220, 270],
+      id: 2152,
+    },
+    tatzelwurm: {
+      name: 'Tatzelwurm', image: 'tatzelwurm',
+      level: [112, 114], crowns: [6288, 10185], experience: [13, 15],
+      strength: [492, 501], dexterity: [280, 285], agility: [509, 518],
+      endurance: [537, 547], charisma: [627, 638], intelligence: [246, 250],
+      armor: [19717, 24916], damage: [327, 402],
+      boss: true, id: 2153,
+    },
+  },
+
+  teutoncamp: {
+    barbarian: {
+      name: 'Barbarian', image: 'barbarian',
+      level: [112, 113], crowns: [5390, 8293], experience: [10, 13],
+      strength: [291, 293], dexterity: [392, 395], agility: [548, 553],
+      endurance: [268, 271], charisma: [352, 355], intelligence: [89, 90],
+      armor: [7254, 8860], damage: [258, 317],
+      id: 2160,
+    },
+    teuton_hero: {
+      name: 'Teuton Hero', image: 'teuton_hero',
+      level: [113, 116], crowns: [5230, 8193], experience: [11, 15],
+      strength: [342, 348], dexterity: [339, 348], agility: [474, 487],
+      endurance: [339, 348], charisma: [593, 609], intelligence: [203, 208],
+      armor: [7378, 8878], damage: [226, 277],
+      id: 2161,
+    },
+    teuton_lord: {
+      name: 'Teuton Lord', image: 'teuton_lord',
+      level: [114, 117], crowns: [5484, 8918], experience: [11, 13],
+      strength: [342, 351], dexterity: [456, 468], agility: [798, 819],
+      endurance: [273, 280], charisma: [758, 778], intelligence: [296, 304],
+      armor: [8280, 10113], damage: [263, 323],
+      id: 2162,
+    },
+    seidr: {
+      name: 'Seidr', image: 'seidr',
+      level: [116, 118], crowns: [6504, 10583], experience: [13, 18],
+      strength: [348, 354], dexterity: [667, 678], agility: [1136, 1156],
+      endurance: [324, 330], charisma: [852, 867], intelligence: [394, 401],
+      armor: [8321, 10175], damage: [393, 482],
+      boss: true, id: 2163,
+    },
+  },
+
+  komanmountain: {
+    infernal_springbok: {
+      name: 'Infernal Springbok', image: 'infernal_springbok',
+      level: [116, 117], crowns: [5988, 8723], experience: [13, 13],
+      strength: [278, 280], dexterity: [522, 526], agility: [730, 737],
+      endurance: [278, 280], charisma: [324, 327], intelligence: [116, 117],
+      armor: [9927, 12247], damage: [267, 328],
+      id: 2170,
+    },
+    sabre_tooth_tiger: {
+      name: 'Sabre-Tooth Tiger', image: 'sabre_tooth_tiger',
+      level: [117, 120], crowns: [6471, 9012], experience: [13, 13],
+      strength: [304, 312], dexterity: [614, 630], agility: [655, 672],
+      endurance: [234, 240], charisma: [532, 546], intelligence: [187, 192],
+      armor: [9391, 10957], damage: [324, 398],
+      id: 2171,
+    },
+    dragon_whelp: {
+      name: 'Dragon Whelp', image: 'dragon_whelp',
+      level: [118, 121], crowns: [5761, 8294], experience: [11, 14],
+      strength: [188, 193], dexterity: [590, 605], agility: [1032, 1058],
+      endurance: [141, 145], charisma: [619, 635], intelligence: [283, 290],
+      armor: [13581, 16621], damage: [327, 401],
+      id: 2172,
+    },
+    dragon: {
+      name: 'Dragon', image: 'dragon',
+      level: [120, 122], crowns: [7001, 11063], experience: [13, 18],
+      strength: [456, 463], dexterity: [480, 488], agility: [504, 512],
+      endurance: [432, 439], charisma: [1092, 1110], intelligence: [480, 488],
+      armor: [19467, 24095], damage: [480, 589],
+      boss: true, id: 2173,
+    },
+  },
+
+  dragonremains: {
+    bone_golem: {
+      name: 'Bone Golem', image: 'bone_golem',
+      level: [120, 121], crowns: [5689, 9465], experience: [11, 14],
+      strength: [336, 338], dexterity: [360, 363], agility: [672, 677],
+      endurance: [312, 314], charisma: [294, 296], intelligence: [48, 48],
+      armor: [14290, 17947], damage: [351, 430],
+      id: 2180,
+    },
+    lemures: {
+      name: 'Lemures', image: 'lemures',
+      level: [121, 124], crowns: [5737, 9516], experience: [11, 14],
+      strength: [121, 124], dexterity: [695, 713], agility: [1016, 1041],
+      endurance: [121, 124], charisma: [762, 781], intelligence: [290, 297],
+      armor: [2575, 3244], damage: [372, 457],
+      id: 2181,
+    },
+    ritualist: {
+      name: 'Ritualist', image: 'ritualist',
+      level: [122, 125], crowns: [5942, 9838], experience: [11, 14],
+      strength: [146, 150], dexterity: [640, 656], agility: [725, 743],
+      endurance: [195, 200], charisma: [725, 743], intelligence: [414, 444],
+      armor: [7784, 9678], damage: [469, 576],
+      id: 2182,
+    },
+    dracolich: {
+      name: 'Dracolich', image: 'dracolich',
+      level: [124, 126], crowns: [7403, 11866], experience: [13, 18],
+      strength: [372, 378], dexterity: [465, 472], agility: [651, 661],
+      endurance: [372, 378], charisma: [1215, 1234], intelligence: [496, 504],
+      armor: [19113, 24127], damage: [572, 703],
+      boss: true, id: 2183,
+    },
+  },
+};
+
+for (const [slug, group] of Object.entries(GERMANIA_ENEMIES)) {
+  expeditionEnemies[slug] = group;
+}
+
+// ---------------------------------------------------------------------------
+// Britannia placeholder enemies. Stat blocks still ride the scaled
+// generator below until real fansite values land. Africa and Germania
+// are curated above and are excluded from the auto-gen pool.
 // ---------------------------------------------------------------------------
 
 interface ZoneSeed {
@@ -790,17 +1116,6 @@ interface ZoneSeed {
 }
 
 const NEW_ZONES: ZoneSeed[] = [
-  // Germania
-  { slug: 'cavetemple',     baseLevel: 40,  enemies: ['Cave Acolyte', 'Cave Cultist', 'Cave Inquisitor', 'Cave Highpriest'] },
-  { slug: 'greenforest',    baseLevel: 45,  enemies: ['Forest Wolf', 'Boar Brute', 'Forest Bear', 'Forest Wendigo'] },
-  { slug: 'cursedvillage',  baseLevel: 50,  enemies: ['Cursed Villager', 'Cursed Smith', 'Cursed Elder', 'Cursed Reeve'] },
-  { slug: 'deathhill',      baseLevel: 55,  enemies: ['Risen Footman', 'Carrion Hound', 'Risen Knight', 'Barrow King'] },
-  { slug: 'vandalvillage',  baseLevel: 95,  enemies: ['Vandal Raider', 'Vandal Berserker', 'Vandal Champion', 'Vandal Warlord'] },
-  { slug: 'mine',           baseLevel: 100, enemies: ['Mine Overseer', 'Pit Mastiff', 'Tunnel Wolf', 'Mine Foreman'] },
-  { slug: 'teutoncamp',     baseLevel: 104, enemies: ['Teuton Brawler', 'Teuton Skirmisher', 'Teuton Captain', 'Teuton Warlord'] },
-  { slug: 'komanmountain',  baseLevel: 108, enemies: ['Mountain Wolf', 'Mountain Troll', 'Stone Giant', 'Koman Wyvern'] },
-  { slug: 'dragonremains',  baseLevel: 112, enemies: ['Bone Scavenger', 'Drake Hatchling', 'Bone Wyrm', 'Skeletal Dragon'] },
-
   // Britannia
   { slug: 'bankofthames',       baseLevel: 120, enemies: ['Briton Levy', 'Briton Skirmisher', 'Briton Centurion', 'River Warlord'] },
   { slug: 'forestfortress',     baseLevel: 130, enemies: ['Fortress Sentry', 'Fortress Archer', 'Fortress Captain', 'Forest Chieftain'] },

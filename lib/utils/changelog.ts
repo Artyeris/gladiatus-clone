@@ -10,6 +10,16 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.20.2',
+    date: '2026-05-22',
+    changes: [
+      'Germania expedition enemies now use hand-curated stat blocks sourced from the gladiatus-bg fansite tables (36 enemies across Cave Temple, Green Forest, Cursed Village, Death Hill, Vandal Village, Mine, Teuton Camp, Koman Mountain and Dragon Remains).',
+      'Bosses Soulless, Werebear, Abomination, Necromancer Prince, Death Knight, Tatzelwurm, Seidr, Dragon and Dracolich keep their boss flag and the fansite-noted spike stats (e.g. Werebear "divine" damage, Tatzelwurm 19k+ armour, Dragon 1.1k+ charisma).',
+      'Germania zone descriptions updated with the fansite\'s strategy hints (Soulless armour wall, Werebear damage spike, Mine = friendly farm zone, etc.). Enemy level strings tightened to match the actual ranges.',
+      'Britannia still rides the scaled placeholder generator until real stat tables land for that continent.',
+    ],
+  },
+  {
     version: '0.20.1',
     date: '2026-05-22',
     changes: [
