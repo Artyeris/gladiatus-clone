@@ -110,11 +110,6 @@ const NavigationBanner = ({
               );
             })}
             <NavLink
-              href='/game/dungeons'
-              label='Dungeons'
-              active={pathname.startsWith('/game/dungeons')}
-            />
-            <NavLink
               href='/game/expeditions/travel'
               label='Traveler'
               active={isRouteActive('/travel')}

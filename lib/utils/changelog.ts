@@ -10,6 +10,16 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.30.1',
+    date: '2026-05-23',
+    changes: [
+      'Dungeons now live inside their parent expedition page -- click an expedition and toggle to the Dungeon tab to see (and enter) the dungeons attached to that region. Mirrors the original Gladiatus "Požemis" tab layout. The standalone Dungeons sidebar entry is gone; the /game/dungeons directory page still exists if you want the full Italy list.',
+      'An expedition can host more than one dungeon (e.g. Pirate Harbour parents both On the Run and The Last Resort); each shows as its own card with its own Enter button.',
+      'Overview gained a Party row: pills for the player + every owned mercenary. Click a pill to switch the left panel between your gladiator\'s stats and a mercenary\'s rolled stats. Mercenary equipment slots and bag are still being forged -- right panel shows a placeholder for now.',
+      'Coming next (v0.31): mercenary listings in Market and Auction (you\'ll be able to flip your rolls or pick up endgame mercs from other players), plus per-mercenary equipment slots so you can gear up tanks and healers.',
+    ],
+  },
+  {
     version: '0.30',
     date: '2026-05-23',
     changes: [
