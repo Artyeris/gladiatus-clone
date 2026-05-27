@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.30.2',
+    date: '2026-05-23',
+    changes: [
+      'Mercenary equipment slots! Mercenary model gained 11 equipment slots mirroring the player (head / cloak / chest / gloves / mainHand / offHand / legs / boots / necklace / ring1 / ring2). When you click a mercenary pill in Overview, the right panel now shows their slot grid -- click an empty slot to pick a compatible item from your bag, click a worn item to return it.',
+      'Equipment bonuses flow into the mercenary\'s stat block: armour, damage, +stats, +health and the dungeon-only fields (threat, hardening, healing, critical healing) all aggregate via the new mercenaryBreakdown helper.',
+      'Dungeon combat now reads from the breakdown: healing boosts the healer role\'s contribution, threat / hardening boost the tank role\'s. The "previously ignored" item stats from v0.30 are live in the resolver.',
+      'Mercenary panel surfaces the role-relevant dungeon stats: Healing + Crit Healing for healers; Threat + Hardening for tanks. Stat numbers now reflect equipped gear.',
+      'Player-to-player mercenary market: list a mercenary from your roster for a fixed price, browse the listings, cancel or buy. New MercenaryListing collection backs the flow. Equipped gear is automatically stripped into the seller\'s bag before listing.',
+      'Mercenaries page restructured into three tabs: Vendor (Italy roll), Player Market (others\' listings), and Your Roster (Sell / Dismiss).',
+      'Market page now opens with a "Mercenary listings" panel above the regular item listings so mercenaries can be bought from the Market screen too, not just from the Mercenaries shop.',
+    ],
+  },
+  {
     version: '0.30.1',
     date: '2026-05-23',
     changes: [

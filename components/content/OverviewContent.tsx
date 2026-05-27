@@ -7,6 +7,7 @@ import { CharacterInterface } from '@/lib/interfaces/character.interface';
 import CharacterPanel from '../overview/CharacterPanel';
 import InventoryEquipment from '../overview/InventoryEquipment';
 import MercenaryPanel from '../overview/MercenaryPanel';
+import MercenaryEquipment from '../overview/MercenaryEquipment';
 
 interface MercForOverview {
   _id: string;
@@ -16,6 +17,8 @@ interface MercForOverview {
   level: number;
   quality: string;
   stats: any;
+  equipment?: Record<string, any>;
+  breakdown?: any;
   power: number;
 }
 
@@ -82,17 +85,11 @@ const OverviewContent = ({ character, mercenaries }: OverviewContentProps) => {
 
         <div className='info-card rounded-sm shadow-md flex flex-col flex-1' style={{ padding: '12px' }}>
           {merc ? (
-            <div className='flex flex-col items-center justify-center text-center py-10 text-brown2 gap-2'>
-              <div className='text-lg font-bold tracking-wide'>
-                Mercenary Equipment
-              </div>
-              <div className='text-xs italic opacity-80 max-w-[360px]'>
-                Equipment slots and bag for mercenaries are still being
-                forged. For now, mercenaries fight with their rolled
-                stats only -- buy higher quality / higher level
-                mercenaries from the Mercenaries shop to upgrade them.
-              </div>
-            </div>
+            <MercenaryEquipment
+              mercenaryId={merc._id}
+              mercenaryName={merc.name}
+              equipment={merc.equipment ?? {}}
+            />
           ) : (
             <InventoryEquipment character={character} />
           )}

@@ -13,12 +13,12 @@ import { connectToDB } from '@/lib/mongoose';
 import { extractUserId } from '@/lib/utils/jwtUtils';
 import { calculateExperience, calculatePower } from '@/lib/utils/characterUtils';
 import { rollExpeditionDrop } from '@/lib/utils/expeditionDrop';
+import { mercenaryBreakdown } from '@/lib/utils/mercenaryBreakdown';
 import {
   DUNGEONS,
   DUNGEON_ORDER,
   DungeonId,
 } from '@/constants/dungeons';
-import { mercenaryPower } from '@/constants/mercenaries';
 
 async function getMyCharacter() {
   const token = cookies().get(COOKIE_NAME);
@@ -82,11 +82,23 @@ export async function runDungeon({ dungeonId }: { dungeonId: DungeonId }) {
     return { error: { message: 'You are at work right now. Claim or cancel your shift first.' } };
   }
 
-  const mercs = await Mercenary.find({ owner: character._id });
+  const mercs = await Mercenary.find({ owner: character._id })
+    .populate({ path: 'equipment.head equipment.chest equipment.legs equipment.gloves equipment.cloak equipment.boots equipment.mainHand equipment.offHand equipment.necklace equipment.ring1 equipment.ring2', model: Item });
   const playerPower = calculatePower(character);
-  const mercPower = mercs.reduce((sum: number, m: any) => sum + mercenaryPower({
-    level: m.level, quality: m.quality, type: m.type, stats: m.stats,
-  }), 0);
+  // Equipment now factors into each merc's effective stats and the
+  // breakdown also surfaces dungeon-specific bonuses (healing for
+  // healers, threat for tanks) which mercenaryPower folds into the
+  // role-weighted score.
+  const mercPower = mercs.reduce((sum: number, m: any) => {
+    const equipment: Record<string, any> = {};
+    for (const slot of ['head','chest','legs','gloves','cloak','boots','mainHand','offHand','necklace','ring1','ring2']) {
+      const it = m.equipment?.[slot];
+      equipment[slot] = it && typeof it === 'object' && 'name' in it ? it : null;
+    }
+    return sum + mercenaryBreakdown({
+      level: m.level, quality: m.quality, type: m.type, stats: m.stats, equipment,
+    }).power;
+  }, 0);
   const partyPower = playerPower + mercPower;
   const bossPower = dungeon.bossLevel * BOSS_POWER_COEF;
   const winChance = Math.max(0.1, Math.min(0.95, partyPower / (partyPower + bossPower)));
