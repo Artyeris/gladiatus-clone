@@ -16,6 +16,8 @@ import { calculateExperience, calculatePower } from '@/lib/utils/characterUtils'
 import { combatBreakdown } from '@/lib/utils/combatBreakdown';
 import { rollExpeditionDrop } from '@/lib/utils/expeditionDrop';
 import { mercenaryBreakdown } from '@/lib/utils/mercenaryBreakdown';
+import { canFight } from '@/lib/utils';
+import { DUNGEON_COOLDOWN } from '@/constants';
 import {
   DUNGEONS,
   DUNGEON_ORDER,
@@ -291,6 +293,15 @@ export async function runNextStep() {
   const character: any = await getMyCharacter();
   if (!character) return { error: { message: 'Not authenticated' } };
 
+  // Same cooldown gate as expedition / arena -- enforced server-side
+  // so a rapid clicker can't tunnel past the timer.
+  if (!canFight({ time: new Date(character.dungeonLastBattle ?? 0).getTime(), fight: 'dungeon' })) {
+    const remaining = Math.max(0, Math.ceil(
+      DUNGEON_COOLDOWN - (Date.now() - new Date(character.dungeonLastBattle ?? 0).getTime()) / 1000,
+    ));
+    return { error: { message: `Dungeon cooldown -- wait ${remaining}s` } };
+  }
+
   const run = await DungeonRun.findOne({ owner: character._id });
   if (!run) return { error: { message: 'No active dungeon run' } };
 
@@ -335,6 +346,7 @@ export async function runNextStep() {
     // Party wipe -- end run with consolation gold.
     goldGained = Math.round(dungeon.goldReward * 0.05);
     character.crowns = (character.crowns ?? 0) + goldGained;
+    character.dungeonLastBattle = new Date();
     await character.save();
     await run.deleteOne();
     revalidatePath('/game/expeditions');
@@ -408,6 +420,7 @@ export async function runNextStep() {
     if (!(character.completedDungeons ?? []).includes(dungeon.id)) {
       character.completedDungeons = [...(character.completedDungeons ?? []), dungeon.id];
     }
+    character.dungeonLastBattle = new Date();
     await character.save();
     await run.deleteOne();
     runFinished = true;
@@ -416,6 +429,7 @@ export async function runNextStep() {
     // Trash step cleared -- advance.
     goldGained = Math.round(dungeon.goldReward * 0.1);
     character.crowns = (character.crowns ?? 0) + goldGained;
+    character.dungeonLastBattle = new Date();
     await character.save();
     run.currentStep = stepIdx + 1;
     run.party = party;
@@ -425,6 +439,8 @@ export async function runNextStep() {
     await run.save();
   } else {
     // Step lost but party still alive -- they recover and try again.
+    character.dungeonLastBattle = new Date();
+    await character.save();
     run.party = party;
     run.lastFight = { step: stepIdx, enemyName, won: false, damage, healed };
     run.markModified('party');

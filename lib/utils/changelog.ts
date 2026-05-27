@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.30.4',
+    date: '2026-05-23',
+    changes: [
+      'Mercenary damage and armour now follow the player model: damage = weapon (or bare hands at strength / 6) + strength / 10 + rolled damage affixes; armour = sum of equipped armour pieces only. The base mercenary stat seed no longer carries damageMin / damageMax / armor; those were the placeholder numbers showing up in the panel.',
+      'Mercenary stats hover-card breakdowns: every primary stat row now opens the same tooltip the player has (Basic / From items / total). Armour, Damage and Healing rows get their own breakdown card explaining where the number comes from.',
+      'Overview hides the Dungeon party card while a mercenary tab is selected -- the slots only matter for the gladiator view.',
+      'Mercenary selling moved to the Market page: the Mercenaries shop no longer has a Sell button (Dismiss only). The Market panel grew a "Sell from roster" picker -- pick any mercenary from your roster, set a price, hit List. Equipped gear is still auto-returned to your bag on listing.',
+      'Dungeon fight cooldown is live (DUNGEON_COOLDOWN = 90s). The header bar\'s second timer (previously "Coming soon") now ticks down after every dungeon fight; runNextStep is server-gated by the cooldown the same way expedition / arena battles are.',
+      'Character schema picked up dungeonLastBattle and the canFight helper learned a "dungeon" fight type.',
+    ],
+  },
+  {
     version: '0.30.3',
     date: '2026-05-23',
     changes: [

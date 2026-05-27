@@ -9,7 +9,6 @@ import {
   buyMercenaryListing,
   cancelMercenaryListing,
   dismissMercenary,
-  listMercenaryOnMarket,
 } from '@/lib/actions/mercenary/mercenary.action';
 import CompactNumber from '@/components/shared/CompactNumber';
 
@@ -125,15 +124,6 @@ const MercenariesContent = ({ characterGold, offers, owned, listings }: Props) =
     startTransition(() => router.refresh());
   };
 
-  const onSell = async (merc: OwnedMerc, price: number) => {
-    setBusy(merc._id);
-    const res: any = await listMercenaryOnMarket({ mercenaryId: merc._id, price });
-    setBusy(null);
-    if (res?.error) return toast.error(res.error.message);
-    toast.success(`Listed ${merc.name} for ${price} gold`);
-    startTransition(() => router.refresh());
-  };
-
   return (
     <div className='px-6 flex flex-col gap-4 text-brown2'>
       <h1 className='text-xl font-bold border-b-[3px] border-brown2 text-center text-brown2'>
@@ -213,7 +203,6 @@ const MercenariesContent = ({ characterGold, offers, owned, listings }: Props) =
                   merc={m}
                   busy={busy === m._id}
                   onDismiss={() => onDismiss(m)}
-                  onSell={(price) => onSell(m, price)}
                 />
               ))}
             </div>
@@ -334,15 +323,12 @@ function ListingCard({
 }
 
 function OwnedCard({
-  merc, busy, onDismiss, onSell,
+  merc, busy, onDismiss,
 }: {
   merc: OwnedMerc;
   busy: boolean;
   onDismiss: () => void;
-  onSell: (price: number) => void;
 }) {
-  const [sellMode, setSellMode] = useState(false);
-  const [price, setPrice] = useState<string>('100');
   return (
     <div className='border-[2px] border-cream2 rounded-sm px-2 py-2 flex flex-col gap-1 text-xs'>
       <div className='flex justify-between items-center'>
@@ -357,55 +343,20 @@ function OwnedCard({
       <StatsRow stats={merc.stats} />
       <div className='flex justify-between items-center mt-1'>
         <span><strong>Power:</strong> <CompactNumber value={merc.power} /></span>
-        {sellMode ? (
-          <div className='flex items-center gap-1'>
-            <input
-              type='number'
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className='fancy-input w-20 px-1 py-0.5 text-xs'
-              min={1}
-            />
-            <button
-              type='button'
-              onClick={() => {
-                const p = parseInt(price, 10);
-                if (!Number.isFinite(p) || p < 1) return;
-                onSell(p);
-              }}
-              disabled={busy}
-              className='general-button px-2 py-0.5 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
-            >
-              List
-            </button>
-            <button
-              type='button'
-              onClick={() => setSellMode(false)}
-              className='text-xs underline'
-            >
-              x
-            </button>
-          </div>
-        ) : (
-          <div className='flex gap-1'>
-            <button
-              type='button'
-              onClick={() => setSellMode(true)}
-              disabled={busy}
-              className='general-button px-2 py-0.5 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
-            >
-              Sell
-            </button>
-            <button
-              type='button'
-              onClick={onDismiss}
-              disabled={busy}
-              className='general-button px-2 py-0.5 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
+        <div className='flex gap-1'>
+          <button
+            type='button'
+            onClick={onDismiss}
+            disabled={busy}
+            className='general-button px-2 py-0.5 rounded-sm text-xs font-semibold hover:brightness-110 disabled:opacity-50'
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+      <div className='text-[10px] italic opacity-70 mt-1'>
+        Sell or list a mercenary at the{' '}
+        <a className='underline text-red3' href='/game/market'>Market</a>.
       </div>
     </div>
   );

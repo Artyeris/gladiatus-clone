@@ -4,6 +4,9 @@ export const MAX_TOKEN_AGE = 30 * 24 * 60 * 60; // 30 days.
 // expedition / arena fights.
 export const EXPEDITION_COOLDOWN = 60;
 export const ARENA_COOLDOWN = 60;
+// Dungeon fights are longer set-pieces -- the gate between successive
+// rounds in a multi-step run, also used by the header timer.
+export const DUNGEON_COOLDOWN = 90;
 export const stats = [
   {
     name: 'Strength',

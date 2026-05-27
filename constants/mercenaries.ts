@@ -13,8 +13,10 @@ export interface MercTemplate {
   // Base price multiplier per level. Final vendor price scales with
   // the rolled level and quality.
   basePrice: number;
-  // Stat seed per level-1 mercenary (before quality multiplier). The
-  // rolled mercenary scales these linearly with its level.
+  // Per-level stat seed (before quality multiplier). Mercenaries
+  // mirror the player: damage is derived from strength + weapon and
+  // armour is sourced entirely from equipped pieces, so neither lives
+  // in the base seed.
   baseStats: {
     health: number;
     strength: number;
@@ -23,11 +25,7 @@ export interface MercTemplate {
     endurance: number;
     charisma: number;
     intelligence: number;
-    armor: number;
-    damageMin: number;
-    damageMax: number;
-    // Healing only matters for the healer role.
-    healing: number;
+    healing: number; // healer-only base; comes through to combat
   };
 }
 
@@ -41,8 +39,7 @@ export const ITALY_MERCENARIES: MercTemplate[] = [
     basePrice: 80,
     baseStats: {
       health: 60, strength: 8, dexterity: 16, agility: 8,
-      endurance: 5, charisma: 4, intelligence: 4,
-      armor: 30, damageMin: 8, damageMax: 14, healing: 0,
+      endurance: 5, charisma: 4, intelligence: 4, healing: 0,
     },
   },
   {
@@ -53,8 +50,7 @@ export const ITALY_MERCENARIES: MercTemplate[] = [
     basePrice: 75,
     baseStats: {
       health: 70, strength: 8, dexterity: 14, agility: 12,
-      endurance: 6, charisma: 7, intelligence: 4,
-      armor: 35, damageMin: 7, damageMax: 13, healing: 0,
+      endurance: 6, charisma: 7, intelligence: 4, healing: 0,
     },
   },
   {
@@ -65,8 +61,7 @@ export const ITALY_MERCENARIES: MercTemplate[] = [
     basePrice: 60,
     baseStats: {
       health: 65, strength: 8, dexterity: 12, agility: 12,
-      endurance: 5, charisma: 5, intelligence: 4,
-      armor: 32, damageMin: 7, damageMax: 12, healing: 0,
+      endurance: 5, charisma: 5, intelligence: 4, healing: 0,
     },
   },
   {
@@ -77,8 +72,7 @@ export const ITALY_MERCENARIES: MercTemplate[] = [
     basePrice: 100,
     baseStats: {
       health: 120, strength: 12, dexterity: 5, agility: 5,
-      endurance: 12, charisma: 12, intelligence: 4,
-      armor: 90, damageMin: 6, damageMax: 11, healing: 0,
+      endurance: 12, charisma: 12, intelligence: 4, healing: 0,
     },
   },
   {
@@ -89,8 +83,7 @@ export const ITALY_MERCENARIES: MercTemplate[] = [
     basePrice: 110,
     baseStats: {
       health: 90, strength: 5, dexterity: 6, agility: 8,
-      endurance: 10, charisma: 8, intelligence: 14,
-      armor: 50, damageMin: 3, damageMax: 6, healing: 14,
+      endurance: 10, charisma: 8, intelligence: 14, healing: 14,
     },
   },
 ];
@@ -122,7 +115,10 @@ export function rollMercenaryQuality(): MercQuality {
   return 'green';
 }
 
-// Rolled stat block for a level-N quality-Q mercenary.
+// Rolled stat block for a level-N quality-Q mercenary. Armour and
+// damage are intentionally absent -- they're derived at combat time
+// from equipped gear (armour) and strength + weapon (damage), the
+// same way the player handles them.
 export function rollMercenaryStats(
   template: MercTemplate,
   level: number,
@@ -139,9 +135,6 @@ export function rollMercenaryStats(
     endurance:    Math.round(s.endurance * lvl * m),
     charisma:     Math.round(s.charisma * lvl * m),
     intelligence: Math.round(s.intelligence * lvl * m),
-    armor:        Math.round(s.armor * lvl * m),
-    damageMin:    Math.round(s.damageMin * lvl * m),
-    damageMax:    Math.round(s.damageMax * lvl * m),
     healing:      Math.round(s.healing * lvl * m),
   };
 }
@@ -167,19 +160,21 @@ export function mercenaryVendorPrice(
 }
 
 // Simple combat power summary for matchmaking dungeon difficulty.
-// Mirrors the player's calculatePower but uses the rolled merc stats
-// directly. Healing contributes via the healer's "save" capacity.
+// `stats` here is the rolled stat block plus any equipment bonuses
+// that have already been folded in by mercenaryBreakdown -- which is
+// why armour / damage live on `stats` even though they're not in the
+// base seed.
 export function mercenaryPower(merc: {
   level: number;
   quality: MercQuality;
   type: MercRole;
-  stats: ReturnType<typeof rollMercenaryStats>;
+  stats: any;
 }): number {
-  const s = merc.stats;
-  const avgDmg = (s.damageMin + s.damageMax) / 2;
-  const offence = avgDmg * 2 + s.strength * 1.2 + s.dexterity * 1.4;
-  const defence = s.armor * 0.05 + s.health * 0.05 + s.endurance * 0.8;
-  const support = merc.type === 'healer' ? s.healing * 3 + s.intelligence * 0.6 : 0;
+  const s = merc.stats ?? {};
+  const avgDmg = ((s.damageMin ?? 0) + (s.damageMax ?? 0)) / 2;
+  const offence = avgDmg * 2 + (s.strength ?? 0) * 1.2 + (s.dexterity ?? 0) * 1.4;
+  const defence = (s.armor ?? 0) * 0.05 + (s.health ?? 0) * 0.05 + (s.endurance ?? 0) * 0.8;
+  const support = merc.type === 'healer' ? (s.healing ?? 0) * 3 + (s.intelligence ?? 0) * 0.6 : 0;
   const roleBoost =
     merc.type === 'tank' ? defence * 0.4 :
     merc.type === 'healer' ? support * 0.6 :

@@ -1,8 +1,8 @@
 // Aggregates a mercenary's rolled stats with bonuses from equipped
-// items. Mirrors the player's combatBreakdown but only walks the
-// fields mercenaries actually use, plus the dungeon-specific ones
-// (threat, hardening, healing, critical healing) so role AIs can
-// read them.
+// items. Mirrors the player's combatBreakdown -- damage flows from
+// strength + weapon (no intrinsic damage seed), armour from equipped
+// pieces only, and every regular stat reports its "from items" share
+// so the tooltips on the panel can show the breakdown.
 
 import { mercenaryPower as mercenaryPowerFromStats } from '@/constants/mercenaries';
 
@@ -26,25 +26,37 @@ interface EquippedItem {
   criticalHealingValue?: number;
 }
 
+type StatKey = 'strength' | 'dexterity' | 'agility' | 'endurance' | 'charisma' | 'intelligence';
+
+export interface MercStatSplit {
+  base: number;
+  fromItems: number;
+  total: number;
+}
+
 export interface MercBreakdown {
-  // Total stats after items.
-  strength: number;
-  dexterity: number;
-  agility: number;
-  endurance: number;
-  charisma: number;
-  intelligence: number;
-  // Combat-derived.
+  // Per-stat splits with base / items attribution.
+  stats: Record<StatKey, MercStatSplit>;
+  // Combat-derived (mirrors the player's combatBreakdown shape).
   armor: number;
   damageMin: number;
   damageMax: number;
+  weaponMin: number;
+  weaponMax: number;
+  hasWeapon: boolean;
+  strDamageBonus: number;
+  // Health: base from health-seed, plus +health from items.
   health: number;
+  healthBase: number;
+  healthFromItems: number;
   // Dungeon stats.
   threat: number;
   hardening: number;
   healing: number;
+  healingBase: number;
+  healingFromItems: number;
   criticalHealing: number;
-  // Derived power score.
+  // Power score.
   power: number;
 }
 
@@ -61,66 +73,102 @@ const EQUIPMENT_SLOTS = [
   'mainHand', 'offHand', 'necklace', 'ring1', 'ring2',
 ] as const;
 
+const STAT_KEYS: StatKey[] = [
+  'strength', 'dexterity', 'agility', 'endurance', 'charisma', 'intelligence',
+];
+
+const UNARMED_DAMAGE_MIN = 1;
+const unarmedMax = (str: number) => Math.max(2, Math.floor(str * 0.15));
+
 export function mercenaryBreakdown(merc: MercLite): MercBreakdown {
   const base = merc.stats ?? {};
-  let strength    = base.strength ?? 0;
-  let dexterity   = base.dexterity ?? 0;
-  let agility     = base.agility ?? 0;
-  let endurance   = base.endurance ?? 0;
-  let charisma    = base.charisma ?? 0;
-  let intelligence = base.intelligence ?? 0;
-  let armor       = base.armor ?? 0;
-  let damageMin   = base.damageMin ?? 0;
-  let damageMax   = base.damageMax ?? 0;
-  let health      = base.health ?? 0;
-  // Dungeon stats start at the rolled values too -- healers carry a
-  // base healing value from their stat seed (Medicus pattern).
-  let threat          = 0;
-  let hardening       = 0;
-  let healing         = base.healing ?? 0;
+
+  // Stat sums: start with the rolled base, add up item contributions.
+  const stats = {} as Record<StatKey, MercStatSplit>;
+  for (const k of STAT_KEYS) {
+    stats[k] = { base: base[k] ?? 0, fromItems: 0, total: base[k] ?? 0 };
+  }
+
+  let armor = 0;
+  let weaponMin = 0;
+  let weaponMax = 0;
+  let flatDamageAdd = 0;
+  let healthFromItems = 0;
+  let healingFromItems = 0;
+  let threat = 0;
+  let hardening = 0;
   let criticalHealing = 0;
+  let hasWeapon = false;
 
   const eq = merc.equipment ?? {};
   for (const slot of EQUIPMENT_SLOTS) {
-    const it = eq[slot] as EquippedItem | null | undefined;
+    const it = eq[slot];
     if (!it) continue;
-    strength    += it.strength    ?? 0;
-    dexterity   += it.dexterity   ?? 0;
-    agility     += it.agility     ?? 0;
-    endurance   += it.endurance   ?? 0;
-    charisma    += it.charisma    ?? 0;
-    intelligence += it.intelligence ?? 0;
-    armor       += it.armor       ?? 0;
-    health      += it.health      ?? 0;
-    threat          += it.threat               ?? 0;
-    hardening       += it.hardeningValue       ?? 0;
-    healing         += it.healing              ?? 0;
-    criticalHealing += it.criticalHealingValue ?? 0;
-    if (slot === 'mainHand' && Array.isArray(it.damage) && it.damage.length === 2) {
-      damageMin += it.damage[0];
-      damageMax += it.damage[1];
+    for (const k of STAT_KEYS) {
+      const v = (it as any)[k] ?? 0;
+      if (v) {
+        stats[k].fromItems += v;
+        stats[k].total += v;
+      }
     }
-    damageMin += it.damageBonus ?? 0;
-    damageMax += it.damageBonus ?? 0;
+    armor            += it.armor ?? 0;
+    healthFromItems  += it.health ?? 0;
+    flatDamageAdd    += it.damageBonus ?? 0;
+    healingFromItems += it.healing ?? 0;
+    threat           += it.threat ?? 0;
+    hardening        += it.hardeningValue ?? 0;
+    criticalHealing  += it.criticalHealingValue ?? 0;
+    if (slot === 'mainHand' && Array.isArray(it.damage) && it.damage.length === 2) {
+      weaponMin += it.damage[0];
+      weaponMax += it.damage[1];
+      hasWeapon = true;
+    }
   }
 
-  // Recompute power with augmented stats. Reuses the same role-weighted
-  // formula from constants/mercenaries so the vendor preview and the
-  // post-equip total stay on the same scale.
+  // Damage: weapon (or unarmed) + flat affix add + strength bonus when
+  // there's no intrinsic weapon damage (same rule as the player).
+  const strTotal = stats.strength.total;
+  const strBonus = hasWeapon ? 0 : Math.floor(strTotal / 10);
+  const baseMin = hasWeapon ? weaponMin : UNARMED_DAMAGE_MIN;
+  const baseMax = hasWeapon ? weaponMax : unarmedMax(strTotal);
+  const damageMin = baseMin + flatDamageAdd + strBonus;
+  const damageMax = baseMax + flatDamageAdd + strBonus;
+
+  // Healing: base healer-seed + item healing. Only the healer role
+  // converts these into combat-time output, but the breakdown surfaces
+  // them for any role so the tooltip is consistent.
+  const healingBase = base.healing ?? 0;
+  const healing = healingBase + healingFromItems;
+
+  const health = (base.health ?? 0) + healthFromItems;
+
   const power = mercenaryPowerFromStats({
     level: merc.level,
     quality: merc.quality,
     type: merc.type,
     stats: {
-      health, strength, dexterity, agility, endurance, charisma,
-      intelligence, armor, damageMin, damageMax, healing,
-    } as any,
+      health,
+      strength: stats.strength.total,
+      dexterity: stats.dexterity.total,
+      agility: stats.agility.total,
+      endurance: stats.endurance.total,
+      charisma: stats.charisma.total,
+      intelligence: stats.intelligence.total,
+      armor,
+      damageMin,
+      damageMax,
+      healing,
+    },
   });
 
   return {
-    strength, dexterity, agility, endurance, charisma, intelligence,
-    armor, damageMin, damageMax, health,
-    threat, hardening, healing, criticalHealing,
+    stats,
+    armor,
+    damageMin, damageMax,
+    weaponMin, weaponMax, hasWeapon, strDamageBonus: strBonus,
+    health, healthBase: base.health ?? 0, healthFromItems,
+    threat, hardening,
+    healing, healingBase, healingFromItems, criticalHealing,
     power,
   };
 }

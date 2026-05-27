@@ -2,6 +2,12 @@ import Image from 'next/image';
 
 import StatBar from '@/components/shared/StatBar';
 import CompactNumber from '@/components/shared/CompactNumber';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
+import { MercBreakdown } from '@/lib/utils/mercenaryBreakdown';
 
 const QUALITY_COLOR: Record<string, string> = {
   green:  '#3b9b3b',
@@ -30,17 +36,18 @@ interface MercForOverview {
   level: number;
   quality: string;
   stats: any;
-  breakdown?: any;
+  breakdown?: MercBreakdown;
   power: number;
 }
 
 // Read-only mercenary stat panel. Reads from `merc.breakdown` (rolled
-// stats + equipped item bonuses + dungeon stats) when present, falling
-// back to the raw `stats` for older mercs without a breakdown.
+// stats + item bonuses with per-stat attribution) when available so
+// the StatBar tooltips can show base vs items the same way the player
+// panel does.
 const MercenaryPanel = ({ merc }: { merc: MercForOverview }) => {
-  const b = merc.breakdown ?? merc.stats ?? {};
-  const damageRange = `${b.damageMin ?? 0} - ${b.damageMax ?? 0}`;
-  const health = b.health ?? merc.stats?.health ?? 0;
+  const b = merc.breakdown;
+  const health = b?.health ?? merc.stats?.health ?? 0;
+  const damageRange = b ? `${b.damageMin} - ${b.damageMax}` : '?';
 
   return (
     <div className='flex flex-col items-center gap-3 p-4 text-brown2'>
@@ -82,38 +89,88 @@ const MercenaryPanel = ({ merc }: { merc: MercForOverview }) => {
           </span>
         </div>
         <div className='relative h-3 rounded-sm overflow-hidden' style={{ backgroundColor: '#3e2714' }}>
-          <div
-            className='absolute top-0 left-0 h-full'
-            style={{ width: '100%', backgroundColor: '#a32626' }}
-          />
+          <div className='absolute top-0 left-0 h-full' style={{ width: '100%', backgroundColor: '#a32626' }} />
         </div>
       </div>
 
       <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
-        <StatLine label='Strength'     value={b.strength ?? 0} />
-        <StatLine label='Dexterity'    value={b.dexterity ?? 0} />
-        <StatLine label='Agility'      value={b.agility ?? 0} />
-        <StatLine label='Endurance'    value={b.endurance ?? 0} />
-        <StatLine label='Charisma'     value={b.charisma ?? 0} />
-        <StatLine label='Intelligence' value={b.intelligence ?? 0} last />
+        <StatRow label='Strength'     split={b?.stats.strength} />
+        <StatRow label='Dexterity'    split={b?.stats.dexterity} />
+        <StatRow label='Agility'      split={b?.stats.agility} />
+        <StatRow label='Endurance'    split={b?.stats.endurance} />
+        <StatRow label='Charisma'     split={b?.stats.charisma} />
+        <StatRow label='Intelligence' split={b?.stats.intelligence} last />
       </div>
 
       <div className='brown-card w-full rounded-sm flex flex-col text-sm'>
-        <StatLine label='Armor'  value={b.armor ?? 0} />
-        <StatLine label='Damage' valueLabel={damageRange} />
-        {/* Role-specific dungeon stats. Healing is now active in combat
-            for healers; threat / hardening surface for tanks. */}
-        {merc.type === 'healer' && <StatLine label='Healing'           value={b.healing ?? 0} />}
-        {merc.type === 'healer' && (b.criticalHealing ?? 0) > 0 && (
-          <StatLine label='Crit Healing' value={b.criticalHealing ?? 0} />
+        <FlatRow
+          label='Armor'
+          value={b?.armor ?? 0}
+          tooltip={
+            <>
+              <div className='flex justify-between gap-4'>
+                <span>Source:</span>
+                <span>equipped pieces</span>
+              </div>
+              <div className='text-[10px] opacity-80 italic mt-1'>
+                Armour only comes from armour items. Equip helmets,
+                chest, legs, cloak, gloves and boots to raise it.
+              </div>
+            </>
+          }
+        />
+        <FlatRow
+          label='Damage'
+          valueLabel={damageRange}
+          tooltip={
+            b && (
+              <>
+                <div className='flex justify-between gap-4'>
+                  <span>{b.hasWeapon ? 'From weapon' : 'Bare hands'}</span>
+                  <span>{b.weaponMin} - {b.weaponMax}</span>
+                </div>
+                <div className='flex justify-between gap-4'>
+                  <span>From strength</span>
+                  <span>+{b.strDamageBonus}</span>
+                </div>
+                <div className='text-[10px] opacity-80 italic mt-1'>
+                  Damage = weapon (or bare hands) + strength / 10 (only
+                  applied bare-handed) + any rolled damage affixes.
+                </div>
+              </>
+            )
+          }
+        />
+        {merc.type === 'healer' && (
+          <FlatRow
+            label='Healing'
+            value={b?.healing ?? 0}
+            tooltip={
+              b && (
+                <>
+                  <div className='flex justify-between gap-4'>
+                    <span>Base seed</span>
+                    <span>{b.healingBase}</span>
+                  </div>
+                  <div className='flex justify-between gap-4'>
+                    <span>From items</span>
+                    <span>+{b.healingFromItems}</span>
+                  </div>
+                  <div className='text-[10px] opacity-80 italic mt-1'>
+                    Healing fires once per dungeon step between fights.
+                  </div>
+                </>
+              )
+            }
+          />
         )}
-        {merc.type === 'tank' && (b.threat ?? 0) > 0 && (
-          <StatLine label='Threat'    value={b.threat ?? 0} />
+        {merc.type === 'tank' && (b?.threat ?? 0) > 0 && (
+          <FlatRow label='Threat' value={b?.threat ?? 0} />
         )}
-        {merc.type === 'tank' && (b.hardening ?? 0) > 0 && (
-          <StatLine label='Hardening' value={b.hardening ?? 0} />
+        {merc.type === 'tank' && (b?.hardening ?? 0) > 0 && (
+          <FlatRow label='Hardening' value={b?.hardening ?? 0} />
         )}
-        <StatLine label='Power' value={merc.power} last />
+        <FlatRow label='Power' value={merc.power} last />
       </div>
     </div>
   );
@@ -121,29 +178,77 @@ const MercenaryPanel = ({ merc }: { merc: MercForOverview }) => {
 
 export default MercenaryPanel;
 
-function StatLine({
-  label, value, valueLabel, last,
+function StatRow({
+  label, split, last,
+}: {
+  label: string;
+  split?: { base: number; fromItems: number; total: number };
+  last?: boolean;
+}) {
+  const s = split ?? { base: 0, fromItems: 0, total: 0 };
+  // Mercenaries have no training cap; max = total + a small headroom
+  // so the bar reads "mostly full" if items contribute heavily.
+  const max = Math.max(1, s.total + Math.max(0, s.fromItems));
+  return (
+    <div className={`flex items-center gap-2 px-2 py-1 ${!last && 'border-b-[3px] border-cream2'}`}>
+      <span className='w-[88px] shrink-0'>{label}</span>
+      <div className='flex-1 min-w-0'>
+        <StatBar
+          statName={label}
+          breakdown={{
+            base: s.base,
+            fromItems: s.fromItems,
+            rawFromItems: s.fromItems,
+            total: s.total,
+            max,
+            byItem: [],
+          } as any}
+        />
+      </div>
+      <span className='font-semibold text-red3 ml-auto text-right shrink-0'>
+        <CompactNumber value={s.total} />
+      </span>
+    </div>
+  );
+}
+
+function FlatRow({
+  label, value, valueLabel, tooltip, last,
 }: {
   label: string;
   value?: number;
   valueLabel?: string;
+  tooltip?: React.ReactNode;
   last?: boolean;
 }) {
   const v = value ?? 0;
-  return (
+  const bar = (
+    <div className='relative h-3 w-full rounded-sm overflow-hidden cursor-help' style={{ backgroundColor: '#3e2714' }}>
+      <div className='absolute top-0 left-0 h-full' style={{ width: '100%', backgroundColor: '#6b8e23' }} />
+    </div>
+  );
+  const row = (
     <div className={`flex items-center gap-2 px-2 py-1 ${!last && 'border-b-[3px] border-cream2'}`}>
       <span className='w-[88px] shrink-0'>{label}</span>
-      {value !== undefined && (
-        <div className='flex-1 min-w-0'>
-          <StatBar
-            statName={label}
-            breakdown={{ total: v, base: v, fromItems: 0, byItem: [] } as any}
-          />
-        </div>
-      )}
+      <div className='flex-1 min-w-0'>{bar}</div>
       <span className='font-semibold text-red3 ml-auto text-right shrink-0'>
         {valueLabel ?? <CompactNumber value={v} />}
       </span>
     </div>
+  );
+  if (!tooltip) return row;
+  return (
+    <HoverCard openDelay={100} closeDelay={0}>
+      <HoverCardTrigger asChild>{row}</HoverCardTrigger>
+      <HoverCardContent className='w-auto p-0 border-none shadow-md'>
+        <div className='red-card flex flex-col min-w-[210px] px-3 py-2 text-cream2 text-xs gap-1'>
+          <div className='flex justify-between gap-4 font-semibold text-sm border-b border-cream2 pb-1 mb-1'>
+            <span>{label}</span>
+            <span className='text-yellow-300'>{valueLabel ?? v}</span>
+          </div>
+          {tooltip}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 }

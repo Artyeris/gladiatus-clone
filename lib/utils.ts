@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from 'clsx'
 import { JwtPayload, verify } from 'jsonwebtoken';
 import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 import { twMerge } from 'tailwind-merge'
-import { ARENA_COOLDOWN, EXPEDITION_COOLDOWN } from '@/constants';
+import { ARENA_COOLDOWN, DUNGEON_COOLDOWN, EXPEDITION_COOLDOWN } from '@/constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -66,6 +66,9 @@ export function canFight({ time, fight }: { time: number, fight: string }) {
     return currentTime >= futureTime;
   } else if (fight === 'arena') {
     const futureTime = new Date(lastFightTime.getTime() + ARENA_COOLDOWN * 1000);
+    return currentTime >= futureTime;
+  } else if (fight === 'dungeon') {
+    const futureTime = new Date(lastFightTime.getTime() + DUNGEON_COOLDOWN * 1000);
     return currentTime >= futureTime;
   } else return false;
 

@@ -94,13 +94,15 @@ const OverviewContent = ({ character, mercenaries }: OverviewContentProps) => {
           ) : (
             <InventoryEquipment character={character} />
           )}
-          <DungeonPartySlots
-            playerName={character.name}
-            playerGender={(character as any).gender ?? 'male'}
-            playerLevel={character.level ?? 1}
-            mercenaries={mercenaries}
-            party={(character as any).dungeonParty ?? {}}
-          />
+          {!merc && (
+            <DungeonPartySlots
+              playerName={character.name}
+              playerGender={(character as any).gender ?? 'male'}
+              playerLevel={character.level ?? 1}
+              mercenaries={mercenaries}
+              party={(character as any).dungeonParty ?? {}}
+            />
+          )}
         </div>
       </div>
     </div>
