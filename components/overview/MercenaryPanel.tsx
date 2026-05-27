@@ -28,6 +28,23 @@ const ROLE_AVATAR: Record<string, string> = {
   damage: '/images/fight.png',
 };
 
+// Mercenary panel portraits reuse the player-style portraits so a
+// mercenary looks like a real fighter instead of a placeholder icon.
+// Mapping is per-template-id; templates without a custom portrait
+// fall back to the player male portrait at the merc's level bucket.
+const TEMPLATE_PORTRAIT: Record<string, string> = {
+  samnit:      '/characters/male/character-lvl-30.jpg',
+  murmillo:    '/characters/male/character-lvl-40.jpg',
+  thracian:    '/characters/male/character-lvl-20.jpg',
+  hoplomachus: '/characters/male/character-lvl-50.jpg',
+  medicus:     '/characters/male/character-lvl-60.jpg',
+};
+
+function portraitLevelBucket(level: number): number {
+  if (level > 80) return 80;
+  return Math.floor(level / 10) * 10;
+}
+
 interface MercForOverview {
   _id: string;
   templateId: string;
@@ -40,14 +57,16 @@ interface MercForOverview {
   power: number;
 }
 
-// Read-only mercenary stat panel. Reads from `merc.breakdown` (rolled
-// stats + item bonuses with per-stat attribution) when available so
-// the StatBar tooltips can show base vs items the same way the player
-// panel does.
+// Read-only mercenary stat panel. Layout mirrors CharacterPanel so a
+// merc tab looks like a real fighter card -- proper portrait, the
+// same StatBar with base/items breakdown, the same combat rows.
 const MercenaryPanel = ({ merc }: { merc: MercForOverview }) => {
   const b = merc.breakdown;
   const health = b?.health ?? merc.stats?.health ?? 0;
   const damageRange = b ? `${b.damageMin} - ${b.damageMax}` : '?';
+  const portrait =
+    TEMPLATE_PORTRAIT[merc.templateId] ??
+    `/characters/male/character-lvl-${portraitLevelBucket(merc.level)}.jpg`;
 
   return (
     <div className='flex flex-col items-center gap-3 p-4 text-brown2'>
@@ -58,18 +77,13 @@ const MercenaryPanel = ({ merc }: { merc: MercForOverview }) => {
         </span>
       </h2>
 
-      <div
-        className='w-full flex items-center justify-center rounded-sm drop-shadow-xl border-[2px] border-cream2'
-        style={{ height: '230px', backgroundColor: '#3e2714' }}
-      >
-        <Image
-          src={ROLE_AVATAR[merc.type]}
-          alt={merc.type}
-          width={140}
-          height={140}
-          style={{ width: '140px', height: '140px', objectFit: 'contain' }}
-        />
-      </div>
+      <Image
+        src={portrait}
+        alt={merc.name}
+        width={230}
+        height={266}
+        className='drop-shadow-xl rounded-sm'
+      />
 
       <div className='w-full flex justify-between text-sm font-semibold'>
         <span>Role</span>

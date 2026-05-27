@@ -175,8 +175,11 @@ function Slot({
   onClick: () => void;
   onClear?: () => void;
 }) {
+  // Outer wrapper is a div, not a button -- nesting <button> inside
+  // <button> (the clear x) is invalid HTML and causes hydration
+  // mismatch under React 18 / Next 14.
   return (
-    <div className='flex flex-col items-center gap-1 w-[88px]'>
+    <div className='relative flex flex-col items-center gap-1 w-[88px]'>
       <button
         type='button'
         onClick={onClick}
@@ -203,18 +206,18 @@ function Slot({
             {label}
           </span>
         )}
-        {onClear && (
-          <button
-            type='button'
-            onClick={(e) => { e.stopPropagation(); onClear(); }}
-            className='absolute -top-2 -right-2 w-5 h-5 rounded-full border-[2px] flex items-center justify-center text-[10px] font-bold'
-            style={{ background: '#974342', borderColor: '#eed7a1', color: '#f4eac8' }}
-            title='Clear'
-          >
-            ×
-          </button>
-        )}
       </button>
+      {onClear && (
+        <button
+          type='button'
+          onClick={(e) => { e.stopPropagation(); onClear(); }}
+          className='absolute -top-2 -right-2 w-5 h-5 rounded-full border-[2px] flex items-center justify-center text-[10px] font-bold z-10'
+          style={{ background: '#974342', borderColor: '#eed7a1', color: '#f4eac8' }}
+          title='Clear'
+        >
+          ×
+        </button>
+      )}
       <span className='text-[10px] font-semibold text-brown2 text-center leading-tight'>
         {label}
       </span>

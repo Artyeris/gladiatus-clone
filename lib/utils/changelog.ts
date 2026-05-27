@@ -10,6 +10,15 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.30.5',
+    date: '2026-05-23',
+    changes: [
+      'Hydration mismatch fixed on the Overview: DungeonPartySlots was nesting a clear (x) button inside the main slot button, which is invalid HTML and caused the page to throw "Expected server HTML to contain a matching <button>". Slots are now a div + button + sibling-button layout so the markup is valid.',
+      'Mercenary panel rebuilt to mirror the gladiator\'s CharacterPanel: full 230x266 portrait (per-template pick, falls back to the level-bucket player portrait), no more 140x140 stick-figure icon in a big empty rectangle. Stat rows, combat rows and breakdown tooltips stay as in v0.30.4.',
+      'Roadmap note: a separate Dungeon-only equipment set on the gladiator (so you can keep your expedition kit on, switch to a dungeon kit, and back) is staying out of this patch -- it touches the Character schema and the moveItem flow and will land in v0.31. Today\'s changes do not affect player equipment.',
+    ],
+  },
+  {
     version: '0.30.4',
     date: '2026-05-23',
     changes: [
