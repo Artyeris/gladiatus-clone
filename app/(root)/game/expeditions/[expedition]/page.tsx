@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import DescriptionCard from '@/components/cards/DescriptionCard';
 import { getExpeditionEnemies } from '@/lib/actions/battle/getExpeditionEnemies.action';
+import { getActiveDungeonRun } from '@/lib/actions/dungeon/dungeon.action';
 import { getUser } from '@/lib/actions/user/getUser.action';
 import { expeditions } from '@/constants/expeditions';
 import { DUNGEONS, DUNGEON_ORDER } from '@/constants/dungeons';
@@ -18,7 +19,6 @@ const Page = async ({ params }: { params: { expedition: string } }) => {
   if (!user.character) redirect('/onboarding');
 
   const expeditionInfo = expeditions[expeditionName];
-
   if (!enemies) return <NoResults />;
 
   const character: any = user.character;
@@ -38,6 +38,17 @@ const Page = async ({ params }: { params: { expedition: string } }) => {
       xpReward: d.xpReward,
       cleared: completed.includes(d.id),
     }));
+
+  // Only surface the active run on the matching expedition tab so
+  // entering Pirate Harbour doesn't show a run started on a different
+  // region's dungeon.
+  const runRes: any = await getActiveDungeonRun();
+  const allRun = runRes?.ok ? runRes.run : null;
+  const activeRun = allRun && matchingDungeons.some((d) => d.id === allRun.dungeonId) ? allRun : null;
+
+  // The dungeon needs at least one assigned party slot to be enterable.
+  const party = character.dungeonParty ?? {};
+  const partyAssigned = Object.values(party).some((v) => !!v);
 
   const expeditionView = (
     <div className='px-4 flex flex-col gap-4'>
@@ -79,8 +90,9 @@ const Page = async ({ params }: { params: { expedition: string } }) => {
   const dungeonView = (
     <DungeonDetailContent
       characterLevel={character.level ?? 1}
-      ownedMercenaryCount={(character.mercenaries ?? []).length}
+      partyAssigned={partyAssigned}
       dungeons={matchingDungeons}
+      activeRun={activeRun}
     />
   );
 

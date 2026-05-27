@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.30.3',
+    date: '2026-05-23',
+    changes: [
+      'Multi-step dungeon runs! Every dungeon is now a 4-fight progression (3 trash steps + boss). Each click resolves one fight; the party HP carries between fights and only refreshes when the next run starts. New DungeonRun collection backs the active run; one run per character at a time.',
+      'Party HP tracking: every fighter has their own HP bar that drains as the dungeon hits the party. Tanks soak ~60% of incoming damage; healers regenerate the party between fights. A wiped party ends the run with consolation gold; surviving the boss drops the guaranteed Blue+ item.',
+      'Dungeon party slots in Overview: a new "Dungeon party" card sits below your inventory with five slots -- Tank / Healer / Damage I / Damage II / Damage III. Click any slot to open a picker and assign your gladiator or one of your hired mercenaries. Role-matched mercs are highlighted. Only the assigned party fights -- no more "auto-take every merc" behaviour.',
+      '"Enter dungeon" now requires at least one filled party slot; the dungeon screen shows a hint and disables the button until you assign at least one fighter.',
+      'Dungeon tab UI rebuilt: when a run is active the cards collapse into a single "Active run" panel with party HP bars, last-fight log, and Next fight / Abandon buttons. Cleared runs auto-close after the boss; abandoning forfeits progress.',
+      'Standalone /game/dungeons page reframed as a directory: each row links you to the parent expedition where the actual Dungeon tab lives (no more duplicate "Enter" buttons).',
+    ],
+  },
+  {
     version: '0.30.2',
     date: '2026-05-23',
     changes: [

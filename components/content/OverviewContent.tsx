@@ -8,6 +8,7 @@ import CharacterPanel from '../overview/CharacterPanel';
 import InventoryEquipment from '../overview/InventoryEquipment';
 import MercenaryPanel from '../overview/MercenaryPanel';
 import MercenaryEquipment from '../overview/MercenaryEquipment';
+import DungeonPartySlots from '../overview/DungeonPartySlots';
 
 interface MercForOverview {
   _id: string;
@@ -83,7 +84,7 @@ const OverviewContent = ({ character, mercenaries }: OverviewContentProps) => {
           {merc ? <MercenaryPanel merc={merc} /> : <CharacterPanel user={character} />}
         </div>
 
-        <div className='info-card rounded-sm shadow-md flex flex-col flex-1' style={{ padding: '12px' }}>
+        <div className='info-card rounded-sm shadow-md flex flex-col flex-1 gap-3' style={{ padding: '12px' }}>
           {merc ? (
             <MercenaryEquipment
               mercenaryId={merc._id}
@@ -93,6 +94,13 @@ const OverviewContent = ({ character, mercenaries }: OverviewContentProps) => {
           ) : (
             <InventoryEquipment character={character} />
           )}
+          <DungeonPartySlots
+            playerName={character.name}
+            playerGender={(character as any).gender ?? 'male'}
+            playerLevel={character.level ?? 1}
+            mercenaries={mercenaries}
+            party={(character as any).dungeonParty ?? {}}
+          />
         </div>
       </div>
     </div>

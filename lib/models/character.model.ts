@@ -158,6 +158,11 @@ const characterSchema = new mongoose.Schema({
   // Dungeon ids the character has cleared at least once. Used to gate
   // the chain and to show a "cleared" badge in the dungeon list.
   completedDungeons: { type: [String], default: [] },
+  // Assigned dungeon party. Each slot holds either the literal string
+  // 'player' (the gladiator joins this slot), a Mercenary _id string,
+  // or null (slot unfilled). Mixed type so a future "rename slot"
+  // change doesn't need a migration.
+  dungeonParty: { type: mongoose.Schema.Types.Mixed, default: {} },
   currentWork: {
     type: {
       _id: false,
