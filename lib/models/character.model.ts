@@ -149,6 +149,15 @@ const characterSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.Mixed],
     default: [],
   },
+  // Hired mercenaries (Mongoose refs into the Mercenary collection).
+  // Mercs are bought from the country vendor and used in dungeon runs.
+  mercenaries: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Mercenary',
+  }],
+  // Dungeon ids the character has cleared at least once. Used to gate
+  // the chain and to show a "cleared" badge in the dungeon list.
+  completedDungeons: { type: [String], default: [] },
   currentWork: {
     type: {
       _id: false,

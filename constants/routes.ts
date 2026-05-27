@@ -35,6 +35,10 @@ export const villageRoutes = [
     link: '/training',
   },
   {
+    name: 'Mercenaries',
+    link: '/mercenaries',
+  },
+  {
     name: 'Weapon Smith',
     link: '/shop/weapons',
   },

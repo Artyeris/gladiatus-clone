@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 // changed.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.30',
+    date: '2026-05-23',
+    changes: [
+      'Dungeons! New /game/dungeons page lists all 10 Italy dungeons -- Gustavo\'s Country House, On the Run, The Dragon Stronghold, The Cave of Dark Intrigue, Hidden Grave, In Enemy Hands, The Last Resort, The True Owner, Gioll Passage, Zagrash\'s Fort. Each has an entry level, parent expedition, named boss and gold/XP rewards.',
+      'Phase-1 combat is an auto-resolve: party power (player + sum of owned mercenaries) vs. boss difficulty (boss level * 90). Win chance is clamped 10-95% so even a weak party has a shot and a strong one isn\'t guaranteed. A clear hands you the gold/XP reward, drops a guaranteed Blue+ item into your Packages mailbox and marks the dungeon "Cleared".',
+      'Mercenaries! New /game/mercenaries page hosts the Italy vendor pool: Samnit, Murmillo, Thracian (damage), Hoplomachus (tank) and Medicus (healer). Three quality offers per template every refresh (green, blue, and a wild-card roll). Buy with gold; dismiss for 25% scrap gold.',
+      'Mercenary quality (Green / Blue / Purple / Orange / Red) multiplies stat output 1.00x / 1.10x / 1.25x / 1.45x / 1.70x, mirroring the Gladiatus rarity curve. Vendor price scales with rolled level + quality.',
+      'Sidebar: Mercenaries entry slots into the Town tab next to Training; Dungeons entry slots into the Expedition tab above Traveler.',
+      'Character schema gained mercenaries (refs into the new Mercenary collection) and completedDungeons (cleared dungeon ids). Item schema picks up dungeon-only stat fields (threat, hardeningValue, healing, criticalHealingValue) which combat ignores for now but the mercenary system will read in later phases.',
+      'Roadmap for the next dungeon phases: party slot UI (tank / healer / 3 damage), proper round-based combat with role AI (tank aggro, healer triage, damage focus), and mercenary equipment slots.',
+    ],
+  },
+  {
     version: '0.22.4',
     date: '2026-05-23',
     changes: [
